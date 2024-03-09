@@ -1,0 +1,361 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import 'antd';
+@import 'tetrominos';
+@import 'font';
+@import 'styles/variables';
+
+@layer base {
+  body {
+    @apply bg-white text-black;
+
+    font-family: 'GmarketSans', Roboto, Arial, 'Noto Sans';
+  }
+}
+
+@layer components {
+  .btn-blue {
+    @apply text-white font-bold px-4 py-2 rounded bg-blue-600 hover:bg-blue-500;
+  }
+}
+
+* {
+  font-family: 'GmarketSans';
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+}
+
+input::placeholder {
+  font-family: 'GmarketSans';
+}
+
+html,
+body {
+  height: 100%;
+  background-color: $gray-100;
+}
+
+.mainBody {
+  margin-left: 208px;
+  background-color: $white-gray;
+  height: 100%;
+}
+
+.mainHeader {
+  margin-left: 208px;
+  background-color: $white-gray;
+}
+
+.listPageHeader {
+  padding: 10px 0px;
+  display: flex;
+  justify-content: space-between;
+  margin: 40px 0 10px;
+}
+
+.datePickerContainer {
+  align-items: center;
+  margin-right: 5px;
+  .ant-picker {
+    margin-right: 5px;
+  }
+  .btnDatePicker {
+    width: 70px;
+    height: 40px !important;
+    margin-right: 5px;
+  }
+}
+
+button {
+  cursor: pointer;
+  &.hoverTextWhite {
+    &:hover {
+      color: #fff !important;
+    }
+  }
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.halfContainer {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  height: calc(100vh - 170px);
+
+  .leftArea {
+    width: 390px;
+    border-radius: 6px;
+    overflow-y: auto;
+  }
+
+  .rightArea {
+    border-radius: 6px;
+    background-color: $white;
+    padding: 20px;
+  }
+}
+
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex justify-between items-center;
+}
+
+/**** BUTTON COSTOM ****/
+.my-mint-btn {
+  @apply rounded-md bg-mint text-white hover:bg-mint/80;
+}
+
+.my-secondary-btn {
+  @apply rounded-md bg-secondary text-white hover:bg-secondary/80 border-0;
+
+  &:not(:disabled):hover {
+    @apply hover:bg-secondary/80;
+    @apply hover:text-white;
+  }
+
+  &.ant-btn-default:disabled {
+    @apply bg-secondary border-0 text-white opacity-30;
+  }
+}
+
+.my-primary-btn {
+  @apply rounded-md bg-primary text-white border-0;
+
+  &:not(:disabled):hover {
+    @apply hover:bg-primary/80;
+    @apply hover:text-white;
+  }
+
+  &.ant-btn-default:disabled {
+    @apply bg-primary border-0 text-white opacity-30;
+  }
+}
+
+.my-gray-btn {
+  @apply rounded-md  text-secondary;
+  background-color: rgba(106, 127, 151, 0.2);
+
+  &:not(:disabled):hover {
+    background-color: rgba(106, 127, 151, 0.3);
+  }
+
+  &:disabled {
+    @apply opacity-30;
+  }
+}
+
+.my-primary-op-btn {
+  @apply rounded-md text-primary bg-primary/20;
+
+  &:not(:disabled):hover {
+    @apply bg-primary/30;
+  }
+
+  &:disabled {
+    @apply opacity-50;
+  }
+}
+
+.my-red-btn {
+  @apply rounded-md bg-red text-white hover:bg-red/80 hover:text-white;
+}
+
+.my-primary-outline-btn {
+  @apply rounded-md border border-primary text-primary hover:bg-primary/10;
+
+  &:not(:disabled):hover {
+    @apply hover:border-primary/80;
+  }
+
+  &:disabled {
+    @apply opacity-30;
+  }
+}
+
+.my-gray-outline-btn {
+  @apply rounded-md border border-secondary text-secondary hover:bg-secondary hover:text-white;
+}
+
+.my-mint-outline-btn {
+  @apply rounded-md border border-mint text-mint hover:bg-mint hover:text-white;
+}
+
+.my-red-outline-btn {
+  @apply rounded-md border border-red text-red hover:bg-red hover:text-white;
+}
+
+/**** BUTTON COSTOM ****/
+
+.required-point {
+  position: relative;
+  &::after {
+    position: absolute;
+    right: auto;
+    top: -2px;
+    content: '*';
+    color: $red;
+  }
+}
+
+.productFilterBtn {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+
+  .filter {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+
+    &.on {
+      background-image: linear-gradient(47deg, #405df6, #14b4ff, #dd84ef, #14b4ff, #405df6);
+      background-size: 360% 360%;
+      animation: gradient-animation 7s ease infinite;
+      box-shadow: 0 4px 15px 3px rgba(79, 106, 241, 0.5);
+    }
+
+    &.off {
+      background-color: $secondary !important;
+    }
+  }
+
+  .resetArea {
+    position: relative;
+    bottom: -60px;
+    transition: all 0.2s ease-in;
+
+    .reset {
+      width: 60px;
+      height: 60px;
+      background-color: $secondary;
+      border-radius: 50%;
+      bottom: -60px;
+    }
+
+    &.active {
+      bottom: 10px;
+    }
+  }
+}
+
+.screen-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-image {
+  animation: rotate 2s linear infinite;
+}
+
+.swiper-pagination-progressbar {
+  background: $gray-400 !important;
+  .swiper-pagination-progressbar-fill {
+    background: $primary !important;
+  }
+}
+
+.rewriteCloseBox {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  width: 60px;
+  height: 60px;
+  z-index: 9999;
+  background-color: $white;
+}
+
+.ant-table-wrapper {
+  .ant-table {
+    .ant-table-content {
+      .ant-table-cell {
+        &.ant-table-cell-row-hover {
+          background: $primary-op;
+        }
+      }
+    }
+  }
+}
+
+.analysis-line-chart-tabs {
+  .ant-tabs-nav {
+    &::before {
+      border-bottom: none;
+    }
+    .ant-tabs-ink-bar {
+      display: none;
+    }
+    .ant-tabs-nav-wrap {
+      .ant-tabs-nav-list {
+        .ant-tabs-tab {
+          padding-top: 0;
+          padding-bottom: 0;
+          padding-left: 0;
+          padding-right: 12px;
+          justify-content: center;
+          &.ant-tabs-tab-active {
+            .ant-tabs-tab-btn {
+              color: $black !important;
+            }
+          }
+          .ant-tabs-tab-btn {
+            color: $gray-500 !important;
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.min-height-modal {
+  .ant-modal-content {
+    min-height: 585px;
+
+    .ant-modal-body {
+      min-height: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+.pushTypography {
+  margin-bottom: 0 !important;
+}
+
+.ant-card.analysis-brand-card {
+  .ant-card-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
