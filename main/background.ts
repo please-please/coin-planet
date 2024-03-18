@@ -20,54 +20,54 @@ if (isProd) {
   app.setPath('userData', `${app.getPath('userData')} (development)`);
 }
 
-const intervalPrice = () => {
-  setInterval(async () => {
-    const { data } = await getCoinPrice();
-    currentPrice['KRW-BTC'] = data[0].trade_price;
-    currentPrice['KRW-ETH'] = data[1].trade_price;
-    currentPrice['KRW-XRP'] = data[2].trade_price;
+// const intervalPrice = () => {
+//   setInterval(async () => {
+//     const { data } = await getCoinPrice();
+//     currentPrice['KRW-BTC'] = data[0].trade_price;
+//     currentPrice['KRW-ETH'] = data[1].trade_price;
+//     currentPrice['KRW-XRP'] = data[2].trade_price;
 
-    const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
-    const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
-    const orderData = JSON.parse(orderDataFile);
+//     const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
+//     const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
+//     const orderData = JSON.parse(orderDataFile);
 
-    // orderData
-    for (let i = 0; i < orderData?.bid?.length; i++) {
-      if (currentPrice[orderData.bid[i].symbol] <= orderData.bid[i].price) {
-        console.log('매수 주문');
+//     // orderData
+//     for (let i = 0; i < orderData?.bid?.length; i++) {
+//       if (currentPrice[orderData.bid[i].symbol] <= orderData.bid[i].price) {
+//         console.log('매수 주문');
 
-        const orderCoinData = {
-          limit: orderData.bid[i].limit,
-          symbol: orderData.bid[i].symbol,
-          minus: 5,
-          plus: 5,
-          totalMoney: orderData.bid[i].totalMoney,
-          side: 'bid',
-        };
-        const { data } = await orderCoin(orderCoinData);
+//         const orderCoinData = {
+//           limit: orderData.bid[i].limit,
+//           symbol: orderData.bid[i].symbol,
+//           minus: 5,
+//           plus: 5,
+//           totalMoney: orderData.bid[i].totalMoney,
+//           side: 'bid',
+//         };
+//         const { data } = await orderCoin(orderCoinData);
 
-        const dataFilePath = `${__dirname}/assets_data.json`;
-        const assetsDataFile = fs.readFileSync(dataFilePath, 'utf8');
-        const assetsData = JSON.parse(assetsDataFile);
-        const newAssetsData = [
-          ...assetsData,
-          {
-            limit: orderData.bid[i].limit,
-            symbol: orderData.bid[i].symbol,
-            price: data.price,
-            totalMoney: orderData.bid[i].totalMoney,
-          },
-        ];
-      }
-    }
+//         const dataFilePath = `${__dirname}/assets_data.json`;
+//         const assetsDataFile = fs.readFileSync(dataFilePath, 'utf8');
+//         const assetsData = JSON.parse(assetsDataFile);
+//         const newAssetsData = [
+//           ...assetsData,
+//           {
+//             limit: orderData.bid[i].limit,
+//             symbol: orderData.bid[i].symbol,
+//             price: data.price,
+//             totalMoney: orderData.bid[i].totalMoney,
+//           },
+//         ];
+//       }
+//     }
 
-    for (let i = orderData?.ask?.length - 1; i >= 0; i--) {
-      if (currentPrice[orderData.ask[i].symbol] >= orderData.ask[i].price) {
-        console.log('매도 주문');
-      }
-    }
-  }, 1000);
-};
+//     for (let i = orderData?.ask?.length - 1; i >= 0; i--) {
+//       if (currentPrice[orderData.ask[i].symbol] >= orderData.ask[i].price) {
+//         console.log('매도 주문');
+//       }
+//     }
+//   }, 1000);
+// };
 
 (async () => {
   await app.whenReady();
@@ -76,20 +76,20 @@ const intervalPrice = () => {
     width: 1000,
     height: 600,
   });
-  const userDataFilePath = `${__dirname}/private_user_data.json`;
-  const userDataFile = fs.readFileSync(userDataFilePath, 'utf8');
-  const userData = JSON.parse(userDataFile);
-  if (userData.accessKey === '' || userData.secretKey === '') {
-    if (isProd) {
-      await mainWindow.loadURL('app://./apply');
-    } else {
-      const port = process.argv[2];
-      await mainWindow.loadURL(`http://localhost:${port}/apply`);
-      mainWindow.webContents.openDevTools();
-    }
+  // const userDataFilePath = `${__dirname}/private_user_data.json`;
+  // const userDataFile = fs.readFileSync(userDataFilePath, 'utf8');
+  // const userData = JSON.parse(userDataFile);
+  // if (userData.accessKey === '' || userData.secretKey === '') {
+  if (isProd) {
+    await mainWindow.loadURL('app://./apply');
+  } else {
+    const port = process.argv[2];
+    await mainWindow.loadURL(`http://localhost:${port}/apply`);
+    mainWindow.webContents.openDevTools();
   }
+  // }
 
-  intervalPrice();
+  // intervalPrice();
 
   if (isProd) {
     await mainWindow.loadURL('app://./home');
