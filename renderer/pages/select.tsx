@@ -57,7 +57,7 @@ function Select() {
     setLoading(true);
 
     // 일단 1차수 구매
-    const { data } = await orderCoin(orderData);
+    const { data } = await orderCoin({ ...orderData, side: 'bid' });
 
     // 구매 데이터 저장
 
@@ -133,7 +133,7 @@ function Select() {
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
-    setOrderData({ ...orderData, symbol: coinListData[Number(newSelectedRowKeys[0]) - 1].symbol });
+    setOrderData({ ...orderData, symbol: coinListData[Number(newSelectedRowKeys[0]) - 1]?.symbol ?? '' });
   };
 
   const rowSelection = {
@@ -148,13 +148,7 @@ function Select() {
       </Header>
 
       <div>
-        <Button
-          style={{ float: 'right', height: '60px' }}
-          type="primary"
-          onClick={reload}
-          disabled={!hasSelected}
-          loading={loading}
-        >
+        <Button style={{ float: 'right', height: '60px' }} type="primary" onClick={reload} loading={loading}>
           Reload
         </Button>
         <Button
