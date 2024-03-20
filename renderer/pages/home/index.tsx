@@ -106,21 +106,21 @@ function Home() {
     // 화면 렌더링
   };
 
-  const handleSelectPage = () => {
-    if (isProd) {
-      window.location.href = 'app://./select.html';
-    } else {
-      window.location.href = '../select';
-    }
-  };
+  // const handleSelectPage = () => {
+  //   if (isProd) {
+  //     window.location.href = 'app://./select.html';
+  //   } else {
+  //     window.location.href = '../select';
+  //   }
+  // };
 
-  const handleApplyPage = () => {
-    if (isProd) {
-      window.location.href = 'app://./apply.html';
-    } else {
-      window.location.href = '../apply';
-    }
-  };
+  // const handleApplyPage = () => {
+  //   if (isProd) {
+  //     window.location.href = 'app://./apply.html';
+  //   } else {
+  //     window.location.href = '../apply';
+  //   }
+  // };
 
   return (
     <React.Fragment>
@@ -138,12 +138,12 @@ function Home() {
           marginTop: '50px',
         }}
       >
-        <Button size={'large'} onClick={handleApplyPage}>
+        {/* <Button size={'large'} onClick={handleApplyPage}>
           key 등록
         </Button>
         <Button size={'large'} onClick={handleSelectPage}>
           주문
-        </Button>
+        </Button> */}
       </div>
     </React.Fragment>
   );
