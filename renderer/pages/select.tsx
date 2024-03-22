@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Layout, Table } from 'antd';
+import { Button, Input, Layout, Modal, Table } from 'antd';
 import { coinList, columns } from '../constants/coinList';
 import { getCoinPrice, orderReservationCoin, orderCoin } from '../api/api';
 import electron from 'electron';
+import { useRouter } from 'next/router';
 
 const ipcRenderer = electron.ipcRenderer;
 
@@ -21,6 +22,48 @@ function Select() {
   });
   // const [afterFirstBuyData, setAfterFirstBuyData] = useState([]);
   const [reservationOrderData, setReservationOrderData] = useState({ bid: [], ask: [] });
+  const router = useRouter();
+  const [modal, contextHolder] = Modal.useModal();
+
+  const countDown = () => {
+    let secondsToGo = 5;
+
+    const instance = modal.error({
+      title: '저장된 api 키가 없습니다.',
+      content: `${secondsToGo}초 후에 키 등록 페이지로 이동합니다.`,
+    });
+
+    instance.then(
+      () => {
+        router.push('/apply');
+      },
+      () => {
+        router.push('/apply');
+      },
+    );
+
+    const timer = setInterval(() => {
+      secondsToGo -= 1;
+      instance.update({
+        content: `${secondsToGo}초 후에 키 등록 페이지로 이동합니다.`,
+      });
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      instance.destroy();
+      if (router.asPath !== '/apply') router.push('/apply');
+    }, secondsToGo * 1000);
+  };
+
+  useEffect(() => {
+    ipcRenderer.send('getSavedUserDataFile', {});
+    ipcRenderer.on('userDataReturn', (evt, arg) => {
+      if (arg.status === 'fail') {
+        countDown();
+      }
+    });
+  }, []);
 
   useEffect(() => {
     getCoinPrice().then((res) => {
@@ -166,6 +209,7 @@ function Select() {
         <Input placeholder="차수입력" onChange={onLimitChange}></Input>
       </div>
       <Table rowSelection={rowSelection} columns={columns} dataSource={coinListData} />
+      {contextHolder}
     </React.Fragment>
   );
 }
