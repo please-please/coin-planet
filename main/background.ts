@@ -126,10 +126,10 @@ ipcMain.on('getSavedUserDataFile', (evt, arg) => {
 
   const userData = fs.readFileSync(dataFilePath, 'utf8');
   if (userData === '') {
-    evt.sender.send('reply', { status: 'fail' });
+    evt.sender.send('userDataReturn', { status: 'fail' });
     return;
   }
-  evt.sender.send('reply', { status: 'success', userData: JSON.parse(userData) });
+  evt.sender.send('userDataReturn', { status: 'success', userData: JSON.parse(userData) });
 });
 
 ipcMain.on('orderFirst', (evt, arg) => {
