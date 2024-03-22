@@ -10,7 +10,7 @@ const { Header } = Layout;
 
 function Select() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({ order: false, reload: false });
   const [coinListData, setCoinListData] = useState(coinList);
   const [orderData, setOrderData] = useState({
     limit: 1,
@@ -24,7 +24,7 @@ function Select() {
 
   useEffect(() => {
     getCoinPrice().then((res) => {
-      const coinPriceList = res.data.map((e) => e.trade_price);
+      const coinPriceList = res.data.map((coinPricdData) => coinPricdData.trade_price);
 
       setCoinListData(
         coinList.map((e, i) => {
@@ -35,26 +35,28 @@ function Select() {
   }, []);
 
   const reload = () => {
-    setLoading(true);
-
-    getCoinPrice().then((res) => {
-      const coinPriceList = res.data.map((e) => e.trade_price);
-
-      setCoinListData(
-        coinList.map((e, i) => {
-          return { ...e, price: coinPriceList[i] };
-        }),
-      );
-    });
+    setLoading((pre) => ({ ...pre, reload: true }));
 
     setTimeout(() => {
       setSelectedRowKeys([]);
-      setLoading(false);
-    }, 500);
+      setLoading((pre) => ({ ...pre, reload: false }));
+    }, 800);
+
+    getCoinPrice()
+      .then((res) => {
+        const coinPriceList = res.data.map((coinPriceData) => coinPriceData.trade_price);
+
+        setCoinListData(
+          coinList.map((e, i) => {
+            return { ...e, price: coinPriceList[i] };
+          }),
+        );
+      })
+      .catch(() => alert('reloading failed'));
   };
 
   const order = async () => {
-    setLoading(true);
+    setLoading((pre) => ({ ...pre, order: true }));
 
     // 일단 1차수 구매
     const { data } = await orderCoin({ ...orderData, side: 'bid' });
@@ -119,7 +121,7 @@ function Select() {
     ipcRenderer.send('order', orderData);
 
     setTimeout(() => {
-      setLoading(false);
+      setLoading((pre) => ({ ...pre, order: false }));
     }, 1000);
   };
 
@@ -148,7 +150,7 @@ function Select() {
       </Header>
 
       <div>
-        <Button style={{ float: 'right', height: '60px' }} type="primary" onClick={reload} loading={loading}>
+        <Button style={{ float: 'right', height: '60px' }} type="primary" onClick={reload} loading={loading.reload}>
           Reload
         </Button>
         <Button
@@ -156,7 +158,7 @@ function Select() {
           type="primary"
           onClick={order}
           disabled={!hasSelected}
-          loading={loading}
+          loading={loading.order}
         >
           Order
         </Button>
