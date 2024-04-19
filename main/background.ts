@@ -181,6 +181,8 @@ ipcMain.on('getToken', async (evt, arg) => {
     evt.sender.send('tokenReturn', { status: 'fail' });
     return;
   }
+  console.log(userData);
+  console.log(arg);
   if (arg.body === undefined) {
     const payload = {
       access_key: userData.accessKey,
@@ -190,6 +192,7 @@ ipcMain.on('getToken', async (evt, arg) => {
     const token = sign(payload, userData.secretKey);
 
     evt.sender.send('tokenReturn', { status: 'success', token });
+    return;
   }
   const query = queryEncode.encode(arg.body);
 
