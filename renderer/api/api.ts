@@ -4,6 +4,7 @@ import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
+import { I_orderBody } from './interface';
 const accessKey = 'dsfs';
 const secretKey = 'dfdf';
 
@@ -71,28 +72,37 @@ export const orderReservationCoin = async (data, limit, side: string, firstPrice
   });
 };
 
-export const orderCoin = async (data) => {
-  const body = {
-    market: data.symbol,
-    side: data.side, // bid 매수, ask 매도
-    price: data.totalMoney,
-    ord_type: 'price',
-  };
+// export const orderCoin = async (data) => {
+//   const body = {
+//     market: data.symbol,
+//     side: data.side, // bid 매수, ask 매도
+//     price: data.totalMoney,
+//     ord_type: 'price',
+//   };
 
-  const query = queryEncode.encode(body);
+//   const query = queryEncode.encode(body);
 
-  const hash = crypto.createHash('sha512');
-  const queryHash = hash.update(query, 'utf-8').digest('hex');
+//   const hash = crypto.createHash('sha512');
+//   const queryHash = hash.update(query, 'utf-8').digest('hex');
 
-  const payload = {
-    access_key: accessKey,
-    nonce: v4(),
-    query_hash: queryHash,
-    query_hash_alg: 'SHA512',
-  };
+//   const payload = {
+//     access_key: accessKey,
+//     nonce: v4(),
+//     query_hash: queryHash,
+//     query_hash_alg: 'SHA512',
+//   };
 
-  const token = sign(payload, secretKey);
+//   const token = sign(payload, secretKey);
 
+//   return await axios.post('https://api.upbit.com/v1/orders', body, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+// };
+
+export const orderCoin = async (token: string, body: I_orderBody) => {
+  console.log('orderCoin');
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,
