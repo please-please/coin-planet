@@ -176,6 +176,11 @@ ipcMain.on('getToken', async (evt, arg) => {
   const dataFilePath = `${__dirname}/private_user_data.json`;
   const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
   const userData = JSON.parse(userDataFile);
+
+  if (userData.accessKey === '' || userData.secretKey === '') {
+    evt.sender.send('tokenReturn', { status: 'fail' });
+    return;
+  }
   if (arg.body === undefined) {
     const payload = {
       access_key: userData.accessKey,
