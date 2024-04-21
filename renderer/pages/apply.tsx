@@ -1,7 +1,6 @@
 import electron from 'electron';
 import React, { useEffect, useState } from 'react';
-import Input from 'antd/lib/input/Input';
-import { Layout, Button, Modal } from 'antd';
+import { Layout, Button, Modal, Input } from 'antd';
 
 const ipcRenderer = electron.ipcRenderer;
 
@@ -36,6 +35,11 @@ function Apply() {
 
   const handleSecretKeyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSecretKey(e.target.value);
+    setSaveDisabled(false);
+  };
+
+  const handleSecretKeyInputFocus = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSecretKey('');
     setSaveDisabled(false);
   };
 
@@ -87,11 +91,13 @@ function Apply() {
           value={accessKey}
           onChange={handleAccessKeyInputChange}
         />
-        <Input
+        <Input.Password
+          visibilityToggle={false}
           style={{ marginTop: '1rem', width: '60%' }}
           placeholder="Secret Key"
           value={secretKey}
           onChange={handleSecretKeyInputChange}
+          onFocus={handleSecretKeyInputFocus}
         />
         <Button
           style={{ marginTop: '3rem', width: '60%' }}
