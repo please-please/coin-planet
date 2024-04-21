@@ -120,7 +120,9 @@ function Select() {
     ipcRenderer.on('tokenReturn', async (_, arg) => {
       if (arg.status === 'success') {
         token = arg.token;
-        await orderCoin(token, body).catch(() => alert('코인 오더 실패'));
+        await orderCoin(token, body).catch((e) => {
+          alert(e.response.data.error.message);
+        });
       }
       if (arg.status === 'fail') alert('토큰 생성 실패');
     });
