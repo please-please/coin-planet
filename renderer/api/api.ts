@@ -102,7 +102,6 @@ export const orderReservationCoin = async (data, limit, side: string, firstPrice
 // };
 
 export const orderCoin = async (token: string, body: I_orderBody) => {
-  console.log('orderCoin');
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,
