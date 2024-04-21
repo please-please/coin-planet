@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Button, TableColumnsType, Table } from 'antd';
+import { TableColumnsType, Table } from 'antd';
 import { useRecoilState } from 'recoil';
-import { MyAssets, MyReservations, MyUserData } from '../../repository/atom';
+import { MyAssets, MyReservations, MyUserData } from '../../recoil/atom';
 import electron from 'electron';
 
 const ipcRenderer = electron.ipcRenderer;
