@@ -69,8 +69,8 @@ function Order() {
     ipcRenderer.send('getToken', {});
     ipcRenderer.on('tokenReturn', (_, arg) => {
       if (arg.status === 'fail') countDown();
+      return () => ipcRenderer.removeAllListeners('tokenReturn');
     });
-    (() => ipcRenderer.removeAllListeners('tokenReturn'))();
   }, []);
 
   useEffect(() => {
@@ -140,13 +140,13 @@ function Order() {
           .catch((e) => alert(e.response.data.error.message));
       }
       if (arg.status === 'fail') alert('토큰 생성 실패');
+
+      return () => ipcRenderer.removeAllListeners('tokenReturn');
     });
 
     setTimeout(() => {
       setLoading((pre) => ({ ...pre, order: false }));
     }, 1000);
-
-    return () => ipcRenderer.removeAllListeners('tokenReturn');
 
     //
     // for (let i = 2; i < orderData.limit + 1; i++) {

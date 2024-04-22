@@ -86,6 +86,16 @@ function Main() {
   // };
 
   useEffect(() => {
+    ipcRenderer.send('getSavedAssetsDataFile');
+    ipcRenderer.on('assetsReturn', (_, arg) => {
+      if (arg.status === 'success') {
+        console.log(arg.assetsData);
+        return () => ipcRenderer.removeAllListeners('assetsReturn');
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     getCoinPrice()
       .then((res) => {
         setTickerData(res.data);
