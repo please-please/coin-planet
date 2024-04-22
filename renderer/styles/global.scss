@@ -298,6 +298,12 @@ button {
       .ant-table-cell {
         &.ant-table-cell-row-hover {
           background: $primary-op;
+          &.ant-table-cell-fix-left {
+            background: $gray-100;
+          }
+          &.ant-table-cell-fix-right {
+            background: $gray-100;
+          }
         }
       }
     }
