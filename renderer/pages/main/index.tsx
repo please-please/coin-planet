@@ -14,6 +14,8 @@ const isProd: boolean = process.env.NODE_ENV === 'production';
 interface I_tableData {
   key: React.Key;
   market: string;
+  name: string;
+  label?: string;
   profitLossComparedPreviousDay?: number;
   profitLoss1st?: number;
   profitLoss2nd?: number;
@@ -86,7 +88,6 @@ function Main() {
   useEffect(() => {
     getCoinPrice()
       .then((res) => {
-        console.log(res);
         setTickerData(res.data);
       })
       .catch(() => alert('조회 오류!'));
@@ -97,8 +98,10 @@ function Main() {
       const newTableData = tableData.map((item, i) => {
         const { prev_closing_price, change, change_price } = tickerData[i];
         const yinyang = change === 'FALL' ? -1 : 1;
+
         return {
           ...item,
+          label: `${item.name}(${item.market})`,
           profitLossComparedPreviousDay: +((change_price / prev_closing_price) * yinyang * 100).toFixed(2),
         };
       });
@@ -120,12 +123,12 @@ function Main() {
 
 export default Main;
 
-const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({ key: v.key, market: v.market }));
+const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({ key: v.key, market: v.market, name: v.name }));
 
 const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
   {
     title: '종목이름',
-    dataIndex: 'market',
+    dataIndex: 'label',
     fixed: 'left',
   },
   {
