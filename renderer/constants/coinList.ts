@@ -12,8 +12,8 @@ export const columns: TableColumnsType<DataType> = [
     dataIndex: 'name',
   },
   {
-    title: 'Symbol',
-    dataIndex: 'symbol',
+    title: 'Market',
+    dataIndex: 'market',
   },
   {
     title: 'Price',

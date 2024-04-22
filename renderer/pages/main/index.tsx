@@ -63,7 +63,7 @@ const data: DataType[] = [
   },
 ];
 
-function Home() {
+function Main() {
   const [myUserData, setMyUserData] = useRecoilState(MyUserData);
   const [myAssets, setMyAssets] = useRecoilState(MyAssets);
   const [myReservationOrderData, setMyReservationOrderData] = useRecoilState(MyReservations);
@@ -149,4 +149,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Main;

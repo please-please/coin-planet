@@ -18,7 +18,7 @@ interface I_orderData {
   price: number;
 }
 
-function Select() {
+function Order() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({ order: false, reload: false });
   const [coinListData, setCoinListData] = useState(coinList);
@@ -240,4 +240,4 @@ function Select() {
   );
 }
 
-export default Select;
+export default Order;
