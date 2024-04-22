@@ -1,10 +1,11 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
-import { I_orderBody } from './interface';
+import { I_orderBody, I_tickerData } from './interface';
+import { coinList } from '../constants/coinList';
 const accessKey = 'dsfs';
 const secretKey = 'dfdf';
 
@@ -30,8 +31,8 @@ export const getAccounts = async () => {
 // };
 
 // BTC, ETH, XRP 현재가 조회
-export const getCoinPrice = async () => {
-  return await axios.get('https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP');
+export const getCoinPrice = async (): Promise<AxiosResponse<I_tickerData[], any>> => {
+  return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v) => v.market).join(',')}`);
 };
 
 export const orderReservationCoin = async (data, limit, side: string, firstPrice: number) => {
