@@ -45,9 +45,9 @@ function Apply() {
 
   const handleNextPage = () => {
     if (isProd) {
-      window.location.href = 'app://./home.html';
+      window.location.href = 'app://./main.html';
     } else {
-      window.location.href = '../home';
+      window.location.href = '../main';
     }
   };
 
