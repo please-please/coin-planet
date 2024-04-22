@@ -147,9 +147,9 @@ const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
     className: 'numeric_value',
     render: (number) => (number ? <p style={{ color: `${number > 0 ? 'red' : 'blue'}` }}>{`${number}%`}</p> : null),
   },
+  { title: '전체 손익', dataIndex: 'totalProfitLoss', className: 'numeric_value' },
   { title: '1차수 손익', dataIndex: 'profitLoss1st', className: 'numeric_value' },
   { title: '2차수 손익', dataIndex: 'profitLoss2nd', className: 'numeric_value' },
   { title: '3차수 손익', dataIndex: 'profitLoss3rd', className: 'numeric_value' },
-  { title: '전체 손익', dataIndex: 'totalProfitLoss', className: 'numeric_value' },
   { title: '전량 매도', dataIndex: 'sellAll', fixed: 'right', render: () => <a>전량 매도</a> },
 ];
