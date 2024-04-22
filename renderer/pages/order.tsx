@@ -70,6 +70,7 @@ function Order() {
     ipcRenderer.on('tokenReturn', (_, arg) => {
       if (arg.status === 'fail') countDown();
     });
+    (() => ipcRenderer.removeAllListeners('tokenReturn'))();
   }, []);
 
   useEffect(() => {
@@ -120,31 +121,32 @@ function Order() {
     ipcRenderer.on('tokenReturn', async (_, arg) => {
       if (arg.status === 'success') {
         token = arg.token;
-        await orderCoin(token, body).catch((e) => {
-          alert(e.response.data.error.message);
-        });
+        await orderCoin(token, body)
+          .then(() => {
+            const firstOrderData = {
+              bid: [
+                {
+                  limit: 1,
+                  market: orderData.market,
+                  price: orderData.price,
+                  // totalMoney: orderData.totalMoney,
+                },
+              ],
+              ask: [],
+            };
+
+            ipcRenderer.send('orderFirst', firstOrderData);
+          })
+          .catch((e) => alert(e.response.data.error.message));
       }
       if (arg.status === 'fail') alert('토큰 생성 실패');
     });
 
-    // 일단 1차수 구매
-    console.log(token);
+    setTimeout(() => {
+      setLoading((pre) => ({ ...pre, order: false }));
+    }, 1000);
 
-    // 구매 데이터 저장
-
-    const firstOrderData = {
-      bid: [
-        {
-          limit: 1,
-          market: orderData.market,
-          price: orderData.price,
-          // totalMoney: orderData.totalMoney,
-        },
-      ],
-      ask: [],
-    };
-
-    ipcRenderer.send('orderFirst', firstOrderData);
+    return () => ipcRenderer.removeAllListeners('tokenReturn');
 
     //
     // for (let i = 2; i < orderData.limit + 1; i++) {
@@ -189,9 +191,6 @@ function Order() {
   // setSelectedRowKeys([]); // 선택 초기화
   // ipcRenderer.send('order', orderData);
 
-  // setTimeout(() => {
-  //   setLoading((pre) => ({ ...pre, order: false }));
-  // }, 1000);
   // };
 
   const onLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
