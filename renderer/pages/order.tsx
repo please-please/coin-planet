@@ -109,44 +109,95 @@ function Order() {
   const order = async () => {
     setLoading((pre) => ({ ...pre, order: true }));
     let token: string;
-
-    const body: I_orderBody = {
+    const { data } = await getCoinPrice();
+    const coinPriceData = {
+      'KRW-BTC': data[0].trade_price,
+      'KRW-ETH': data[1].trade_price,
+      'KRW-XRP': data[2].trade_price,
+    };
+    console.log(coinPriceData);
+    const body: any = {
       market: orderData.market,
       side: 'bid',
-      price: orderData.price,
-      ord_type: 'price',
+      price: (coinPriceData[orderData.market] + coinPriceData[orderData.market] * (1 / 100)).toFixed(1),
+      ord_type: 'limit',
+      volume: (orderData.price / coinPriceData[orderData.market]).toFixed(2),
+      // ord_type: 'price',
     };
+    // [
+    //   {
+    //     bid: [
+    //       {
+    //         number: 2,
+    //         market: 'KRW-BTC',
+    //         side: 'bid',
+    //         price: '1차수에 구매한 가격 * 0.95 * 0.95', // 일단 -5퍼에서 매수되게 고정해놓고 나중에 변수로 뺴서 수정
+    //         ord_type: 'limit',
+    //         volume: orderData.price / this.price,
+    //       },
+    //     ],
+    //     ask: [
+    //       {
+    //         number: 1,
+    //         market: 'KRW-BTC',
+    //         side: 'bid',
+    //         price: '1차수에 구매한 가격 * 1.05', // 일단 +5퍼에서 매도되게 고정해놓고 나중에 변수로 뺴서 수정
+    //         ord_type: 'limit',
+    //         volume: orderData.price / this.price,
+    //       },
+    //       {
+    //         number: 2,
+    //         market: 'KRW-BTC',
+    //         side: 'bid',
+    //         price: '1차수에 구매한 가격 * 0.95 *1.05', // 일단 +5퍼에서 매도되게 고정해놓고 나중에 변수로 뺴서 수정
+    //         ord_type: 'limit',
+    //         volume: orderData.price / this.price,
+    //       },
+    //     ],
+    //   },
+    // ];
 
     ipcRenderer.send('getToken', { body });
     ipcRenderer.on('tokenReturn', async (_, arg) => {
       if (arg.status === 'success') {
         token = arg.token;
-        await orderCoin(token, body)
-          .then(() => {
-            const firstOrderData = {
-              bid: [
-                {
-                  limit: 1,
-                  market: orderData.market,
-                  price: orderData.price,
-                  // totalMoney: orderData.totalMoney,
-                },
-              ],
-              ask: [],
-            };
-
-            ipcRenderer.send('orderFirst', firstOrderData);
-          })
-          .catch((e) => alert(e.response.data.error.message));
+        console.log(body);
+        const { data } = await orderCoin(token, body);
+        console.log(data);
+        // ipcRenderer.removeAllListeners('tokenReturn');
+        // const bodyData = {
+        //   uuid: data.uuid,
+        // };
+        // ipcRenderer.send('getToken', { body: bodyData });
+        // ipcRenderer.on('tokenReturn', async (_, arg) => {
+        //   console.log(arg);
+        //   if (arg.status === 'success') {
+        //     const response = await getPurchaseData(bodyData, arg.token, arg.query);
+        //     console.log(data);
+        //   }
+        // });
       }
       if (arg.status === 'fail') alert('토큰 생성 실패');
     });
 
-    setTimeout(() => {
-      setLoading((pre) => ({ ...pre, order: false }));
-    }, 1000);
+    // 일단 1차수 구매
+    console.log(token);
 
-    return () => ipcRenderer.removeAllListeners('tokenReturn');
+    // 구매 데이터 저장
+
+    const firstOrderData = {
+      bid: [
+        {
+          limit: 1,
+          market: orderData.market,
+          price: orderData.price,
+          // purchasePrice:
+        },
+      ],
+      ask: [],
+    };
+
+    ipcRenderer.send('orderFirst', firstOrderData);
 
     //
     // for (let i = 2; i < orderData.limit + 1; i++) {

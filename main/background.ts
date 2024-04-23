@@ -4,11 +4,12 @@ import serve from 'electron-serve';
 import { createWindow } from './helpers';
 import * as fs from 'fs';
 import axios from 'axios';
-import { getCoinPrice, orderCoin } from '../renderer/api/api';
+
 import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
+import { getCoinPrice, orderCoin } from './api';
 const isProd = process.env.NODE_ENV === 'production';
 
 const currentPrice = {
@@ -23,54 +24,53 @@ if (isProd) {
   app.setPath('userData', `${app.getPath('userData')} (development)`);
 }
 
-// const intervalPrice = () => {
-//   setInterval(async () => {
-//     const { data } = await getCoinPrice();
-//     currentPrice['KRW-BTC'] = data[0].trade_price;
-//     currentPrice['KRW-ETH'] = data[1].trade_price;
-//     currentPrice['KRW-XRP'] = data[2].trade_price;
+const intervalPrice = () => {
+  setInterval(async () => {
+    const { data } = await getCoinPrice();
 
-//     const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
-//     const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
-//     const orderData = JSON.parse(orderDataFile);
+    // const a = await axios.get(`https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP`);
+    currentPrice['KRW-BTC'] = data[0].trade_price;
+    currentPrice['KRW-ETH'] = data[1].trade_price;
+    currentPrice['KRW-XRP'] = data[2].trade_price;
+    // console.log(currentPrice);
 
-//     // orderData
-//     for (let i = 0; i < orderData?.bid?.length; i++) {
-//       if (currentPrice[orderData.bid[i].symbol] <= orderData.bid[i].price) {
-//         console.log('매수 주문');
+    // const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
+    // const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
+    // const orderData = JSON.parse(orderDataFile);
+    // orderData
+    // for (let i = 0; i < orderData?.bid?.length; i++) {
+    //   if (currentPrice[orderData.bid[i].symbol] <= orderData.bid[i].price) {
+    //     console.log('매수 주문');
+    //     const orderCoinData = {
+    //       limit: orderData.bid[i].limit,
+    //       symbol: orderData.bid[i].symbol,
+    //       minus: 5,
+    //       plus: 5,
+    //       totalMoney: orderData.bid[i].totalMoney,
+    //       side: 'bid',
+    //     };
 
-//         const orderCoinData = {
-//           limit: orderData.bid[i].limit,
-//           symbol: orderData.bid[i].symbol,
-//           minus: 5,
-//           plus: 5,
-//           totalMoney: orderData.bid[i].totalMoney,
-//           side: 'bid',
-//         };
-//         const { data } = await orderCoin(orderCoinData);
-
-//         const dataFilePath = `${__dirname}/assets_data.json`;
-//         const assetsDataFile = fs.readFileSync(dataFilePath, 'utf8');
-//         const assetsData = JSON.parse(assetsDataFile);
-//         const newAssetsData = [
-//           ...assetsData,
-//           {
-//             limit: orderData.bid[i].limit,
-//             symbol: orderData.bid[i].symbol,
-//             price: data.price,
-//             totalMoney: orderData.bid[i].totalMoney,
-//           },
-//         ];
-//       }
-//     }
-
-//     for (let i = orderData?.ask?.length - 1; i >= 0; i--) {
-//       if (currentPrice[orderData.ask[i].symbol] >= orderData.ask[i].price) {
-//         console.log('매도 주문');
-//       }
-//     }
-//   }, 1000);
-// };
+    //     const dataFilePath = `${__dirname}/assets_data.json`;
+    //     const assetsDataFile = fs.readFileSync(dataFilePath, 'utf8');
+    //     const assetsData = JSON.parse(assetsDataFile);
+    //     const newAssetsData = [
+    //       ...assetsData,
+    //       {
+    //         limit: orderData.bid[i].limit,
+    //         symbol: orderData.bid[i].symbol,
+    //         price: data.price,
+    //         totalMoney: orderData.bid[i].totalMoney,
+    //       },
+    //     ];
+    //   }
+    // }
+    // for (let i = orderData?.ask?.length - 1; i >= 0; i--) {
+    //   if (currentPrice[orderData.ask[i].symbol] >= orderData.ask[i].price) {
+    //     console.log('매도 주문');
+    //   }
+    // }
+  }, 1000);
+};
 
 (async () => {
   await app.whenReady();
@@ -100,7 +100,7 @@ if (isProd) {
     }
   }
 
-  // intervalPrice();
+  intervalPrice();
 })();
 
 app.on('window-all-closed', () => {
@@ -170,6 +170,7 @@ ipcMain.on('orderReservation', (evt, arg) => {
   const dataFilePath = `${__dirname}/reservation_order_data.json`;
   const reservationOrderData = JSON.stringify(arg, null, 2);
   fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
+  evt.sender.send('reservationOrderReturn', { status: 'success' });
 });
 
 ipcMain.on('getToken', async (evt, arg) => {
@@ -181,8 +182,8 @@ ipcMain.on('getToken', async (evt, arg) => {
     evt.sender.send('tokenReturn', { status: 'fail' });
     return;
   }
-  console.log(userData);
-  console.log(arg);
+  // console.log(userData);
+  // console.log(arg);
   if (arg.body === undefined) {
     const payload = {
       access_key: userData.accessKey,
@@ -208,5 +209,5 @@ ipcMain.on('getToken', async (evt, arg) => {
 
   const token = sign(payload, userData.secretKey);
 
-  evt.sender.send('tokenReturn', { status: 'success', token });
+  evt.sender.send('tokenReturn', { status: 'success', token, query });
 });

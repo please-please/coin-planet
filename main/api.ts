@@ -4,8 +4,8 @@ import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
-import { I_orderBody, I_tickerData } from './interface';
-import { coinList } from '../constants/coinList';
+import { coinList } from './coinList';
+
 const accessKey = 'dsfs';
 const secretKey = 'dfdf';
 
@@ -32,8 +32,8 @@ export const getAccounts = async () => {
 
 // BTC, ETH, XRP 현재가 조회
 export const getCoinPrice = async () => {
-  return await axios.get(`https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP`);
-  // return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v) => v.market).join(',')}`);
+  //   return await axios.get(`https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP`);
+  return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v: any) => v.market).join(',')}`);
 };
 
 export const orderReservationCoin = async (data, limit, side: string, firstPrice: number) => {
@@ -103,31 +103,10 @@ export const orderReservationCoin = async (data, limit, side: string, firstPrice
 //   });
 // };
 
-export const orderCoin = async (token: string, body: I_orderBody) => {
+export const orderCoin = async (token: string, body: any) => {
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-};
-
-export const getPurchaseData = async (body: any, token: any, query: any) => {
-  // return await axios.get(`https://api.upbit.com/v1/order?${query}`, {
-  //   headers: {
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  // });
-  console.log(body, token, query);
-  try {
-    const response = await axios.get(`https://api.upbit.com/v1/order?${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: body,
-    });
-    console.log('sdfdsfdssf', response);
-    return response;
-  } catch (error) {
-    console.error(error);
-  }
 };
