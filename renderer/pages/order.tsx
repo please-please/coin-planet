@@ -119,9 +119,9 @@ function Order() {
     const body: any = {
       market: orderData.market,
       side: 'bid',
-      price: (coinPriceData[orderData.market] + coinPriceData[orderData.market] * (1 / 100)).toFixed(1),
+      price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
       ord_type: 'limit',
-      volume: (orderData.price / coinPriceData[orderData.market]).toFixed(2),
+      volume: orderData.price / coinPriceData[orderData.market],
       // ord_type: 'price',
     };
     // [
@@ -160,14 +160,16 @@ function Order() {
     ipcRenderer.send('getToken', { body });
     ipcRenderer.on('tokenReturn', async (_, arg) => {
       if (arg.status === 'success') {
+        console.log('arg', arg);
         token = arg.token;
-        console.log(body);
+        console.log('body', body);
         await orderCoin(token, body)
-          .then(() => {
+          .then((res) => {
+            console.log('res', res);
             const firstOrderData = {
               bid: [
                 {
-                  limit: 1,
+                  limit: orderData.limit,
                   market: orderData.market,
                   price: orderData.price,
                   // purchasePrice:
@@ -180,8 +182,8 @@ function Order() {
           })
           .catch((e) => alert(e.response.data.error.message));
       }
-
       if (arg.status === 'fail') alert('토큰 생성 실패');
+      return () => ipcRenderer.removeAllListeners('tokenReturn');
     });
 
     // ipcRenderer.removeAllListeners('tokenReturn');
