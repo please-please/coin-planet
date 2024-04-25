@@ -191,14 +191,34 @@ function Order() {
             // 다차수 구매
             if (orderData.limit > 1) {
               const nextOrderData = {
-                market: orderData.market,
-                side: orderData.side,
-                inputPrice: orderData.inputPrice,
+                [data['market']]: {
+                  bid: [
+                    {
+                      number: 2,
+                      market: data.market,
+                      side: data.side,
+                      price: +data.price * 0.95,
+                      ord_type: data.ord_type,
+                      volume: orderData.inputPrice / (+data.price * 0.95),
+                    },
+                  ],
+                },
               };
-              await orderReservationCoin(nextOrderData, orderData.limit, data.price).then((res) => {
-                // invalid_access_key 오류 발생
-                console.log('reservation res', res);
+              ipcRenderer.send('orderReservation', nextOrderData);
+              ipcRenderer.on('reservationOrderReturn', (_, arg) => {
+                if (arg.status === 'success') {
+                  console.log('reservation data 저장 성공');
+                }
               });
+              // const nextOrderData = {
+              //   market: orderData.market,
+              //   side: orderData.side,
+              //   inputPrice: orderData.inputPrice,
+              // };
+              // await orderReservationCoin(nextOrderData, orderData.limit, data.price).then((res) => {
+              //   // invalid_access_key 오류 발생
+              //   console.log('reservation res', res);
+              // });
             }
           })
           .catch((e) => alert(e.response.data.error.message));
