@@ -4,7 +4,7 @@ interface DataType {
   key: React.Key;
   name: string;
   market: string;
-  price: number;
+  price: number | string;
 }
 export const columns: TableColumnsType<DataType> = [
   {

@@ -80,7 +80,7 @@ function Order() {
 
       setCoinListData(
         coinList.map((e, i) => {
-          return { ...e, price: coinPriceList[i] };
+          return { ...e, price: coinPriceList[i].toLocaleString() };
         }),
       );
     });
@@ -126,7 +126,7 @@ function Order() {
       side: orderData.side,
       price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
       ord_type: orderData.ord_type,
-      volume: orderData.inputPrice / coinPriceData[orderData.market],
+      volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
       // ord_type: 'price',
     };
     // [
@@ -199,9 +199,10 @@ function Order() {
                       side: data.side,
                       price: +data.price * 0.95,
                       ord_type: data.ord_type,
-                      volume: orderData.inputPrice / (+data.price * 0.95),
+                      inputPrice: orderData.inputPrice,
                     },
                   ],
+                  limit: orderData.limit,
                 },
               };
               ipcRenderer.send('orderReservation', nextOrderData);
