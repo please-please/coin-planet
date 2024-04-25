@@ -10,12 +10,11 @@ const ipcRenderer = electron.ipcRenderer;
 
 const { Header } = Layout;
 
-interface I_orderData {
+interface I_orderData extends Partial<I_orderBody> {
   limit: number;
-  market: string;
   plus: number;
   minus: number;
-  price: number;
+  inputPrice: number;
 }
 
 function Order() {
@@ -25,9 +24,11 @@ function Order() {
   const [orderData, setOrderData] = useState<I_orderData>({
     limit: 1,
     market: '',
+    side: 'bid',
+    ord_type: 'limit',
     minus: 5,
     plus: 5,
-    price: 5000,
+    inputPrice: 5000,
   });
   // const [afterFirstBuyData, setAfterFirstBuyData] = useState([]);
   // const [reservationOrderData, setReservationOrderData] = useState({ bid: [], ask: [] });
@@ -67,9 +68,9 @@ function Order() {
 
   useEffect(() => {
     ipcRenderer.send('getToken', {});
-    ipcRenderer.on('tokenReturn', (_, arg) => {
+    ipcRenderer.once('tokenReturn', (_, arg) => {
       if (arg.status === 'fail') countDown();
-      return () => ipcRenderer.removeAllListeners('tokenReturn');
+      (() => ipcRenderer.removeAllListeners('tokenReturn'))();
     });
   }, []);
 
@@ -108,6 +109,10 @@ function Order() {
 
   const order = async () => {
     setLoading((pre) => ({ ...pre, order: true }));
+    setTimeout(() => {
+      setLoading((pre) => ({ ...pre, order: false }));
+    }, 700);
+
     let token: string;
     const { data } = await getCoinPrice();
     const coinPriceData = {
@@ -116,12 +121,12 @@ function Order() {
       'KRW-XRP': data[2].trade_price,
     };
     console.log(coinPriceData);
-    const body: any = {
+    const body: I_orderBody = {
       market: orderData.market,
-      side: 'bid',
+      side: orderData.side,
       price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
-      ord_type: 'limit',
-      volume: orderData.price / coinPriceData[orderData.market],
+      ord_type: orderData.ord_type,
+      volume: orderData.inputPrice / coinPriceData[orderData.market],
       // ord_type: 'price',
     };
     // [
@@ -159,26 +164,42 @@ function Order() {
 
     ipcRenderer.send('getToken', { body });
     ipcRenderer.on('tokenReturn', async (_, arg) => {
-      if (arg.status === 'success') {
+      //query가 있는 토큰 요청의 경우에만 orderCoin 실행
+      if (arg.status === 'success' && arg.query) {
         console.log('arg', arg);
         token = arg.token;
         console.log('body', body);
         await orderCoin(token, body)
-          .then((res) => {
+          .then(async (res) => {
             console.log('res', res);
+            const { data } = res;
             const firstOrderData = {
               bid: [
                 {
-                  limit: orderData.limit,
-                  market: orderData.market,
-                  price: orderData.price,
-                  // purchasePrice:
+                  market: data.market,
+                  side: data.side,
+                  price: data.price,
+                  ord_type: data.ord_type,
+                  volume: data.volume,
                 },
               ],
               ask: [],
             };
 
             ipcRenderer.send('orderFirst', firstOrderData);
+
+            // 다차수 구매
+            if (orderData.limit > 1) {
+              const nextOrderData = {
+                market: orderData.market,
+                side: orderData.side,
+                inputPrice: orderData.inputPrice,
+              };
+              await orderReservationCoin(nextOrderData, orderData.limit, data.price).then((res) => {
+                // invalid_access_key 오류 발생
+                console.log('reservation res', res);
+              });
+            }
           })
           .catch((e) => alert(e.response.data.error.message));
       }
@@ -254,7 +275,7 @@ function Order() {
   };
 
   const onPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOrderData({ ...orderData, price: Number(e.target.value) });
+    setOrderData({ ...orderData, inputPrice: Number(e.target.value) });
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
