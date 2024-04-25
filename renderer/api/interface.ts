@@ -1,11 +1,29 @@
-export interface I_orderBody {
+export interface I_coinOrderResponseData {
+  created_at: string;
+  executed_volume: string | number;
+  locked: string | number;
   market: string;
-  side: 'bid' | 'ask';
-  volume?: number;
-  price: number;
   ord_type: 'limit' | 'price' | 'market' | 'best';
+  paid_fee: string | number;
+  price: string | number;
+  remaining_fee: string | number;
+  remaining_volume: string | number;
+  reserved_fee: string | number;
+  side: 'bid' | 'ask';
+  state: string;
+  trades_count: number;
+  uuid: string;
+  volume: string | number;
+}
+
+export interface I_orderBody
+  extends Pick<I_coinOrderResponseData, 'market' | 'side' | 'ord_type' | 'price' | 'volume'> {
   identifier?: string;
   time_in_force?: string;
+}
+
+export interface I_orderReservationData extends Pick<I_orderBody, 'market' | 'side'> {
+  inputPrice: number;
 }
 
 export interface I_tickerData {

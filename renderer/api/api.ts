@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
-import { I_orderBody, I_tickerData } from './interface';
+import { I_coinOrderResponseData, I_orderBody, I_orderReservationData, I_tickerData } from './interface';
 import { coinList } from '../constants/coinList';
 const accessKey = 'dsfs';
 const secretKey = 'dfdf';
@@ -31,25 +31,28 @@ export const getAccounts = async () => {
 // };
 
 // BTC, ETH, XRP 현재가 조회
-export const getCoinPrice = async () => {
-  return await axios.get(`https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP`);
-  // return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v) => v.market).join(',')}`);
+export const getCoinPrice = async (): Promise<AxiosResponse<I_tickerData[], any>> => {
+  return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v) => v.market).join(',')}`);
 };
 
-export const orderReservationCoin = async (data, limit, side: string, firstPrice: number) => {
+export const orderReservationCoin = async (
+  data: I_orderReservationData,
+  limit: number,
+  firstPrice: string | number,
+): Promise<AxiosResponse<any, any>> => {
   const body = {
-    market: data.symbol,
-    side: side, // bid 매수, ask 매도
+    market: data.market,
+    side: data.side, // bid 매수, ask 매도
     price: firstPrice,
-    volume: data.totalMoney / firstPrice,
+    volume: data.inputPrice / +firstPrice,
     ord_type: 'limit',
   };
 
   for (let i = 0; i < limit - 1; i++) {
-    if (side === 'bid') {
-      body.price = body.price * (1 - 5 / 100);
+    if (data.side === 'bid') {
+      body.price = +body.price * (1 - 5 / 100);
     } else {
-      body.price = body.price * (1 + 5 / 100);
+      body.price = +body.price * (1 + 5 / 100);
     }
   }
 
@@ -103,7 +106,10 @@ export const orderReservationCoin = async (data, limit, side: string, firstPrice
 //   });
 // };
 
-export const orderCoin = async (token: string, body: I_orderBody) => {
+export const orderCoin = async (
+  token: string,
+  body: I_orderBody,
+): Promise<AxiosResponse<I_coinOrderResponseData, any>> => {
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,
