@@ -39,7 +39,7 @@ export const orderReservationCoin = async (
   data: I_orderReservationData,
   limit: number,
   firstPrice: string | number,
-): Promise<AxiosResponse<any, any>> => {
+) => {
   const body = {
     market: data.market,
     side: data.side, // bid 매수, ask 매도
