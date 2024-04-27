@@ -174,16 +174,18 @@ function Order() {
             console.log('res', res);
             const { data } = res;
             const firstOrderData = {
-              bid: [
-                {
-                  market: data.market,
-                  side: data.side,
-                  price: data.price,
-                  ord_type: data.ord_type,
-                  volume: data.volume,
-                },
-              ],
-              ask: [],
+              [data['market']]: {
+                bid: [
+                  {
+                    number: 1,
+                    price: data.price,
+                    ord_type: data.ord_type,
+                    created_at: data.created_at,
+                    volume: data.volume,
+                  },
+                ],
+                ask: [],
+              },
             };
 
             ipcRenderer.send('orderFirst', firstOrderData);
@@ -195,10 +197,18 @@ function Order() {
                   bid: [
                     {
                       number: 2,
-                      market: data.market,
-                      side: data.side,
-                      price: +data.price * 0.95,
+                      price: +data.price * (100 - orderData.minus) * 0.01,
                       ord_type: data.ord_type,
+                      inputPrice: orderData.inputPrice,
+                    },
+                  ],
+                  ask: [
+                    {
+                      number: 1,
+                      price: +data.price * (100 + orderData.plus) * 0.01,
+                      ord_type: data.ord_type,
+                      created_at: '',
+                      volume: data.volume,
                       inputPrice: orderData.inputPrice,
                     },
                   ],
