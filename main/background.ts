@@ -29,47 +29,86 @@ const intervalPrice = () => {
     const { data } = await getCoinPrice();
 
     // const a = await axios.get(`https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP`);
-    currentPrice['KRW-BTC'] = data[0].trade_price;
+    // currentPrice['KRW-BTC'] = data[0].trade_price;
     currentPrice['KRW-ETH'] = data[1].trade_price;
     currentPrice['KRW-XRP'] = data[2].trade_price;
+    currentPrice['KRW-BTC'] = 85065000;
+    // currentPrice['KRW-BTC'] = data[0].trade_price;
+    const aaa = data[0].trade_price;
+
+    // currentPrice['KRW-ETH'] = 4000000;
+    // currentPrice['KRW-XRP'] = 800;
     // console.log(currentPrice);
 
-    // const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
-    // const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
-    // const orderData = JSON.parse(orderDataFile);
-    // orderData
-    // for (let i = 0; i < orderData?.bid?.length; i++) {
-    //   if (currentPrice[orderData.bid[i].symbol] <= orderData.bid[i].price) {
-    //     console.log('매수 주문');
-    //     const orderCoinData = {
-    //       limit: orderData.bid[i].limit,
-    //       symbol: orderData.bid[i].symbol,
-    //       minus: 5,
-    //       plus: 5,
-    //       totalMoney: orderData.bid[i].totalMoney,
-    //       side: 'bid',
-    //     };
+    const orderDataFilePath = `${__dirname}/reservation_order_data.json`;
+    const orderDataFile = fs.readFileSync(orderDataFilePath, 'utf8');
+    const orderData = JSON.parse(orderDataFile);
 
-    //     const dataFilePath = `${__dirname}/assets_data.json`;
-    //     const assetsDataFile = fs.readFileSync(dataFilePath, 'utf8');
-    //     const assetsData = JSON.parse(assetsDataFile);
-    //     const newAssetsData = [
-    //       ...assetsData,
-    //       {
-    //         limit: orderData.bid[i].limit,
-    //         symbol: orderData.bid[i].symbol,
-    //         price: data.price,
-    //         totalMoney: orderData.bid[i].totalMoney,
-    //       },
-    //     ];
-    //   }
-    // }
-    // for (let i = orderData?.ask?.length - 1; i >= 0; i--) {
-    //   if (currentPrice[orderData.ask[i].symbol] >= orderData.ask[i].price) {
-    //     console.log('매도 주문');
-    //   }
-    // }
-  }, 1000);
+    const btcData = orderData['KRW-BTC'];
+    const ethData = orderData['KRW-ETH'];
+    const xrpData = orderData['KRW-XRP'];
+
+    // reservation_order_data.json에 저장된 가격보다 현재가가 낮거나 같으면 시작
+    if (btcData.bid.length && btcData.bid[0].price >= currentPrice['KRW-BTC']) {
+      console.log('aaaaaa');
+      if (btcData.bid[0].number === btcData.bid[0].limit) {
+        console.log('마지막 차수');
+        return;
+      }
+
+      const body: any = {
+        market: 'KRW-BTC',
+        side: 'bid',
+        price: Math.ceil(aaa / 1000) * 1000,
+        ord_type: 'limit',
+        volume: (btcData.bid[0].inputPrice / currentPrice['KRW-BTC']).toFixed(8),
+      };
+      console.log(body);
+      // 매수 하고
+      const { data } = await orderCoin(body);
+      console.log(data);
+
+      const assetsDataFilePath = `${__dirname}/assets_data.json`;
+      const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
+      const assetsData = JSON.parse(assetsDataFile);
+
+      // assets_data.json에 차수 별 매매 데이터 추가
+      const newAssetsData = {
+        number: btcData.bid[0].number,
+        price: data.price, // 내가 구매한 금액
+        volume: data.volume, // 내가 구매한 수량
+        ord_type: 'limit',
+        created_at: data.created_at,
+      };
+
+      assetsData['KRW-BTC'].bid.push(newAssetsData);
+      fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
+
+      let nextOrderFlag = true;
+      if (btcData.limit <= btcData.bid[0].number) {
+        // 마지막 차수까지 매수 된거임
+        nextOrderFlag = false;
+      }
+
+      if (nextOrderFlag) {
+        const newOrderData = {
+          number: btcData.bid[0].number + 1,
+          market: btcData.bid[0].market,
+          side: 'bid',
+          price: data.price,
+          ord_type: 'limit',
+          inputPrice: btcData.bid[0].inputPrice,
+        };
+
+        orderData['KRW-BTC'].bid.push(newOrderData);
+      }
+
+      // 제일 앞에꺼 빼고
+      orderData['KRW-BTC'].bid.shift();
+
+      fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
+    }
+  }, 10000);
 };
 
 (async () => {

@@ -4,6 +4,7 @@ import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
+import * as fs from 'fs';
 import { coinList } from './coinList';
 
 const accessKey = 'dsfs';
@@ -103,7 +104,24 @@ export const orderReservationCoin = async (data, limit, side: string, firstPrice
 //   });
 // };
 
-export const orderCoin = async (token: string, body: any) => {
+export const orderCoin = async (body: any) => {
+  const dataFilePath = `${__dirname}/private_user_data.json`;
+  const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
+  const userData = JSON.parse(userDataFile);
+  const query = queryEncode.encode(body);
+
+  const hash = crypto.createHash('sha512');
+  const queryHash = hash.update(query, 'utf-8').digest('hex');
+
+  const payload = {
+    access_key: userData.accessKey,
+    nonce: v4(),
+    query_hash: queryHash,
+    query_hash_alg: 'SHA512',
+  };
+
+  const token = sign(payload, userData.secretKey);
+  console.log(body);
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,
