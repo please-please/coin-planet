@@ -32,9 +32,9 @@ const intervalPrice = () => {
     // currentPrice['KRW-BTC'] = data[0].trade_price;
     currentPrice['KRW-ETH'] = data[1].trade_price;
     currentPrice['KRW-XRP'] = data[2].trade_price;
-    currentPrice['KRW-BTC'] = 85065000;
-    // currentPrice['KRW-BTC'] = data[0].trade_price;
-    const aaa = data[0].trade_price;
+    // currentPrice['KRW-BTC'] = 85065000;
+    currentPrice['KRW-BTC'] = data[0].trade_price;
+    // const aaa = data[0].trade_price;
 
     // currentPrice['KRW-ETH'] = 4000000;
     // currentPrice['KRW-XRP'] = 800;
@@ -59,7 +59,7 @@ const intervalPrice = () => {
       const body: any = {
         market: 'KRW-BTC',
         side: 'bid',
-        price: Math.ceil(aaa / 1000) * 1000,
+        price: Math.ceil(currentPrice['KRW-BTC'] / 1000) * 1000,
         ord_type: 'limit',
         volume: (btcData.bid[0].inputPrice / currentPrice['KRW-BTC']).toFixed(8),
       };
