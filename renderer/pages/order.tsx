@@ -221,6 +221,7 @@ function Order() {
                   console.log('reservation data 저장 성공');
                 }
               });
+              alert('주문 성공');
               // const nextOrderData = {
               //   market: orderData.market,
               //   side: orderData.side,
