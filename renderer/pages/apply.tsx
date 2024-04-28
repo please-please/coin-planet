@@ -1,6 +1,6 @@
 import electron from 'electron';
 import React, { useEffect, useState } from 'react';
-import { Layout, Button, Modal, Input } from 'antd';
+import { Layout, Button, Modal, Input, Typography } from 'antd';
 
 const ipcRenderer = electron.ipcRenderer;
 
@@ -73,10 +73,7 @@ function Apply() {
 
   return (
     <React.Fragment>
-      <Header>
-        <a className="text-white">1. key 등록</a>
-      </Header>
-
+      <Typography.Title level={2}>api 키 등록</Typography.Title>
       <div
         style={{
           display: 'flex',
@@ -86,7 +83,7 @@ function Apply() {
         }}
       >
         <Input
-          style={{ marginTop: '5rem', width: '60%' }}
+          style={{ width: '60%' }}
           placeholder="Access Key"
           value={accessKey}
           onChange={handleAccessKeyInputChange}
@@ -106,13 +103,6 @@ function Apply() {
           onClick={saveUserData}
         >
           저장
-        </Button>
-        <Button
-          style={{ marginTop: '20rem', width: '60%', height: '60px' }}
-          disabled={nextVisible}
-          onClick={handleNextPage}
-        >
-          메인화면
         </Button>
       </div>
       <div>

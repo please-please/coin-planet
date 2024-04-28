@@ -8,15 +8,15 @@ interface DataType {
 }
 export const columns: TableColumnsType<DataType> = [
   {
-    title: 'Name',
+    title: '종목이름',
     dataIndex: 'name',
   },
   {
-    title: 'Market',
+    title: '심볼',
     dataIndex: 'market',
   },
   {
-    title: 'Price',
+    title: '가격',
     dataIndex: 'price',
   },
 ];

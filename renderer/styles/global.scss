@@ -7,6 +7,39 @@
 @import 'font';
 @import 'styles/variables';
 
+.logo {
+  height: 10em;
+  cursor: pointer;
+  transition: 0.5s;
+
+  &:hover {
+    animation: tilt-shaking 0.25s;
+  }
+}
+
+@keyframes tilt-shaking {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  50% {
+    transform: rotate(0eg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.ant-btn {
+  color: $primary-dark !important;
+  border-color: $primary-dark !important;
+}
+
 @layer base {
   body {
     @apply bg-white text-black;
@@ -79,7 +112,7 @@ button {
   cursor: pointer;
   &.hoverTextWhite {
     &:hover {
-      color: #fff !important;
+      color: #b48282 !important;
     }
   }
 }
@@ -118,6 +151,7 @@ button {
 }
 
 /**** BUTTON COSTOM ****/
+
 .my-mint-btn {
   @apply rounded-md bg-mint text-white hover:bg-mint/80;
 }

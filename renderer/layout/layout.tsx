@@ -2,23 +2,25 @@ import { Layout, Menu } from 'antd';
 import { MenuProps } from 'antd/lib/menu';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import logo from '../public/logo.png';
+import Link from 'next/link';
 
 const { Content } = Layout;
 
 const items = [
   {
     key: 0,
-    label: 'main',
+    label: '종목손익',
     path: 'main',
   },
   {
     key: 1,
-    label: 'apply',
+    label: 'api 키 등록',
     path: 'apply',
   },
   {
     key: 2,
-    label: 'order',
+    label: '주문하기',
     path: 'order',
   },
 ];
@@ -29,6 +31,10 @@ type Props = {
 export default function RootLayout({ children }: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['0']);
   const router = useRouter();
+
+  const clickLogoHandler = () => {
+    router.push('/main');
+  };
 
   const clickMenuHandler: MenuProps['onClick'] = (info) => {
     router.push(`/${items[items.findIndex((item) => item.key === +info.key)].path}`);
@@ -41,7 +47,9 @@ export default function RootLayout({ children }: Props) {
   return (
     <Layout>
       <Header style={{ display: 'flex', alignItems: 'center' }}>
-        <div className="demo-logo" />
+        <div onClick={clickLogoHandler}>
+          <img className="logo" src="/logo.png" />
+        </div>
         <Menu
           theme="dark"
           mode="horizontal"
@@ -52,7 +60,7 @@ export default function RootLayout({ children }: Props) {
         />
       </Header>
       <Content style={{ padding: '0 48px' }}>{children}</Content>
-      <Footer style={{ textAlign: 'center' }}>Ant Design ©{new Date().getFullYear()} Created by Ant UED</Footer>
+      <Footer style={{ textAlign: 'center' }}>Coin Planet ©2024 Created by please-please</Footer>
     </Layout>
   );
 }

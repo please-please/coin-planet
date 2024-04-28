@@ -1,5 +1,14 @@
 @import 'styles/variables';
 
+.ant-typography {
+  font-family: 'GmarketSans';
+  font-weight: 500 !important;
+}
+
+a:hover {
+  color: $primary-dark;
+}
+
 .ant-table-body {
   &::-webkit-scrollbar {
     width: 5px;
@@ -44,7 +53,7 @@
 }
 
 .ant-btn-primary {
-  background-color: $sky !important;
+  background-color: $primary-light !important;
 }
 
 .ant-modal .ant-modal-close {
@@ -100,9 +109,7 @@
     border-color: $primary;
   }
 
-  &:not(.ant-checkbox-wrapper-disabled):hover
-    .ant-checkbox-checked:not(.ant-checkbox-disabled)
-    .ant-checkbox-inner {
+  &:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-checked:not(.ant-checkbox-disabled) .ant-checkbox-inner {
     background-color: $primary;
   }
 }
@@ -112,7 +119,12 @@
 }
 
 .ant-layout {
+  height: 100vh;
   background-color: $white;
+}
+
+.ant-layout-content {
+  padding: 48px !important;
 }
 
 .layoutContent {
@@ -131,7 +143,7 @@
 .ant-menu-item {
   &:not(.ant-menu-item-selected) {
     &:hover {
-      background-color: $gray-200 !important;
+      background-color: $secondary !important;
     }
   }
 
@@ -290,13 +302,18 @@
       .ant-table-cell {
         padding: 6px 0 !important;
         font-size: 15px !important;
-        color: $secondary !important;
+        color: $primary-deepDark !important;
         font-weight: normal !important;
         background: $gray-100;
         text-align: center;
       }
     }
     .ant-table-tbody {
+      .ant-table-row-level-0 {
+        &:hover {
+          background: $primary-lighter;
+        }
+      }
       .ant-table-row {
         &.ant-table-row-selected {
           .ant-table-cell {

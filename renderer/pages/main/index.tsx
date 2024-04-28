@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TableColumnsType, Table } from 'antd';
+import { TableColumnsType, Table, Typography } from 'antd';
 import { useRecoilState } from 'recoil';
 import { MyAssets, MyReservations, MyUserData } from '../../recoil/atom';
 import electron from 'electron';
@@ -122,10 +122,7 @@ function Main() {
 
   return (
     <React.Fragment>
-      {/* <Header>
-        <a className="text-white">리스트</a>
-      </Header> */}
-
+      <Typography.Title level={2}>종목손익</Typography.Title>
       <Table columns={columns} dataSource={tableData} scroll={{ x: 1300 }} pagination={false} bordered />
     </React.Fragment>
   );

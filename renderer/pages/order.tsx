@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Layout, Modal, Table } from 'antd';
+import { Button, Input, Layout, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
 import { getCoinPrice, orderReservationCoin, orderCoin } from '../api/api';
 import electron from 'electron';
@@ -321,27 +321,30 @@ function Order() {
   const hasSelected = selectedRowKeys.length > 0;
   return (
     <React.Fragment>
-      <Header>
-        <a className="text-white">2. 선택</a>
-      </Header>
-
+      <Typography.Title level={2}>주문하기</Typography.Title>
       <div>
-        <Button style={{ float: 'right', height: '60px' }} type="primary" onClick={reload} loading={loading.reload}>
-          Reload
+        <Button style={{ float: 'right', height: '50px' }} type="primary" onClick={reload} loading={loading.reload}>
+          새로고침
         </Button>
         <Button
-          style={{ float: 'right', height: '60px', marginRight: '10px' }}
+          style={{ float: 'right', height: '50px', marginRight: '10px' }}
           type="primary"
           onClick={order}
           disabled={!hasSelected}
           loading={loading.order}
         >
-          Order
+          주문하기
         </Button>
-        <Input placeholder="구매금액" onChange={onPriceChange}></Input>
-        <Input placeholder="차수입력" onChange={onLimitChange}></Input>
+        <Input style={{ marginTop: '1rem' }} placeholder="구매금액" onChange={onPriceChange}></Input>
+        <Input style={{ marginTop: '0.5rem' }} placeholder="차수입력" onChange={onLimitChange}></Input>
       </div>
-      <Table rowSelection={rowSelection} columns={columns} dataSource={coinListData} />
+      <Table
+        style={{ marginTop: '2rem' }}
+        rowSelection={rowSelection}
+        columns={columns}
+        dataSource={coinListData}
+        pagination={false}
+      />
       {contextHolder}
     </React.Fragment>
   );
