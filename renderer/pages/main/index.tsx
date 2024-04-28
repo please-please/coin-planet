@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { TableColumnsType, Table, Typography } from 'antd';
+import { TableColumnsType, Table, Typography, Button } from 'antd';
 import { useRecoilState } from 'recoil';
 import { MyAssets, MyReservations, MyUserData } from '../../recoil/atom';
 import electron from 'electron';
 import { getCoinPrice } from '../../api/api';
 import { I_tickerData } from '../../api/interface';
 import { coinList } from '../../constants/coinList';
+import { I_assetBid } from '../../recoil/interface';
+import { getProfitLoss } from '../../utils';
 
 const ipcRenderer = electron.ipcRenderer;
 
@@ -17,18 +19,28 @@ interface I_tableData {
   name: string;
   label?: string;
   profitLossComparedPreviousDay?: number;
-  profitLoss1st?: number;
-  profitLoss2nd?: number;
-  profitLoss3rd?: number;
-  totalProfitLoss?: number;
+  totalProfitLoss: number;
+  profitLoss?: number[];
+  [key: string]: any;
+}
+
+interface I_tableSource extends I_tableData {
+  [key: string]: React.Key | string | number | number[];
+}
+
+export interface I_assetsData {
+  [symbol: string]: {
+    bid: I_assetBid[];
+  };
 }
 
 function Main() {
   const [tickerData, setTickerData] = useState<I_tickerData[]>();
   const [tableData, setTableData] = useState<I_tableData[]>(TABLE_DEFAULT_DATA);
+  const [tableSource, setTableSource] = useState<I_tableSource[]>();
   const [columns, setColumns] = useState<TableColumnsType<I_tableData>>(TABLE_DEFAULT_COLUMNS);
   const [myUserData, setMyUserData] = useRecoilState(MyUserData);
-  const [myAssets, setMyAssets] = useRecoilState(MyAssets);
+  const [myAssets, setMyAssets] = useRecoilState<I_assetsData>(MyAssets);
   const [myReservationOrderData, setMyReservationOrderData] = useRecoilState(MyReservations);
 
   // useEffect(() => {
@@ -69,28 +81,11 @@ function Main() {
     // 화면 렌더링
   };
 
-  // const handleSelectPage = () => {
-  //   if (isProd) {
-  //     window.location.href = 'app://./select.html';
-  //   } else {
-  //     window.location.href = '../select';
-  //   }
-  // };
-
-  // const handleApplyPage = () => {
-  //   if (isProd) {
-  //     window.location.href = 'app://./apply.html';
-  //   } else {
-  //     window.location.href = '../apply';
-  //   }
-  // };
-
   useEffect(() => {
     ipcRenderer.send('getSavedAssetsDataFile');
-    ipcRenderer.on('assetsReturn', (_, arg) => {
+    ipcRenderer.once('assetsReturn', (_, arg) => {
       if (arg.status === 'success') {
-        console.log(arg.assetsData);
-        return () => ipcRenderer.removeAllListeners('assetsReturn');
+        setMyAssets(arg.assetsData);
       }
     });
   }, []);
@@ -98,55 +93,137 @@ function Main() {
   useEffect(() => {
     getCoinPrice()
       .then((res) => {
+        console.log(res.data);
         setTickerData(res.data);
       })
       .catch(() => alert('조회 오류!'));
   }, []);
 
   useEffect(() => {
-    if (tickerData) {
-      const newTableData = tableData.map((item, i) => {
+    if (myAssets && tickerData) {
+      const profitLoss = getProfitLoss(myAssets, tickerData);
+      let newTableData = tableData.map((item, i) => {
         const { prev_closing_price, change, change_price } = tickerData[i];
         const yinyang = change === 'FALL' ? -1 : 1;
 
         return {
           ...item,
+          totalProfitLoss: 0,
           label: `${item.name}(${item.market})`,
           profitLossComparedPreviousDay: +((change_price / prev_closing_price) * yinyang * 100).toFixed(2),
+          profitLoss: profitLoss[item.market],
         };
       });
 
+      console.log('newTableData', newTableData);
+
+      //   // 전체손익, 각 차수별 손익 계산
+      //   // Myassets에서 토큰별 비드 값에서 volume * price -> 구매한 토큰 원화가격
+      //   //
+      // }
+
       setTableData(newTableData);
     }
-  }, [tickerData]);
+  }, [tickerData, myAssets]);
+
+  useEffect(() => {
+    const newTableSource = [...tableData];
+    const newTableColumn = [...columns];
+    for (let i = 0; i < tableData.length; i++) {
+      if (tableData[i].profitLoss?.length) {
+        for (let j = 0; j < tableData[i].profitLoss?.length; j++) {
+          newTableSource[i][`profitLoss${j + 1}`] = tableData[i].profitLoss[j];
+
+          if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
+            newTableColumn.push({
+              title: `${j + 1}차수 손익`,
+              dataIndex: `profitLoss${j + 1}`,
+              className: 'numeric_value',
+              width: 100,
+              render: (number) =>
+                number !== undefined ? (
+                  <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
+                ) : null,
+            });
+          }
+        }
+        if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
+          newTableColumn.push({
+            title: '전량 매도',
+            dataIndex: 'sellAll',
+            width: '8rem',
+            fixed: 'right',
+            render: () => <a>전량 매도</a>,
+          });
+      }
+      if (newTableSource[i].profitLoss?.length)
+        newTableSource[i].totalProfitLoss = newTableSource[i].profitLoss.reduce((p, c) => p + c, 0);
+    }
+    setColumns(newTableColumn);
+    setTableSource(newTableSource);
+    console.log('newTableSource', newTableSource);
+  }, [tableData]);
 
   return (
     <React.Fragment>
       <Typography.Title level={2}>종목손익</Typography.Title>
-      <Table columns={columns} dataSource={tableData} scroll={{ x: 1300 }} pagination={false} bordered />
+      <Button
+        style={{ float: 'right', height: '50px', marginBottom: '1rem' }}
+        type="primary"
+        onClick={reload}
+        loading={true}
+      >
+        새로고침
+      </Button>
+      <Table
+        title={() => new Date(tickerData?.[0].timestamp).toLocaleString() + ' 조회 기준'}
+        columns={columns}
+        dataSource={tableSource}
+        scroll={{ x: 1300 }}
+        pagination={false}
+        bordered
+      />
     </React.Fragment>
   );
 }
 
 export default Main;
 
-const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({ key: v.key, market: v.market, name: v.name }));
+const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({
+  key: v.key,
+  market: v.market,
+  name: v.name,
+  totalProfitLoss: 0,
+}));
 
 const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
   {
     title: '종목이름',
     dataIndex: 'label',
     fixed: 'left',
+    width: '10rem',
   },
   {
-    title: '전일대비 손익',
+    title: '전일대비 등락률',
     dataIndex: 'profitLossComparedPreviousDay',
     className: 'numeric_value',
-    render: (number) => (number ? <p style={{ color: `${number > 0 ? 'red' : 'blue'}` }}>{`${number}%`}</p> : null),
+    width: 100,
+    render: (number) => (
+      <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}%`}</p>
+    ),
   },
-  { title: '전체 손익', dataIndex: 'totalProfitLoss', className: 'numeric_value' },
-  { title: '1차수 손익', dataIndex: 'profitLoss1st', className: 'numeric_value' },
-  { title: '2차수 손익', dataIndex: 'profitLoss2nd', className: 'numeric_value' },
-  { title: '3차수 손익', dataIndex: 'profitLoss3rd', className: 'numeric_value' },
-  { title: '전량 매도', dataIndex: 'sellAll', fixed: 'right', render: () => <a>전량 매도</a> },
+  {
+    title: '전체 손익',
+    dataIndex: 'totalProfitLoss',
+    className: 'numeric_value',
+    width: 100,
+    render: (number) =>
+      number !== undefined ? (
+        <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
+      ) : null,
+  },
+  // { title: '1차수 손익', dataIndex: `profitLoss1`, className: 'numeric_value' },
+  // { title: '2차수 손익', dataIndex: 'profitLoss2', className: 'numeric_value' },
+  // { title: '3차수 손익', dataIndex: 'profitLoss3', className: 'numeric_value' },
+  // { title: '전량 매도', dataIndex: 'sellAll', width: '8rem', render: () => <a>전량 매도</a> },
 ];

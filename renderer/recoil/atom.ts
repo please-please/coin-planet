@@ -2,7 +2,7 @@ import { atom } from 'recoil';
 
 export const MyAssets = atom({
   key: 'MyAssets',
-  default: [],
+  default: {},
 });
 
 export const MyReservations = atom({

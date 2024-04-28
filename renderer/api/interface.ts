@@ -32,4 +32,5 @@ export interface I_tickerData {
   change_price: number; // 변화액
   trade_price: number; // 종가(현재가)
   prev_closing_price: number; // 전일 종가
+  timestamp: number;
 }

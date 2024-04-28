@@ -179,9 +179,9 @@ function Order() {
                   {
                     number: 1,
                     price: data.price,
+                    volume: data.volume,
                     ord_type: data.ord_type,
                     created_at: data.created_at,
-                    volume: data.volume,
                   },
                 ],
                 ask: [],
