@@ -50,7 +50,6 @@ const intervalPrice = () => {
 
     // reservation_order_data.json에 저장된 가격보다 현재가가 낮거나 같으면 시작
     if (btcData.bid.length && btcData.bid[0].price >= currentPrice['KRW-BTC']) {
-      console.log('aaaaaa');
       if (btcData.bid[0].number === btcData.bid[0].limit) {
         console.log('마지막 차수');
         return;
@@ -63,10 +62,9 @@ const intervalPrice = () => {
         ord_type: 'limit',
         volume: (btcData.bid[0].inputPrice / currentPrice['KRW-BTC']).toFixed(8),
       };
-      console.log(body);
+
       // 매수 하고
       const { data } = await orderCoin(body);
-      console.log(data);
 
       const assetsDataFilePath = `${__dirname}/assets_data.json`;
       const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
@@ -176,7 +174,14 @@ ipcMain.on('getSavedUserDataFile', (evt, arg) => {
 
 ipcMain.on('orderFirst', (evt, arg) => {
   const dataFilePath = `${__dirname}/assets_data.json`;
-  const assetsData = JSON.stringify(arg, null, 2);
+  const isAssetsData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+  const newAssetsData = {
+    ...isAssetsData,
+    ...arg,
+  };
+
+  const assetsData = JSON.stringify(newAssetsData, null, 2);
   fs.writeFileSync(dataFilePath, assetsData, 'utf8');
 });
 
@@ -207,7 +212,13 @@ ipcMain.on('getSavedReservationOrderDataFile', (evt, arg) => {
 
 ipcMain.on('orderReservation', (evt, arg) => {
   const dataFilePath = `${__dirname}/reservation_order_data.json`;
-  const reservationOrderData = JSON.stringify(arg, null, 2);
+  const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+  const newReservationData = {
+    ...isReservationData,
+    ...arg,
+  };
+  const reservationOrderData = JSON.stringify(newReservationData, null, 2);
   fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
   evt.sender.send('reservationOrderReturn', { status: 'success' });
 });
