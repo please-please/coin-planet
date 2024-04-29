@@ -39,9 +39,11 @@ function Main() {
   const [tableData, setTableData] = useState<I_tableData[]>(TABLE_DEFAULT_DATA);
   const [tableSource, setTableSource] = useState<I_tableSource[]>();
   const [columns, setColumns] = useState<TableColumnsType<I_tableData>>(TABLE_DEFAULT_COLUMNS);
-  const [myUserData, setMyUserData] = useRecoilState(MyUserData);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [myAssets, setMyAssets] = useRecoilState<I_assetsData>(MyAssets);
-  const [myReservationOrderData, setMyReservationOrderData] = useRecoilState(MyReservations);
+
+  // const [myUserData, setMyUserData] = useRecoilState(MyUserData);
+  // const [myReservationOrderData, setMyReservationOrderData] = useRecoilState(MyReservations);
 
   // useEffect(() => {
   //   // 저장되어있는 private user data 불러와서 글로벌에 할당해야함. recoil 쓸까 말까
@@ -79,14 +81,24 @@ function Main() {
     // 현재가 불러와서
     // myAssets에 있는 것들 수익률 계산하고
     // 화면 렌더링
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 800);
+    ipcRenderer.send('getSavedAssetsDataFile');
+    getCoinPrice()
+      .then((res) => {
+        setTickerData(res.data);
+      })
+      .catch(() => alert('조회 오류!'));
   };
 
   useEffect(() => {
     ipcRenderer.send('getSavedAssetsDataFile');
     ipcRenderer.once('assetsReturn', (_, arg) => {
+      // console.log('에셋리턴');
       if (arg.status === 'success') {
         setMyAssets(arg.assetsData);
       }
+      // return ipcRenderer.removeAllListeners('assetsReturn');
     });
   }, []);
 
@@ -100,7 +112,7 @@ function Main() {
   }, []);
 
   useEffect(() => {
-    if (myAssets && tickerData) {
+    if (Object.keys(myAssets).length > 0 && tickerData?.length > 0) {
       const profitLoss = getProfitLoss(myAssets, tickerData);
       let newTableData = tableData.map((item, i) => {
         const { prev_closing_price, change, change_price } = tickerData[i];
@@ -127,41 +139,43 @@ function Main() {
   }, [tickerData, myAssets]);
 
   useEffect(() => {
-    const newTableSource = [...tableData];
-    const newTableColumn = [...columns];
-    for (let i = 0; i < tableData.length; i++) {
-      if (tableData[i].profitLoss?.length) {
-        for (let j = 0; j < tableData[i].profitLoss?.length; j++) {
-          newTableSource[i][`profitLoss${j + 1}`] = tableData[i].profitLoss[j];
+    if (tableData.length > 0) {
+      const newTableSource = [...tableData];
+      const newTableColumn = [...columns];
+      for (let i = 0; i < tableData.length; i++) {
+        if (tableData[i].profitLoss?.length) {
+          for (let j = 0; j < tableData[i].profitLoss?.length; j++) {
+            newTableSource[i][`profitLoss${j + 1}`] = tableData[i].profitLoss[j];
 
-          if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
-            newTableColumn.push({
-              title: `${j + 1}차수 손익`,
-              dataIndex: `profitLoss${j + 1}`,
-              className: 'numeric_value',
-              width: 100,
-              render: (number) =>
-                number !== undefined ? (
-                  <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
-                ) : null,
-            });
+            if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
+              newTableColumn.push({
+                title: `${j + 1}차수 손익`,
+                dataIndex: `profitLoss${j + 1}`,
+                className: 'numeric_value',
+                width: 100,
+                render: (number) =>
+                  number !== undefined ? (
+                    <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
+                  ) : null,
+              });
+            }
           }
+          if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
+            newTableColumn.push({
+              title: '전량 매도',
+              dataIndex: 'sellAll',
+              width: '8rem',
+              fixed: 'right',
+              render: () => <a>전량 매도</a>,
+            });
         }
-        if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
-          newTableColumn.push({
-            title: '전량 매도',
-            dataIndex: 'sellAll',
-            width: '8rem',
-            fixed: 'right',
-            render: () => <a>전량 매도</a>,
-          });
+        if (newTableSource[i].profitLoss?.length)
+          newTableSource[i].totalProfitLoss = newTableSource[i].profitLoss.reduce((p, c) => p + c, 0);
       }
-      if (newTableSource[i].profitLoss?.length)
-        newTableSource[i].totalProfitLoss = newTableSource[i].profitLoss.reduce((p, c) => p + c, 0);
+      setColumns(newTableColumn);
+      setTableSource(newTableSource);
+      console.log('newTableSource', newTableSource);
     }
-    setColumns(newTableColumn);
-    setTableSource(newTableSource);
-    console.log('newTableSource', newTableSource);
   }, [tableData]);
 
   return (
@@ -171,7 +185,7 @@ function Main() {
         style={{ float: 'right', height: '50px', marginBottom: '1rem' }}
         type="primary"
         onClick={reload}
-        loading={true}
+        loading={isLoading}
       >
         새로고침
       </Button>
