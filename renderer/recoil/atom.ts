@@ -17,3 +17,12 @@ export const MyUserData = atom({
     secretKey: '',
   },
 });
+
+export const HasAsk = atom<{ [key: string]: boolean }>({
+  key: 'HasAsk',
+  default: {
+    'KRW-BTC': false,
+    'KRW-ETH': false,
+    'KRW-XRP': false,
+  },
+});
