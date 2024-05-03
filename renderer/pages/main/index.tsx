@@ -35,21 +35,37 @@ function Main() {
   const [tableSource, setTableSource] = useState<I_tableSource[]>();
   const [columns, setColumns] = useState<TableColumnsType<I_tableData>>(TABLE_DEFAULT_COLUMNS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetched, setIsFetched] = useState<boolean>(false);
 
   const myAssets = useRecoilValue<I_assetsData>(MyAssets);
 
   const coinPrice = useGetCoinPrice();
-  const getAssetData = useGetAssetData();
+  const assetData = useGetAssetData();
 
-  const reload = () => {
+  const reload = async () => {
+    setIsFetched(false);
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 800);
-    getAssetData();
+    assetData.reload();
     coinPrice.reload();
   };
 
+  const clickReloadHandler = () => {
+    reload()
+      .then(() => {
+        setIsFetched(true);
+      })
+      .catch((e) => alert('새로고침 실패'));
+  };
+
   useEffect(() => {
-    if (Object.keys(myAssets).length > 0 && coinPrice.tickerData?.length > 0) {
+    if (coinPrice.isFetched && assetData.isFetched) {
+      setIsFetched(true);
+    }
+  }, [coinPrice.isFetched, assetData.isFetched]);
+
+  useEffect(() => {
+    if (assetData.isFetched && coinPrice.isFetched) {
       const profitLoss = getProfitLoss(myAssets, coinPrice.tickerData);
       let newTableData = tableData.map((item, i) => {
         const { prev_closing_price, change, change_price } = coinPrice.tickerData[i];
@@ -71,7 +87,7 @@ function Main() {
   }, [coinPrice.tickerData, myAssets]);
 
   useEffect(() => {
-    if (tableData.length > 0) {
+    if (tableData.length > 0 && isFetched) {
       const newTableSource = [...tableData];
       const newTableColumn = [...columns];
       for (let i = 0; i < tableData.length; i++) {
@@ -120,7 +136,7 @@ function Main() {
       <Button
         style={{ float: 'right', height: '50px', marginBottom: '1rem' }}
         type="primary"
-        onClick={reload}
+        onClick={clickReloadHandler}
         loading={isLoading}
       >
         새로고침

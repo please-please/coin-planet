@@ -4,16 +4,20 @@ import { I_tickerData } from '../../api/interface';
 
 export const useGetCoinPrice = () => {
   const [tickerData, setTickerData] = useState<I_tickerData[]>();
+  const [isFetched, setIsFetched] = useState<boolean>();
 
   const reload = () => {
+    setIsFetched(false);
+
     getCoinPrice()
       .then((res) => {
         setTickerData(res.data);
+        setIsFetched(true);
       })
       .catch(() => alert('조회 오류!'));
   };
 
   useEffect(reload, []);
 
-  return { tickerData, reload };
+  return { tickerData, reload, isFetched };
 };
