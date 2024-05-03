@@ -1,6 +1,8 @@
 # COIN PLANET
 
-![COINPLANET](https://velog.velcdn.com/images/wndud2274/post/791234bb-16ef-4dd6-8690-e03131133439/image.jpeg)
+![COINPLANET](https://velog.velcdn.com/images/2pandi/post/8e271e45-8305-4066-94f4-ca786d977933/image.png)
+
+
 
 <br>
 
