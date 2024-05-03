@@ -8,6 +8,24 @@ import * as queryEncode from 'querystring';
 import crypto from 'crypto';
 import { getCoinPrice, orderCoin } from './api';
 import { CoinService } from './service/coin-service';
+import {
+  ASSETS_RETURN,
+  FAIL,
+  GET_SAVED_ASSETS_DATA_FILE,
+  GET_SAVED_RESERVATION_ORDER_DATA_FILE,
+  GET_SAVED_USER_DATA_FILE,
+  GET_TOKEN,
+  ORDER_FIRST,
+  ORDER_RESERVATION,
+  REPLY,
+  RESERVATION_ORDER_RETURN,
+  SAVE_FILE,
+  SUCCESS,
+  TOKEN_RETURN,
+  USER_DATA_RETURN,
+  WINDOW_ALL_CLOSED,
+} from '../constants';
+
 const isProd = process.env.NODE_ENV === 'production';
 
 const coinService = new CoinService();
@@ -365,17 +383,17 @@ const intervalPrice = () => {
   intervalPrice();
 })();
 
-app.on('window-all-closed', () => {
+app.on(WINDOW_ALL_CLOSED, () => {
   app.quit();
 });
 
-ipcMain.on('message', async (event, arg) => {
-  event.reply('message', `${arg} World!`);
-});
+// ipcMain.on('message', async (event, arg) => {
+//   event.reply('message', `${arg} World!`);
+// });
 
-ipcMain.on('saveFile', (evt, arg) => {
+ipcMain.on(SAVE_FILE, (evt, arg) => {
   if (arg.accessKey === '' || arg.secretKey === '') {
-    evt.sender.send('reply', { status: 'fail' });
+    evt.sender.send(REPLY, { status: FAIL });
     return;
   }
 
@@ -383,21 +401,21 @@ ipcMain.on('saveFile', (evt, arg) => {
   const userData = JSON.stringify(arg, null, 2);
 
   fs.writeFileSync(dataFilePath, userData, 'utf8');
-  evt.sender.send('reply', { status: 'success' });
+  evt.sender.send(REPLY, { status: SUCCESS });
 });
 
-ipcMain.on('getSavedUserDataFile', (evt, arg) => {
+ipcMain.on(GET_SAVED_USER_DATA_FILE, (evt, arg) => {
   const dataFilePath = `${__dirname}/private_user_data.json`;
 
   const userData = fs.readFileSync(dataFilePath, 'utf8');
   if (userData === '') {
-    evt.sender.send('userDataReturn', { status: 'fail' });
+    evt.sender.send(USER_DATA_RETURN, { status: FAIL });
     return;
   }
-  evt.sender.send('userDataReturn', { status: 'success', userData: JSON.parse(userData) });
+  evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: JSON.parse(userData) });
 });
 
-ipcMain.on('orderFirst', (evt, arg) => {
+ipcMain.on(ORDER_FIRST, (evt, arg) => {
   const dataFilePath = `${__dirname}/assets_data.json`;
   const isAssetsData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
 
@@ -410,32 +428,32 @@ ipcMain.on('orderFirst', (evt, arg) => {
   fs.writeFileSync(dataFilePath, assetsData, 'utf8');
 });
 
-ipcMain.on('getSavedAssetsDataFile', (evt, arg) => {
+ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, (evt, arg) => {
   const dataFilePath = `${__dirname}/assets_data.json`;
   const assetsData = fs.readFileSync(dataFilePath, 'utf8');
 
   if (assetsData === '') {
-    evt.sender.send('assetsReturn', { status: 'fail' });
+    evt.sender.send(ASSETS_RETURN, { status: FAIL });
     return;
   }
-  evt.sender.send('assetsReturn', { status: 'success', assetsData: JSON.parse(assetsData) });
+  evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: JSON.parse(assetsData) });
 });
 
-ipcMain.on('getSavedReservationOrderDataFile', (evt, arg) => {
+ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, (evt, arg) => {
   const dataFilePath = `${__dirname}/reservation_order_data.json`;
 
   const reservationOrderData = fs.readFileSync(dataFilePath, 'utf8');
   if (reservationOrderData === '') {
-    evt.sender.send('reservationOrderReturn', { status: 'fail' });
+    evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL });
     return;
   }
-  evt.sender.send('reservationOrderReturn', {
-    status: 'success',
+  evt.sender.send(RESERVATION_ORDER_RETURN, {
+    status: SUCCESS,
     reservationOrderData: JSON.parse(reservationOrderData),
   });
 });
 
-ipcMain.on('orderReservation', (evt, arg) => {
+ipcMain.on(ORDER_RESERVATION, (evt, arg) => {
   const dataFilePath = `${__dirname}/reservation_order_data.json`;
   const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
 
@@ -445,16 +463,16 @@ ipcMain.on('orderReservation', (evt, arg) => {
   };
   const reservationOrderData = JSON.stringify(newReservationData, null, 2);
   fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
-  evt.sender.send('reservationOrderReturn', { status: 'success' });
+  evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
 });
 
-ipcMain.on('getToken', async (evt, arg) => {
+ipcMain.on(GET_TOKEN, async (evt, arg) => {
   const dataFilePath = `${__dirname}/private_user_data.json`;
   const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
   const userData = JSON.parse(userDataFile);
 
   if (userData.accessKey === '' || userData.secretKey === '') {
-    evt.sender.send('tokenReturn', { status: 'fail' });
+    evt.sender.send(TOKEN_RETURN, { status: FAIL });
     return;
   }
   // console.log(userData);
@@ -467,7 +485,7 @@ ipcMain.on('getToken', async (evt, arg) => {
 
     const token = sign(payload, userData.secretKey);
 
-    evt.sender.send('tokenReturn', { status: 'success', token });
+    evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token });
     return;
   }
   const query = queryEncode.encode(arg.body);
@@ -484,5 +502,5 @@ ipcMain.on('getToken', async (evt, arg) => {
 
   const token = sign(payload, userData.secretKey);
 
-  evt.sender.send('tokenReturn', { status: 'success', token, query });
+  evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token, query });
 });

@@ -1,6 +1,7 @@
 import electron from 'electron';
 import React, { useEffect, useState } from 'react';
 import { Layout, Button, Modal, Input, Typography } from 'antd';
+import { GET_SAVED_USER_DATA_FILE, REPLY, SAVE_FILE, SUCCESS, USER_DATA_RETURN } from '../../constants';
 
 const ipcRenderer = electron.ipcRenderer;
 
@@ -17,9 +18,9 @@ function Apply() {
   const [saveDisabled, setSaveDisabled] = useState(false);
 
   useEffect(() => {
-    ipcRenderer.send('getSavedUserDataFile', {});
-    ipcRenderer.on('userDataReturn', (evt, arg) => {
-      if (arg.status === 'success') {
+    ipcRenderer.send(GET_SAVED_USER_DATA_FILE, {});
+    ipcRenderer.on(USER_DATA_RETURN, (_, arg) => {
+      if (arg.status === SUCCESS) {
         setAccessKey(arg?.userData?.accessKey);
         setSecretKey(arg?.userData?.secretKey);
         setNextVisible(false);
@@ -58,9 +59,9 @@ function Apply() {
       return;
     }
 
-    ipcRenderer.send('saveFile', { accessKey, secretKey });
-    ipcRenderer.on('reply', (evt, arg) => {
-      if (arg.status === 'success') {
+    ipcRenderer.send(SAVE_FILE, { accessKey, secretKey });
+    ipcRenderer.on(REPLY, (_, arg) => {
+      if (arg.status === SUCCESS) {
         setModalVisible(true);
         setModalMessage('저장 성공');
         setNextVisible(false);

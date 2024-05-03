@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Layout, Modal, Table, Typography } from 'antd';
+import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
-import { getCoinPrice, orderReservationCoin, orderCoin } from '../api/api';
+import { getCoinPrice, orderCoin } from '../api/api';
 import electron from 'electron';
 import { useRouter } from 'next/router';
 import { I_orderBody } from '../api/interface';
+import { useRecoilState } from 'recoil';
+import { HasAsk, MyReservations } from '../recoil/atom';
+import {
+  FAIL,
+  GET_SAVED_RESERVATION_ORDER_DATA_FILE,
+  GET_TOKEN,
+  ORDER_FIRST,
+  ORDER_RESERVATION,
+  RESERVATION_ORDER_RETURN,
+  SUCCESS,
+  TOKEN_RETURN,
+} from '../../constants';
 
 const ipcRenderer = electron.ipcRenderer;
-
-const { Header } = Layout;
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
@@ -30,10 +40,28 @@ function Order() {
     plus: 5,
     inputPrice: 5000,
   });
-  // const [afterFirstBuyData, setAfterFirstBuyData] = useState([]);
-  // const [reservationOrderData, setReservationOrderData] = useState({ bid: [], ask: [] });
+
+  const [, setReservationData] = useRecoilState(MyReservations);
+  const [hasAsk, setHasAsk] = useRecoilState(HasAsk);
+
   const router = useRouter();
   const [modal, contextHolder] = Modal.useModal();
+
+  useEffect(() => {
+    ipcRenderer.send(GET_SAVED_RESERVATION_ORDER_DATA_FILE);
+    ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
+      if (arg.status === FAIL) return alert('차수주문 내역 조회 실패');
+      const { reservationOrderData } = arg;
+      setReservationData(reservationOrderData);
+
+      const markets = Object.keys(reservationOrderData);
+      for (let i = 0; i < markets.length; i++) {
+        if (reservationOrderData[markets[i]].ask.length > 0) {
+          setHasAsk((pre) => ({ ...pre, [markets[i]]: true }));
+        }
+      }
+    });
+  }, []);
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -67,10 +95,10 @@ function Order() {
   };
 
   useEffect(() => {
-    ipcRenderer.send('getToken', {});
-    ipcRenderer.once('tokenReturn', (_, arg) => {
-      if (arg.status === 'fail') countDown();
-      (() => ipcRenderer.removeAllListeners('tokenReturn'))();
+    ipcRenderer.send(GET_TOKEN, {});
+    ipcRenderer.once(TOKEN_RETURN, (_, arg) => {
+      if (arg.status === FAIL) countDown();
+      (() => ipcRenderer.removeAllListeners(TOKEN_RETURN))();
     });
   }, []);
 
@@ -108,6 +136,8 @@ function Order() {
   };
 
   const order = async () => {
+    if (hasAsk[orderData.market]) return alert('미판매된 자동 매도 차수가 있습니다.\n전 차수 매도 후 주문해 주세요.');
+
     setLoading((pre) => ({ ...pre, order: true }));
     setTimeout(() => {
       setLoading((pre) => ({ ...pre, order: false }));
@@ -162,10 +192,10 @@ function Order() {
     //   },
     // ];
 
-    ipcRenderer.send('getToken', { body });
-    ipcRenderer.on('tokenReturn', async (_, arg) => {
+    ipcRenderer.send(GET_TOKEN, { body });
+    ipcRenderer.on(TOKEN_RETURN, async (_, arg) => {
       //query가 있는 토큰 요청의 경우에만 orderCoin 실행
-      if (arg.status === 'success' && arg.query) {
+      if (arg.status === SUCCESS && arg.query) {
         console.log('arg', arg);
         token = arg.token;
         console.log('body', body);
@@ -188,7 +218,7 @@ function Order() {
               },
             };
 
-            ipcRenderer.send('orderFirst', firstOrderData);
+            ipcRenderer.send(ORDER_FIRST, firstOrderData);
 
             // 다차수 구매
             if (orderData.limit > 1) {
@@ -215,9 +245,9 @@ function Order() {
                   limit: orderData.limit,
                 },
               };
-              ipcRenderer.send('orderReservation', nextOrderData);
-              ipcRenderer.on('reservationOrderReturn', (_, arg) => {
-                if (arg.status === 'success') {
+              ipcRenderer.send(ORDER_RESERVATION, nextOrderData);
+              ipcRenderer.on(RESERVATION_ORDER_RETURN, (_, arg) => {
+                if (arg.status === SUCCESS) {
                   console.log('reservation data 저장 성공');
                 }
               });
@@ -235,8 +265,8 @@ function Order() {
           })
           .catch((e) => alert(e.response.data.error.message));
       }
-      if (arg.status === 'fail') alert('토큰 생성 실패');
-      return () => ipcRenderer.removeAllListeners('tokenReturn');
+      if (arg.status === FAIL) alert('토큰 생성 실패');
+      return () => ipcRenderer.removeAllListeners(TOKEN_RETURN);
     });
 
     // ipcRenderer.removeAllListeners('tokenReturn');
