@@ -58,6 +58,7 @@ function Main() {
       .catch((e) => alert('새로고침 실패'));
   };
 
+  // tableData 세팅
   useEffect(() => {
     if (coinPrice.isFetched && assetData.isFetched) {
       setIsFetched(true);
@@ -86,6 +87,7 @@ function Main() {
     }
   }, [coinPrice.tickerData, myAssets]);
 
+  // tableColumn 세팅
   useEffect(() => {
     if (tableData.length > 0 && isFetched) {
       const newTableSource = [...tableData];
