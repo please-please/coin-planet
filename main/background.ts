@@ -61,285 +61,27 @@ const intervalPrice = () => {
     // reservation_order_data.json에 저장된 가격보다 현재가가 낮거나 같으면 시작
     if (btcData.bid.length && btcData.bid[0].price >= currentPrice['KRW-BTC']) {
       await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-BTC');
-      // if (btcData.bid[0].number === btcData.bid[0].limit) {
-      //   console.log('마지막 차수');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-BTC',
-      //   side: 'bid',
-      //   price: Math.ceil(currentPrice['KRW-BTC'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: (btcData.bid[0].inputPrice / currentPrice['KRW-BTC']).toFixed(8),
-      // };
-      // // 매수 하고
-      // const { data } = await orderCoin(body);
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: btcData.bid[0].number,
-      //   price: data.price, // 내가 구매한 금액
-      //   volume: data.volume, // 내가 구매한 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-      // assetsData['KRW-BTC'].bid.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-      // let nextOrderFlag = true;
-      // if (btcData.limit <= btcData.bid[0].number) {
-      //   // 마지막 차수까지 매수 된거임
-      //   nextOrderFlag = false;
-      // }
-      // if (nextOrderFlag) {
-      //   const newOrderData = {
-      //     number: btcData.bid[0].number + 1,
-      //     market: btcData.bid[0].market,
-      //     side: 'bid',
-      //     price: data.price,
-      //     ord_type: 'limit',
-      //     inputPrice: btcData.bid[0].inputPrice,
-      //   };
-      //   const newAskOrderData = {
-      //     number: btcData.ask[btcData.ask.length - 1].number + 1,
-      //     side: 'ask',
-      //     price: +data.price * (100 + 5) * 0.01,
-      //     ord_type: 'limit',
-      //     volume: data.volume,
-      //     inputPrice: btcData.ask[btcData.ask.length - 1].inputPrice,
-      //   };
-      //   orderData['KRW-BTC'].bid.push(newOrderData);
-      //   // 매도는 새로 추가
-      //   orderData['KRW-BTC'].ask.push(newAskOrderData);
-      // }
-      // // 제일 앞에꺼 빼고
-      // orderData['KRW-BTC'].bid.shift();
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
 
     if (ethData.bid.length && ethData.bid[0].price >= currentPrice['KRW-ETH']) {
       await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-ETH');
-      // if (ethData.bid[0].number === ethData.bid[0].limit) {
-      //   console.log('마지막 차수');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-ETH',
-      //   side: 'bid',
-      //   price: Math.ceil(currentPrice['KRW-ETH'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: (ethData.bid[0].inputPrice / currentPrice['KRW-ETH']).toFixed(8),
-      // };
-      // // 매수 하고
-      // const { data } = await orderCoin(body);
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: ethData.bid[0].number,
-      //   price: data.price, // 내가 구매한 금액
-      //   volume: data.volume, // 내가 구매한 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-      // assetsData['KRW-ETH'].bid.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-      // let nextOrderFlag = true;
-      // if (ethData.limit <= ethData.bid[0].number) {
-      //   // 마지막 차수까지 매수 된거임
-      //   nextOrderFlag = false;
-      // }
-      // if (nextOrderFlag) {
-      //   const newOrderData = {
-      //     number: ethData.bid[0].number + 1,
-      //     market: ethData.bid[0].market,
-      //     side: 'bid',
-      //     price: data.price,
-      //     ord_type: 'limit',
-      //     inputPrice: ethData.bid[0].inputPrice,
-      //   };
-      //   const newAskOrderData = {
-      //     number: ethData.ask[ethData.ask.length - 1].number + 1,
-      //     side: 'ask',
-      //     price: +data.price * (100 + 5) * 0.01,
-      //     ord_type: 'limit',
-      //     volume: data.volume,
-      //     inputPrice: ethData.ask[ethData.ask.length - 1].inputPrice,
-      //   };
-      //   orderData['KRW-ETH'].bid.push(newOrderData);
-      //   // 매도는 새로 추가
-      //   orderData['KRW-ETH'].ask.push(newAskOrderData);
-      // }
-      // // 제일 앞에꺼 빼고
-      // orderData['KRW-ETH'].bid.shift();
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
 
     if (xrpData.bid.length && xrpData.bid[0].price >= currentPrice['KRW-XRP']) {
       await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-XRP');
-      // if (xrpData.bid[0].number === xrpData.bid[0].limit) {
-      //   console.log('마지막 차수');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-XRP',
-      //   side: 'bid',
-      //   price: Math.ceil(currentPrice['KRW-XRP'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: (xrpData.bid[0].inputPrice / currentPrice['KRW-XRP']).toFixed(8),
-      // };
-      // // 매수 하고
-      // const { data } = await orderCoin(body);
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: xrpData.bid[0].number,
-      //   price: data.price, // 내가 구매한 금액
-      //   volume: data.volume, // 내가 구매한 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-      // assetsData['KRW-XRP'].bid.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-      // let nextOrderFlag = true;
-      // if (xrpData.limit <= xrpData.bid[0].number) {
-      //   // 마지막 차수까지 매수 된거임
-      //   nextOrderFlag = false;
-      // }
-      // if (nextOrderFlag) {
-      //   const newOrderData = {
-      //     number: xrpData.bid[0].number + 1,
-      //     market: xrpData.bid[0].market,
-      //     side: 'bid',
-      //     price: data.price,
-      //     ord_type: 'limit',
-      //     inputPrice: xrpData.bid[0].inputPrice,
-      //   };
-      //   orderData['KRW-XRP'].bid.push(newOrderData);
-      // }
-      // const newAskOrderData = {
-      //   number: xrpData.ask[xrpData.ask.length - 1].number + 1,
-      //   side: 'ask',
-      //   price: +data.price * (100 + 5) * 0.01,
-      //   ord_type: 'limit',
-      //   volume: data.volume,
-      //   inputPrice: xrpData.ask[xrpData.ask.length - 1].inputPrice,
-      // };
-      // // 제일 앞에꺼 빼고
-      // orderData['KRW-XRP'].bid.shift();
-      // // 매도는 새로 추가
-      // orderData['KRW-XRP'].ask.push(newAskOrderData);
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
 
     // 매도
     if (btcData.ask.length && btcData.ask[btcData.ask.length - 1].price <= currentPrice['KRW-BTC']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-BTC');
-      // if (btcData.ask[btcData.ask.length - 1].number === 1) {
-      //   console.log('일단 첫번째 차수는 매도 안되게 설정');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-BTC',
-      //   side: 'ask',
-      //   price: Math.floor(currentPrice['KRW-BTC'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: btcData.ask[btcData.ask.length - 1].volume,
-      // };
-      // // 매도 하고
-      // const { data } = await orderCoin(body);
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: btcData.ask[btcData.ask.length - 1].number,
-      //   price: data.price, // 내가 판 금액
-      //   volume: data.volume, // 내가 판 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-      // assetsData['KRW-BTC'].ask.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-      // // 있던 데이터 빼고
-      // orderData['KRW-BTC'].ask.pop();
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
 
     if (ethData.ask.length && ethData.ask[ethData.ask.length - 1].price <= currentPrice['KRW-ETH']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-ETH');
-      // if (ethData.ask[ethData.ask.length - 1].number === 1) {
-      //   console.log('일단 첫번째 차수는 매도 안되게 설정');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-BTC',
-      //   side: 'ask',
-      //   price: Math.floor(currentPrice['KRW-BTC'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: ethData.ask[ethData.ask.length - 1].volume,
-      // };
-      // // 매도 하고
-      // const { data } = await orderCoin(body);
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: ethData.ask[ethData.ask.length - 1].number,
-      //   price: data.price, // 내가 판 금액
-      //   volume: data.volume, // 내가 판 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-      // assetsData['KRW-ETH'].ask.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-      // // 있던 데이터 빼고
-      // orderData['KRW-ETH'].ask.pop();
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
 
     if (xrpData.ask.length && xrpData.ask[xrpData.ask.length - 1].price <= currentPrice['KRW-XRP']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-XRP');
-      // if (xrpData.ask[xrpData.ask.length - 1].number === 1) {
-      //   console.log('일단 첫번째 차수는 매도 안되게 설정');
-      //   return;
-      // }
-      // const body: any = {
-      //   market: 'KRW-BTC',
-      //   side: 'ask',
-      //   price: Math.floor(currentPrice['KRW-BTC'] / 1000) * 1000,
-      //   ord_type: 'limit',
-      //   volume: xrpData.ask[xrpData.ask.length - 1].volume,
-      // };
-
-      // // 매도 하고
-      // const { data } = await orderCoin(body);
-
-      // const assetsDataFilePath = `${__dirname}/assets_data.json`;
-      // const assetsDataFile = fs.readFileSync(assetsDataFilePath, 'utf8');
-      // const assetsData = JSON.parse(assetsDataFile);
-
-      // // assets_data.json에 차수 별 매매 데이터 추가
-      // const newAssetsData = {
-      //   number: xrpData.ask[xrpData.ask.length - 1].number,
-      //   price: data.price, // 내가 판 금액
-      //   volume: data.volume, // 내가 판 수량
-      //   ord_type: 'limit',
-      //   created_at: data.created_at,
-      // };
-
-      // assetsData['KRW-XRP'].ask.push(newAssetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
-
-      // // 있던 데이터 빼고
-      // orderData['KRW-XRP'].ask.pop();
-
-      // fs.writeFileSync(orderDataFilePath, JSON.stringify(orderData), 'utf8');
     }
   }, 10000);
 };
@@ -351,12 +93,13 @@ const intervalPrice = () => {
     width: 1000,
     height: 600,
   });
-  const userDataFilePath = `${__dirname}/private_user_data.json`;
-  const userDataFile = fs.readFileSync(userDataFilePath, 'utf8');
-  const userData = JSON.parse(userDataFile);
+
+  const { data: userData } = await coinService.getPrivateUserData();
+
   if (userData.accessKey === '' || userData.secretKey === '') {
     if (isProd) {
-      await mainWindow.loadURL('app://./apply');
+      await mainWindow.loadURL('app://./apply.html');
+      mainWindow.webContents.openDevTools();
     } else {
       const port = process.argv[2];
       await mainWindow.loadURL(`http://localhost:${port}/apply`);
@@ -364,7 +107,8 @@ const intervalPrice = () => {
     }
   } else {
     if (isProd) {
-      await mainWindow.loadURL('app://./home');
+      await mainWindow.loadURL('app://./main.html');
+      mainWindow.webContents.openDevTools();
     } else {
       const port = process.argv[2];
       await mainWindow.loadURL(`http://localhost:${port}/main`);
@@ -378,10 +122,6 @@ const intervalPrice = () => {
 app.on(WINDOW_ALL_CLOSED, () => {
   app.quit();
 });
-
-// ipcMain.on('message', async (event, arg) => {
-//   event.reply('message', `${arg} World!`);
-// });
 
 ipcMain.on(SAVE_FILE, (evt, arg) => {
   if (arg.accessKey === '' || arg.secretKey === '') {

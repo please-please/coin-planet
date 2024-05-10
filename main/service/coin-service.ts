@@ -123,4 +123,8 @@ export class CoinService {
   }
 
   async getCoinPrice() {}
+
+  async getPrivateUserData() {
+    return await this.coinRepository.getJsonData('private_user_data');
+  }
 }
