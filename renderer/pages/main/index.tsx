@@ -58,14 +58,7 @@ function Main() {
       .catch((e) => alert('새로고침 실패'));
   };
 
-  // tableData 세팅
-  useEffect(() => {
-    if (coinPrice.isFetched && assetData.isFetched) {
-      setIsFetched(true);
-    }
-  }, [coinPrice.isFetched, assetData.isFetched]);
-
-  useEffect(() => {
+  const tableDataSetter = () => {
     if (assetData.isFetched && coinPrice.isFetched) {
       const profitLoss = getProfitLoss(myAssets, coinPrice.tickerData);
       let newTableData = tableData.map((item, i) => {
@@ -85,10 +78,9 @@ function Main() {
 
       setTableData(newTableData);
     }
-  }, [coinPrice.tickerData, myAssets]);
+  };
 
-  // tableColumn 세팅
-  useEffect(() => {
+  const tableColumnSetter = () => {
     if (tableData.length > 0 && isFetched) {
       const newTableSource = [...tableData];
       const newTableColumn = [...columns];
@@ -130,6 +122,20 @@ function Main() {
       setTableSource(newTableSource);
       console.log('newTableSource', newTableSource);
     }
+  };
+
+  useEffect(() => {
+    if (coinPrice.isFetched && assetData.isFetched) {
+      setIsFetched(true);
+    }
+  }, [coinPrice.isFetched, assetData.isFetched]);
+
+  useEffect(() => {
+    tableDataSetter();
+  }, [coinPrice.tickerData, myAssets]);
+
+  useEffect(() => {
+    tableColumnSetter();
   }, [tableData]);
 
   return (

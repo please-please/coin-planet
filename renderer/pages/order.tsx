@@ -2,23 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
 import { getCoinPrice, orderCoin } from '../api/api';
-import electron from 'electron';
 import { useRouter } from 'next/router';
-import { I_orderBody } from '../api/interface';
-import { useRecoilState } from 'recoil';
-import { HasAsk, MyReservations } from '../recoil/atom';
-import {
-  FAIL,
-  GET_SAVED_RESERVATION_ORDER_DATA_FILE,
-  GET_TOKEN,
-  ORDER_FIRST,
-  ORDER_RESERVATION,
-  RESERVATION_ORDER_RETURN,
-  SUCCESS,
-  TOKEN_RETURN,
-} from '../../constants';
-
-const ipcRenderer = electron.ipcRenderer;
+import { I_coinOrderData, I_orderBody } from '../api/interface';
+import { useRecoilValue } from 'recoil';
+import { HasAsk } from '../recoil/atom';
+import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
+import { getToken, orderFirst, orderReservation } from '../utils';
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
@@ -38,30 +27,14 @@ function Order() {
     ord_type: 'limit',
     minus: 5,
     plus: 5,
-    inputPrice: 5000,
+    inputPrice: 0,
   });
 
-  const [, setReservationData] = useRecoilState(MyReservations);
-  const [hasAsk, setHasAsk] = useRecoilState(HasAsk);
+  const hasAsk = useRecoilValue(HasAsk);
 
-  const router = useRouter();
   const [modal, contextHolder] = Modal.useModal();
-
-  useEffect(() => {
-    ipcRenderer.send(GET_SAVED_RESERVATION_ORDER_DATA_FILE);
-    ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
-      if (arg.status === FAIL) return alert('차수주문 내역 조회 실패');
-      const { reservationOrderData } = arg;
-      setReservationData(reservationOrderData);
-
-      const markets = Object.keys(reservationOrderData);
-      for (let i = 0; i < markets.length; i++) {
-        if (reservationOrderData[markets[i]].ask.length > 0) {
-          setHasAsk((pre) => ({ ...pre, [markets[i]]: true }));
-        }
-      }
-    });
-  }, []);
+  const router = useRouter();
+  const coinPrice = useGetCoinPrice();
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -94,45 +67,32 @@ function Order() {
     }, secondsToGo * 1000);
   };
 
+  useGetReservationOrderData();
+
   useEffect(() => {
-    ipcRenderer.send(GET_TOKEN, {});
-    ipcRenderer.once(TOKEN_RETURN, (_, arg) => {
-      if (arg.status === FAIL) countDown();
-      (() => ipcRenderer.removeAllListeners(TOKEN_RETURN))();
-    });
+    getToken(countDown);
   }, []);
 
   useEffect(() => {
-    getCoinPrice().then((res) => {
-      const coinPriceList = res.data.map((coinPricdData) => coinPricdData.trade_price);
+    if (coinPrice.tickerData?.length) {
+      const coinPriceList = coinPrice.tickerData.map((coinPriceData) => coinPriceData.trade_price);
 
       setCoinListData(
         coinList.map((e, i) => {
           return { ...e, price: coinPriceList[i].toLocaleString() };
         }),
       );
-    });
-  }, []);
+    }
+  }, [coinPrice.tickerData]);
 
   const reload = () => {
     setLoading((pre) => ({ ...pre, reload: true }));
 
     setTimeout(() => {
-      setSelectedRowKeys([]);
       setLoading((pre) => ({ ...pre, reload: false }));
     }, 800);
 
-    getCoinPrice()
-      .then((res) => {
-        const coinPriceList = res.data.map((coinPriceData) => coinPriceData.trade_price);
-
-        setCoinListData(
-          coinList.map((e, i) => {
-            return { ...e, price: coinPriceList[i] };
-          }),
-        );
-      })
-      .catch(() => alert('reloading failed'));
+    coinPrice.reload();
   };
 
   const order = async () => {
@@ -143,68 +103,30 @@ function Order() {
       setLoading((pre) => ({ ...pre, order: false }));
     }, 700);
 
-    let token: string;
     const { data } = await getCoinPrice();
-    const coinPriceData = {
-      'KRW-BTC': data[0].trade_price,
-      'KRW-ETH': data[1].trade_price,
-      'KRW-XRP': data[2].trade_price,
-    };
-    console.log(coinPriceData);
+
+    const coinPriceData = {};
+
+    for (let i = 0; i < data.length; i++) {
+      coinPriceData[data[i].market] = data[i].trade_price;
+    }
+
     const body: I_orderBody = {
       market: orderData.market,
       side: orderData.side,
       price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
       ord_type: orderData.ord_type,
       volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
-      // ord_type: 'price',
     };
-    // [
-    //   {
-    //     bid: [
-    //       {
-    //         number: 2,
-    //         market: 'KRW-BTC',
-    //         side: 'bid',
-    //         price: '1차수에 구매한 가격 * 0.95 * 0.95', // 일단 -5퍼에서 매수되게 고정해놓고 나중에 변수로 뺴서 수정
-    //         ord_type: 'limit',
-    //         volume: orderData.price / this.price,
-    //       },
-    //     ],
-    //     ask: [
-    //       {
-    //         number: 1,
-    //         market: 'KRW-BTC',
-    //         side: 'bid',
-    //         price: '1차수에 구매한 가격 * 1.05', // 일단 +5퍼에서 매도되게 고정해놓고 나중에 변수로 뺴서 수정
-    //         ord_type: 'limit',
-    //         volume: orderData.price / this.price,
-    //       },
-    //       {
-    //         number: 2,
-    //         market: 'KRW-BTC',
-    //         side: 'bid',
-    //         price: '1차수에 구매한 가격 * 0.95 *1.05', // 일단 +5퍼에서 매도되게 고정해놓고 나중에 변수로 뺴서 수정
-    //         ord_type: 'limit',
-    //         volume: orderData.price / this.price,
-    //       },
-    //     ],
-    //   },
-    // ];
 
-    ipcRenderer.send(GET_TOKEN, { body });
-    ipcRenderer.on(TOKEN_RETURN, async (_, arg) => {
-      //query가 있는 토큰 요청의 경우에만 orderCoin 실행
-      if (arg.status === SUCCESS && arg.query) {
-        console.log('arg', arg);
-        token = arg.token;
-        console.log('body', body);
-        await orderCoin(token, body)
-          .then(async (res) => {
-            console.log('res', res);
+    const successCallback = (arg: any) => {
+      if (arg.query) {
+        const { token } = arg;
+        orderCoin(token, body)
+          .then((res) => {
             const { data } = res;
-            const firstOrderData = {
-              [data['market']]: {
+            const firstOrderData: I_coinOrderData = {
+              [data.market]: {
                 bid: [
                   {
                     number: 1,
@@ -212,17 +134,18 @@ function Order() {
                     volume: data.volume,
                     ord_type: data.ord_type,
                     created_at: data.created_at,
+                    inputPrice: orderData.inputPrice,
                   },
                 ],
                 ask: [],
               },
             };
 
-            ipcRenderer.send(ORDER_FIRST, firstOrderData);
+            orderFirst(firstOrderData);
 
-            // 다차수 구매
+            // 다차수 주문
             if (orderData.limit > 1) {
-              const nextOrderData = {
+              const nextOrderData: I_coinOrderData = {
                 [data['market']]: {
                   bid: [
                     {
@@ -245,92 +168,16 @@ function Order() {
                   limit: orderData.limit,
                 },
               };
-              ipcRenderer.send(ORDER_RESERVATION, nextOrderData);
-              ipcRenderer.on(RESERVATION_ORDER_RETURN, (_, arg) => {
-                if (arg.status === SUCCESS) {
-                  console.log('reservation data 저장 성공');
-                }
-              });
-              alert('주문 성공');
-              // const nextOrderData = {
-              //   market: orderData.market,
-              //   side: orderData.side,
-              //   inputPrice: orderData.inputPrice,
-              // };
-              // await orderReservationCoin(nextOrderData, orderData.limit, data.price).then((res) => {
-              //   // invalid_access_key 오류 발생
-              //   console.log('reservation res', res);
-              // });
+
+              orderReservation(nextOrderData);
             }
           })
           .catch((e) => alert(e.response.data.error.message));
       }
-      if (arg.status === FAIL) alert('토큰 생성 실패');
-      return () => ipcRenderer.removeAllListeners(TOKEN_RETURN);
-    });
+    };
 
-    // ipcRenderer.removeAllListeners('tokenReturn');
-    // const bodyData = {
-    //   uuid: data.uuid,
-    // };
-    // ipcRenderer.send('getToken', { body: bodyData });
-    // ipcRenderer.on('tokenReturn', async (_, arg) => {
-    //   console.log(arg);
-    //   if (arg.status === 'success') {
-    //     const response = await getPurchaseData(bodyData, arg.token, arg.query);
-    //     console.log(data);
-    //   }
-    // });
+    getToken(() => alert('토큰 생성 실패'), successCallback, body);
   };
-
-  // setTimeout(() => {
-  //   setLoading((pre) => ({ ...pre, order: false }));
-  // }, 1000);
-
-  //
-  // for (let i = 2; i < orderData.limit + 1; i++) {
-  //   ipcRenderer.send('limitOrder', {
-  //     limit: i, // 차수
-  //     side: 'bid', // 매수
-  //     market: orderData.market, // 종목
-  //     price: data.price * (1 - 5 / 100), // 가격
-  //     totalMoney: orderData.totalMoney, // 금액
-  //   });
-  //   setReservationOrderData({
-  //     bid: [
-  //       ...reservationOrderData.bid,
-  //       {
-  //         limit: i,
-  //         market: orderData.market,
-  //         price: data.price * (1 - 5 / 100),
-  //         totalMoney: orderData.totalMoney,
-  //         side: 'bid',
-  //       },
-  //     ],
-  //     ask: reservationOrderData.ask,
-  //   }); // 2차 매수
-
-  // await orderReservationCoin(orderData, i, 'ask', data.price); // 2차 매도
-  // setReservationOrderData({
-  //   bid: reservationOrderData.bid,
-  //   ask: [
-  //     ...reservationOrderData.ask,
-  //     {
-  //       limit: i,
-  //       market: orderData.market,
-  //       price: data.price * (1 + 5 / 100),
-  //       totalMoney: orderData.totalMoney,
-  //       side: 'ask',
-  //     },
-  //   ],
-  // }); // 2차 매도
-  // };
-
-  // ipcRenderer.send('orderReservation', reservationOrderData);
-  // setSelectedRowKeys([]); // 선택 초기화
-  // ipcRenderer.send('order', orderData);
-
-  // };
 
   const onLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOrderData({ ...orderData, limit: Number(e.target.value) });

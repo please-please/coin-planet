@@ -1,11 +1,10 @@
 import electron from 'electron';
 import React, { useEffect, useState } from 'react';
-import { Layout, Button, Modal, Input, Typography } from 'antd';
+import { Button, Modal, Input, Typography } from 'antd';
 import { GET_SAVED_USER_DATA_FILE, REPLY, SAVE_FILE, SUCCESS, USER_DATA_RETURN } from '../../constants';
+import { saveUserKey } from '../utils';
 
 const ipcRenderer = electron.ipcRenderer;
-
-const { Header } = Layout;
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -14,7 +13,6 @@ function Apply() {
   const [secretKey, setSecretKey] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [nextVisible, setNextVisible] = useState(true);
   const [saveDisabled, setSaveDisabled] = useState(false);
 
   useEffect(() => {
@@ -23,7 +21,6 @@ function Apply() {
       if (arg.status === SUCCESS) {
         setAccessKey(arg?.userData?.accessKey);
         setSecretKey(arg?.userData?.secretKey);
-        setNextVisible(false);
         setSaveDisabled(true);
       }
     });
@@ -44,14 +41,6 @@ function Apply() {
     setSaveDisabled(false);
   };
 
-  const handleNextPage = () => {
-    if (isProd) {
-      window.location.href = 'app://./main.html';
-    } else {
-      window.location.href = '../main';
-    }
-  };
-
   const saveUserData = () => {
     if (accessKey === '' || secretKey === '') {
       setModalVisible(true);
@@ -59,17 +48,12 @@ function Apply() {
       return;
     }
 
-    ipcRenderer.send(SAVE_FILE, { accessKey, secretKey });
-    ipcRenderer.on(REPLY, (_, arg) => {
-      if (arg.status === SUCCESS) {
-        setModalVisible(true);
-        setModalMessage('저장 성공');
-        setNextVisible(false);
-      } else {
-        setModalVisible(true);
-        setModalMessage('저장 실패');
-      }
-    });
+    saveUserKey(
+      { accessKey, secretKey },
+      () => setModalVisible(true),
+      () => setModalMessage('저장 성공'),
+      () => setModalMessage('저장 실패'),
+    );
   };
 
   return (

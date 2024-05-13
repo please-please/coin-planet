@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 
 import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
@@ -121,7 +121,7 @@ export const orderCoin = async (body: any) => {
   };
 
   const token = sign(payload, userData.secretKey);
-  console.log(body);
+
   return await axios.post('https://api.upbit.com/v1/orders', body, {
     headers: {
       Authorization: `Bearer ${token}`,

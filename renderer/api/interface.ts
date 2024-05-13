@@ -34,3 +34,20 @@ export interface I_tickerData {
   prev_closing_price: number; // 전일 종가
   timestamp: number;
 }
+
+interface I_bidData extends Pick<I_coinOrderResponseData, 'price' | 'ord_type'> {
+  number: number;
+  inputPrice: number;
+  volume?: I_coinOrderResponseData['volume'];
+  created_at?: I_coinOrderResponseData['created_at'];
+}
+
+interface I_askData extends I_bidData {}
+
+export interface I_coinOrderData {
+  [key: string]: {
+    bid: I_bidData[];
+    ask: I_askData[];
+    limit?: number;
+  };
+}

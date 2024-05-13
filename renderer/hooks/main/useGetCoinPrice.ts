@@ -6,7 +6,7 @@ export const useGetCoinPrice = () => {
   const [tickerData, setTickerData] = useState<I_tickerData[]>();
   const [isFetched, setIsFetched] = useState<boolean>();
 
-  const reload = () => {
+  const reload = async () => {
     setIsFetched(false);
 
     getCoinPrice()
@@ -17,7 +17,9 @@ export const useGetCoinPrice = () => {
       .catch(() => alert('조회 오류!'));
   };
 
-  useEffect(reload, []);
+  useEffect(() => {
+    reload();
+  }, []);
 
   return { tickerData, reload, isFetched };
 };
