@@ -6,6 +6,7 @@ import * as queryEncode from 'querystring';
 import crypto from 'crypto';
 import { I_coinOrderResponseData, I_orderBody, I_orderReservationData, I_tickerData } from './interface';
 import { coinList } from '../constants/coinList';
+
 const accessKey = 'dsfs';
 const secretKey = 'dfdf';
 
@@ -114,13 +115,21 @@ export const orderCoin = async (token: string, body: I_orderBody): Promise<Axios
   });
 };
 
-export const getPurchaseData = async (body: any, token: any, query: any) => {
-  // return await axios.get(`https://api.upbit.com/v1/order?${query}`, {
-  //   headers: {
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  // });
-  console.log(body, token, query);
+export const getPurchaseData = async (body: any) => {
+  const query = queryEncode.encode(body);
+
+  const hash = crypto.createHash('sha512');
+  const queryHash = hash.update(query, 'utf-8').digest('hex');
+
+  const payload = {
+    access_key: 'qNVJMiRTRK3Nr24cMswV7OUI6cBeZ52lLOOrPAkp',
+    nonce: v4(),
+    query_hash: queryHash,
+    query_hash_alg: 'SHA512',
+  };
+
+  const token = sign(payload, 'JTJuKZtxvfHZtx52ftjbEFaNLzobWaz4P1Btpsed');
+
   try {
     const response = await axios.get(`https://api.upbit.com/v1/order?${query}`, {
       headers: {
@@ -128,7 +137,10 @@ export const getPurchaseData = async (body: any, token: any, query: any) => {
       },
       data: body,
     });
-    console.log('sdfdsfdssf', response);
+    console.log(
+      '이게 주문내역 조회한 데이터임-이게 주문내역 조회한 데이터임이게 주문내역 조회한 데이터임이게 주문내역 조회한 데이터임-이게 주문내역 조회한 데이터임이게 주문내역 조회한 데이터임',
+      response,
+    );
     return response;
   } catch (error) {
     console.error(error);

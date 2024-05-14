@@ -127,4 +127,8 @@ export class CoinService {
   async getPrivateUserData() {
     return await this.coinRepository.getJsonData('private_user_data');
   }
+
+  async saveUserData(arg) {
+    return await this.coinRepository.writeJsonData(`${__dirname}/private_user_data.json`, arg);
+  }
 }
