@@ -9,6 +9,7 @@ import {
   TOKEN_RETURN,
 } from '../../constants';
 import { I_coinOrderData, I_orderBody, I_tickerData } from '../api/interface';
+import { coinList } from '../constants/coinList';
 import { I_assetsData } from '../pages/main';
 import electron from 'electron';
 
@@ -17,22 +18,28 @@ interface I_keys {
   secretKey: string;
 }
 
+interface I_profitLoss {
+  [market: string]: [number, number, number];
+}
+
 const ipcRenderer = electron.ipcRenderer;
 
-export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[]) => {
-  const totalData = {
-    'KRW-BTC': [],
-    'KRW-ETH': [],
-    'KRW-XRP': [],
-  };
+export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[]): I_profitLoss => {
+  const totalData = {};
+  for (let i = 0; i < coinList.length; i++) {
+    totalData[coinList[i].market] = [];
+  }
 
   for (let key of Object.keys(totalData)) {
-    totalData[key] = assetData[key]?.bid?.map(
-      (item) =>
-        +((tickerData[tickerData.findIndex((v) => v.market === key)].trade_price - +item.price) * +item.volume).toFixed(
-          2,
-        ),
-    );
+    totalData[key] = assetData[key]?.bid?.map((item) => {
+      const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
+
+      return [
+        +((marketData.trade_price - +item.price) * +item.volume).toFixed(2), // 수익액
+        +((marketData.trade_price - +item.price) / +marketData.trade_price).toFixed(2), // 수익률
+        +item.volume, // 구매 수량
+      ];
+    });
   }
 
   return totalData;

@@ -15,7 +15,7 @@ interface I_tableData {
   name: string;
   label?: string;
   profitLossComparedPreviousDay?: number;
-  totalProfitLoss: number;
+  totalProfitLoss: [number, number];
   profitLoss?: number[];
   [key: string]: any;
 }
@@ -67,7 +67,7 @@ function Main() {
 
         return {
           ...item,
-          totalProfitLoss: 0,
+          totalProfitLoss: [0, 0] as [number, number],
           label: `${item.name}(${item.market})`,
           profitLossComparedPreviousDay: +((change_price / prev_closing_price) * yinyang * 100).toFixed(2),
           profitLoss: profitLoss[item.market],
@@ -89,15 +89,19 @@ function Main() {
           for (let j = 0; j < tableData[i].profitLoss.length; j++) {
             newTableSource[i][`profitLoss${j + 1}`] = tableData[i].profitLoss[j];
 
+            console.log('ddsfaew', newTableSource);
+
             if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
               newTableColumn.push({
                 title: `${j + 1}차수 손익`,
                 dataIndex: `profitLoss${j + 1}`,
                 className: 'numeric_value',
                 width: 100,
-                render: (number) =>
-                  number !== undefined ? (
-                    <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
+                render: (tuple) =>
+                  tuple !== undefined ? (
+                    <p
+                      style={{ color: `${tuple[0] > 0 ? 'red' : tuple[0] < 0 ? 'blue' : 'black'}` }}
+                    >{`${tuple[0]}원 (${tuple[1]}%)`}</p>
                   ) : null,
               });
 
@@ -114,8 +118,19 @@ function Main() {
             }
           }
         }
-        if (newTableSource[i].profitLoss?.length)
-          newTableSource[i].totalProfitLoss = +newTableSource[i].profitLoss.reduce((p, c) => p + c, 0).toFixed(2);
+        if (newTableSource[i].profitLoss?.length) {
+          const closingPrice = coinPrice.tickerData[i].prev_closing_price;
+          newTableSource[i].totalProfitLoss = [
+            // 손익액 합게
+            +newTableSource[i].profitLoss.reduce((p, c) => p + c[0], 0).toFixed(2),
+            // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
+            +(
+              +newTableSource[i].profitLoss.reduce((p, c) => p + c[0], 0) /
+              newTableSource[i].profitLoss.reduce((p, c) => p + c[2], 0) /
+              closingPrice
+            ).toFixed(2),
+          ];
+        }
       }
 
       setColumns(newTableColumn);
@@ -167,7 +182,7 @@ const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({
   key: v.key,
   market: v.market,
   name: v.name,
-  totalProfitLoss: 0,
+  totalProfitLoss: [0, 0],
 }));
 
 const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
@@ -191,9 +206,11 @@ const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
     dataIndex: 'totalProfitLoss',
     className: 'numeric_value',
     width: 100,
-    render: (number) =>
-      number !== undefined ? (
-        <p style={{ color: `${number > 0 ? 'red' : number < 0 ? 'blue' : 'black'}` }}>{`${number}원`}</p>
+    render: (tuple) =>
+      tuple !== undefined ? (
+        <p
+          style={{ color: `${tuple[0] > 0 ? 'red' : tuple[0] < 0 ? 'blue' : 'black'}` }}
+        >{`${tuple[0]}원 (${tuple[1]}%)`}</p>
       ) : null,
   },
 ];
