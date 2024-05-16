@@ -16,19 +16,11 @@ export const orderCoin = async (token: string, body: I_orderBody): Promise<Axios
   });
 };
 
-export const getPurchaseData = async (body: any, token: any, query: any) => {
-  console.log(body, token, query);
-
-  const response = await axios
-    .get(`https://api.upbit.com/v1/order?${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: body,
-    })
-    .then(() => {
-      console.log('getPurchaseData response', response);
-      return response;
-    })
-    .catch((error) => console.error(error));
+export const getPurchaseData = async (body: any, token: any) => {
+  return await axios.get(`https://api.upbit.com/v1/order?uuid=${body.uuid}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: body,
+  });
 };
