@@ -1,4 +1,4 @@
-![image](https://github.com/please-please/coin-planet/assets/99231626/43c8665f-1402-48db-92a2-321f6a439b71)# COIN PLANET
+
 
 ![COINPLANET](https://velog.velcdn.com/images/2pandi/post/8e271e45-8305-4066-94f4-ca786d977933/image.png)
 
