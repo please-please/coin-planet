@@ -10,6 +10,6 @@ export class CoinRepository {
 
   async writeJsonData(filePath: string, data: any) {
     fs.writeFileSync(filePath, JSON.stringify(data), 'utf8');
-    return;
+    return true;
   }
 }
