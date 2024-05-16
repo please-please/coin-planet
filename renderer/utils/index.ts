@@ -24,6 +24,19 @@ interface I_profitLoss {
 
 const ipcRenderer = electron.ipcRenderer;
 
+const shortenRate = (number: number) => {
+  if (number > 1) return +number.toFixed(2);
+
+  let shortRate = 0;
+  let i = 2;
+  while (shortRate === 0) {
+    shortRate = +number.toFixed(i);
+    i++;
+  }
+
+  return shortRate;
+};
+
 export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[]): I_profitLoss => {
   const totalData = {};
   for (let i = 0; i < coinList.length; i++) {
@@ -34,11 +47,11 @@ export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[
     totalData[key] = assetData[key]?.bid?.map((item) => {
       const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
 
-      return [
-        +((marketData.trade_price - +item.price) * +item.volume).toFixed(2), // 손익액
-        +((marketData.trade_price - +item.price) / +marketData.prev_closing_price).toFixed(2), // 손익율
-        +item.volume, // 구매 수량
-      ];
+      const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
+      const profitLossRate = (marketData.trade_price - +item.price) / +marketData.prev_closing_price;
+      const shortProfitLossRate = shortenRate(profitLossRate);
+
+      return [profitLoss, shortProfitLossRate, +item.volume];
     });
   }
 
@@ -47,14 +60,17 @@ export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[
 
 export const getTotalProfitLoss = (profitLoss: number[], tickerData: I_tickerData): [number, number] => {
   const closingPrice = tickerData.prev_closing_price;
-  const totalProfitLoss = [
-    // 손익액 합게
-    +profitLoss.reduce((p, c) => p + c[0], 0),
-    // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
-    +(+profitLoss.reduce((p, c) => p + c[0], 0) / profitLoss.reduce((p, c) => p + c[2], 0) / closingPrice).toFixed(2),
-  ] as [number, number];
+  // 손익액 합게
+  const total = +profitLoss.reduce((p, c) => p + c[0], 0);
+  // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
+  const profitLossRate = +(
+    +profitLoss.reduce((p, c) => p + c[0], 0) /
+    profitLoss.reduce((p, c) => p + c[2], 0) /
+    closingPrice
+  );
+  const shortProfitLossRate = shortenRate(profitLossRate);
 
-  return totalProfitLoss;
+  return [total, shortProfitLossRate] as [number, number];
 };
 
 export const saveUserKey = (
@@ -71,7 +87,7 @@ export const saveUserKey = (
   });
 };
 
-export const getToken = (failCallback: () => void, successCallback?: (arg: any) => void, body?: I_orderBody) => {
+export const getToken = (failCallback: () => void, successCallback?: (arg: any) => void, body?: any) => {
   ipcRenderer.send(GET_TOKEN, body ? { body } : {});
   ipcRenderer.once(TOKEN_RETURN, (_, arg) => {
     if (arg.status === FAIL) return failCallback();
