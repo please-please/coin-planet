@@ -1,4 +1,4 @@
-# COIN PLANET
+![image](https://github.com/please-please/coin-planet/assets/99231626/43c8665f-1402-48db-92a2-321f6a439b71)# COIN PLANET
 
 ![COINPLANET](https://velog.velcdn.com/images/2pandi/post/8e271e45-8305-4066-94f4-ca786d977933/image.png)
 
@@ -28,8 +28,18 @@
 
 ---
 
-- 스크린샷 집어넣을 곳
+![메인페이지](https://velog.velcdn.com/images/2pandi/post/06ee2ee2-99b2-4367-bbba-a5e7bf16dfdf/image.png)
+메인(종목손익 조회) 페이지
 
+<br>
+
+![키등록페이지](https://velog.velcdn.com/images/2pandi/post/50cabef5-a82f-4dda-9246-d64b0cecab9f/image.png)
+api 키 등록 페이지
+
+<br>
+
+![주문하기페이지](https://velog.velcdn.com/images/2pandi/post/97a3119b-fd1e-41cc-b5eb-201edaf63229/image.png)
+주문하기 페이지
 <br>
 
 ## 🛠 사용 방법
