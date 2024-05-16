@@ -35,14 +35,26 @@ export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[
       const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
 
       return [
-        +((marketData.trade_price - +item.price) * +item.volume).toFixed(2), // 수익액
-        +((marketData.trade_price - +item.price) / +marketData.trade_price).toFixed(2), // 수익률
+        +((marketData.trade_price - +item.price) * +item.volume).toFixed(2), // 손익액
+        +((marketData.trade_price - +item.price) / +marketData.prev_closing_price).toFixed(2), // 손익율
         +item.volume, // 구매 수량
       ];
     });
   }
 
   return totalData;
+};
+
+export const getTotalProfitLoss = (profitLoss: number[], tickerData: I_tickerData): [number, number] => {
+  const closingPrice = tickerData.prev_closing_price;
+  const totalProfitLoss = [
+    // 손익액 합게
+    +profitLoss.reduce((p, c) => p + c[0], 0),
+    // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
+    +(+profitLoss.reduce((p, c) => p + c[0], 0) / profitLoss.reduce((p, c) => p + c[2], 0) / closingPrice).toFixed(2),
+  ] as [number, number];
+
+  return totalProfitLoss;
 };
 
 export const saveUserKey = (

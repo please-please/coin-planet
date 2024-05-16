@@ -4,23 +4,23 @@ import { useRecoilValue } from 'recoil';
 import { MyAssets } from '../../recoil/atom';
 import { I_assetBid } from '../../recoil/interface';
 import { coinList } from '../../constants/coinList';
-import { getProfitLoss } from '../../utils';
+import { getProfitLoss, getTotalProfitLoss } from '../../utils';
 import { useGetAssetData, useGetCoinPrice } from '../../hooks';
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
-interface I_tableData {
+interface I_initialTableData {
   key: React.Key;
   market: string;
   name: string;
   label?: string;
   profitLossComparedPreviousDay?: number;
-  totalProfitLoss: [number, number];
+  totalProfitLoss?: [number, number];
   profitLoss?: number[];
-  [key: string]: any;
+  [key: string]: React.Key | string | number | number[];
 }
 
-interface I_tableSource extends I_tableData {
+interface I_tableSource extends I_initialTableData {
   [key: string]: React.Key | string | number | number[];
 }
 
@@ -31,9 +31,9 @@ export interface I_assetsData {
 }
 
 function Main() {
-  const [tableData, setTableData] = useState<I_tableData[]>(TABLE_DEFAULT_DATA);
+  const [initialTableData, setInitialTableData] = useState<I_initialTableData[]>(DEFAULT_TABLE_DATA);
   const [tableSource, setTableSource] = useState<I_tableSource[]>();
-  const [columns, setColumns] = useState<TableColumnsType<I_tableData>>(TABLE_DEFAULT_COLUMNS);
+  const [columns, setColumns] = useState<TableColumnsType<I_initialTableData>>(DEFAULT_TABLE_COLUMN);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetched, setIsFetched] = useState<boolean>(false);
 
@@ -58,84 +58,64 @@ function Main() {
       .catch((e) => alert('새로고침 실패'));
   };
 
-  const tableDataSetter = () => {
-    if (assetData.isFetched && coinPrice.isFetched) {
-      const profitLoss = getProfitLoss(myAssets, coinPrice.tickerData);
-      let newTableData = tableData.map((item, i) => {
-        const { prev_closing_price, change, change_price } = coinPrice.tickerData[i];
-        const yinyang = change === 'FALL' ? -1 : 1;
+  const initialTableDataSetter = () => {
+    const profitLoss = getProfitLoss(myAssets, coinPrice.tickerData);
+    let newTableData = initialTableData.map((item, i) => {
+      const { prev_closing_price, change, change_price } = coinPrice.tickerData[i];
+      const yinyang = change === 'FALL' ? -1 : 1;
 
-        return {
-          ...item,
-          totalProfitLoss: [0, 0] as [number, number],
-          label: `${item.name}(${item.market})`,
-          profitLossComparedPreviousDay: +((change_price / prev_closing_price) * yinyang * 100).toFixed(2),
-          profitLoss: profitLoss[item.market],
-        };
-      });
+      return {
+        ...item,
+        label: `${item.name}(${item.market})`,
+        profitLossComparedPreviousDay: +((change_price / prev_closing_price) * yinyang * 100).toFixed(2),
+        profitLoss: profitLoss[item.market],
+      };
+    });
 
-      console.log('newTableData', newTableData);
-
-      setTableData(newTableData);
-    }
+    setInitialTableData(newTableData);
   };
 
-  const tableColumnSetter = () => {
-    if (tableData.length > 0 && isFetched) {
-      const newTableSource = [...tableData];
-      const newTableColumn = [...columns];
-      for (let i = 0; i < tableData.length; i++) {
-        if (tableData[i].profitLoss?.length) {
-          for (let j = 0; j < tableData[i].profitLoss.length; j++) {
-            newTableSource[i][`profitLoss${j + 1}`] = tableData[i].profitLoss[j];
+  const tableSourceSetter = () => {
+    const newTableSource = [...initialTableData];
+    const newTableColumn = [...columns];
+    for (let i = 0; i < initialTableData.length; i++) {
+      if (initialTableData[i].profitLoss?.length) {
+        for (let j = 0; j < initialTableData[i].profitLoss.length; j++) {
+          newTableSource[i][`profitLoss${j + 1}`] = initialTableData[i].profitLoss[j];
 
-            console.log('ddsfaew', newTableSource);
+          if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
+            newTableColumn.push({
+              title: `${j + 1}차수 손익`,
+              dataIndex: `profitLoss${j + 1}`,
+              className: 'numeric_value',
+              width: 100,
+              render: (tuple) =>
+                tuple !== undefined ? (
+                  <p
+                    style={{ color: `${tuple[0] > 0 ? 'red' : tuple[0] < 0 ? 'blue' : 'black'}` }}
+                  >{`${(+tuple[0]).toLocaleString()}원 (${(+tuple[1]).toLocaleString()}%)`}</p>
+                ) : null,
+            });
 
-            if (newTableColumn.findIndex((v) => v.title === `${j + 1}차수 손익`) < 0) {
-              newTableColumn.push({
-                title: `${j + 1}차수 손익`,
-                dataIndex: `profitLoss${j + 1}`,
-                className: 'numeric_value',
-                width: 100,
-                render: (tuple) =>
-                  tuple !== undefined ? (
-                    <p
-                      style={{ color: `${tuple[0] > 0 ? 'red' : tuple[0] < 0 ? 'blue' : 'black'}` }}
-                    >{`${tuple[0]}원 (${tuple[1]}%)`}</p>
-                  ) : null,
-              });
-
-              if (i === tableData.length - 1 && j === tableData[i].profitLoss.length - 1) {
-                if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
-                  newTableColumn.push({
-                    title: '전량 매도',
-                    dataIndex: 'sellAll',
-                    width: '8rem',
-                    fixed: 'right',
-                    render: () => <a>전량 매도</a>,
-                  });
-              }
+            if (i === initialTableData.length - 1 && j === initialTableData[i].profitLoss.length - 1) {
+              if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
+                newTableColumn.push({
+                  title: '전량 매도',
+                  dataIndex: 'sellAll',
+                  width: '8rem',
+                  fixed: 'right',
+                  render: () => <a>전량 매도</a>,
+                });
             }
           }
         }
-        if (newTableSource[i].profitLoss?.length) {
-          const closingPrice = coinPrice.tickerData[i].prev_closing_price;
-          newTableSource[i].totalProfitLoss = [
-            // 손익액 합게
-            +newTableSource[i].profitLoss.reduce((p, c) => p + c[0], 0).toFixed(2),
-            // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
-            +(
-              +newTableSource[i].profitLoss.reduce((p, c) => p + c[0], 0) /
-              newTableSource[i].profitLoss.reduce((p, c) => p + c[2], 0) /
-              closingPrice
-            ).toFixed(2),
-          ];
-        }
+      }
+      if (newTableSource[i].profitLoss?.length) {
+        newTableSource[i].totalProfitLoss = getTotalProfitLoss(newTableSource[i].profitLoss, coinPrice.tickerData[i]);
       }
 
       setColumns(newTableColumn);
       setTableSource(newTableSource);
-      console.log('newTableSource', newTableSource);
     }
   };
 
@@ -146,12 +126,16 @@ function Main() {
   }, [coinPrice.isFetched, assetData.isFetched]);
 
   useEffect(() => {
-    tableDataSetter();
-  }, [coinPrice.tickerData, myAssets]);
+    if (isFetched) {
+      initialTableDataSetter();
+    }
+  }, [isFetched]);
 
   useEffect(() => {
-    tableColumnSetter();
-  }, [tableData]);
+    if (initialTableData.length > 0 && isFetched) {
+      tableSourceSetter();
+    }
+  }, [initialTableData]);
 
   return (
     <React.Fragment>
@@ -178,14 +162,13 @@ function Main() {
 
 export default Main;
 
-const TABLE_DEFAULT_DATA: I_tableData[] = coinList.map((v) => ({
+const DEFAULT_TABLE_DATA: I_initialTableData[] = coinList.map((v) => ({
   key: v.key,
   market: v.market,
   name: v.name,
-  totalProfitLoss: [0, 0],
 }));
 
-const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
+const DEFAULT_TABLE_COLUMN: TableColumnsType<I_initialTableData> = [
   {
     title: '종목이름',
     dataIndex: 'label',
@@ -210,7 +193,7 @@ const TABLE_DEFAULT_COLUMNS: TableColumnsType<I_tableData> = [
       tuple !== undefined ? (
         <p
           style={{ color: `${tuple[0] > 0 ? 'red' : tuple[0] < 0 ? 'blue' : 'black'}` }}
-        >{`${tuple[0]}원 (${tuple[1]}%)`}</p>
+        >{`${(+tuple[0]).toLocaleString()}원 (${(+tuple[1]).toLocaleString()}%)`}</p>
       ) : null,
   },
 ];
