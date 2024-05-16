@@ -96,17 +96,16 @@ function Main() {
                   >{`${(+tuple[0]).toLocaleString()}원 (${(+tuple[1]).toLocaleString()}%)`}</p>
                 ) : null,
             });
-
-            if (i === initialTableData.length - 1 && j === initialTableData[i].profitLoss.length - 1) {
-              if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
-                newTableColumn.push({
-                  title: '전량 매도',
-                  dataIndex: 'sellAll',
-                  width: '8rem',
-                  fixed: 'right',
-                  render: () => <a>전량 매도</a>,
-                });
-            }
+          }
+          if (i === initialTableData.length - 1 && j === initialTableData[i].profitLoss.length - 1) {
+            if (newTableColumn.findIndex((v) => v.title === '전량 매도') < 0)
+              newTableColumn.push({
+                title: '전량 매도',
+                dataIndex: 'sellAll',
+                width: '8rem',
+                fixed: 'right',
+                render: () => <a>전량 매도</a>,
+              });
           }
         }
       }
