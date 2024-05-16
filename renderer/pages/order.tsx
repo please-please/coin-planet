@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
-import { getCoinPrice, orderCoin } from '../api/api';
+import { getCoinPrice, getPurchaseData, orderCoin } from '../api/api';
 import { useRouter } from 'next/router';
 import { I_coinOrderData, I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
@@ -45,12 +45,8 @@ function Order() {
     });
 
     instance.then(
-      () => {
-        router.push('/apply');
-      },
-      () => {
-        router.push('/apply');
-      },
+      () => router.push('/apply'),
+      () => router.push('/apply'),
     );
 
     const timer = setInterval(() => {
@@ -125,52 +121,83 @@ function Order() {
         orderCoin(token, body)
           .then((res) => {
             const { data } = res;
-            const firstOrderData: I_coinOrderData = {
-              [data.market]: {
-                bid: [
-                  {
-                    number: 1,
-                    price: data.price,
-                    volume: data.volume,
-                    ord_type: data.ord_type,
-                    created_at: data.created_at,
-                    inputPrice: orderData.inputPrice,
-                  },
-                ],
-                ask: [],
-              },
-            };
+            const uuid = data.uuid;
 
-            orderFirst(firstOrderData);
+            setTimeout(() => {
+              getToken(
+                () => alert('구매데이터 조회 토큰 발행실패'),
+                (arg) => {
+                  getPurchaseData({ uuid }, arg.token)
+                    .then((res) => {
+                      const writeOrder = (res) => {
+                        const { price } = res.data?.trades?.[0];
+                        const firstOrderData: I_coinOrderData = {
+                          [data.market]: {
+                            bid: [
+                              {
+                                number: 1,
+                                price: price,
+                                volume: data.volume,
+                                ord_type: data.ord_type,
+                                created_at: data.created_at,
+                                inputPrice: orderData.inputPrice,
+                              },
+                            ],
+                            ask: [],
+                          },
+                        };
 
-            // 다차수 주문
-            if (orderData.limit > 1) {
-              const nextOrderData: I_coinOrderData = {
-                [data['market']]: {
-                  bid: [
-                    {
-                      number: 2,
-                      price: +data.price * (100 - orderData.minus) * 0.01,
-                      ord_type: data.ord_type,
-                      inputPrice: orderData.inputPrice,
-                    },
-                  ],
-                  ask: [
-                    {
-                      number: 1,
-                      price: +data.price * (100 + orderData.plus) * 0.01,
-                      ord_type: data.ord_type,
-                      created_at: '',
-                      volume: data.volume,
-                      inputPrice: orderData.inputPrice,
-                    },
-                  ],
-                  limit: orderData.limit,
+                        orderFirst(firstOrderData);
+
+                        // 다차수 주문
+                        if (orderData.limit > 1) {
+                          const nextOrderData: I_coinOrderData = {
+                            [data['market']]: {
+                              bid: [
+                                {
+                                  number: 2,
+                                  price: price * (100 - orderData.minus) * 0.01,
+                                  ord_type: data.ord_type,
+                                  inputPrice: orderData.inputPrice,
+                                },
+                              ],
+                              ask: [
+                                {
+                                  number: 1,
+                                  price: price * (100 + orderData.plus) * 0.01,
+                                  ord_type: data.ord_type,
+                                  created_at: '',
+                                  volume: data.volume,
+                                  inputPrice: orderData.inputPrice,
+                                },
+                              ],
+                              limit: orderData.limit,
+                            },
+                          };
+
+                          orderReservation(nextOrderData);
+                        }
+                      };
+                      if (res.data.state === 'wait') {
+                        let id = setInterval(() => {
+                          getPurchaseData({ uuid }, arg.token).then((res) => {
+                            if (res.data.state === 'done') {
+                              clearInterval(id);
+                              writeOrder(res);
+                            }
+                          });
+                        }, 500);
+                      }
+                      if (res.data.state === 'done') writeOrder(res);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                      alert(error);
+                    });
                 },
-              };
-
-              orderReservation(nextOrderData);
-            }
+                { uuid },
+              );
+            }, 500);
           })
           .catch((e) => alert(e.response.data.error.message));
       }
