@@ -120,8 +120,8 @@ export class CoinService {
     return;
   }
 
-  async getCoinPrice(coinList: DataType[]) {
-    return await this.coinRepository.getCoinPrice(coinList);
+  async getCoinPrice() {
+    return await this.coinRepository.getCoinPrice();
   }
 
   async getPrivateUserData() {

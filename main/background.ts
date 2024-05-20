@@ -1,10 +1,15 @@
-import { app } from 'electron';
+import { app, ipcMain } from 'electron';
 import serve from 'electron-serve';
 import { createWindow } from './helpers';
 import * as fs from 'fs';
 
 import { CoinService } from './service/coin-service';
-import { WINDOW_ALL_CLOSED } from '../constants';
+import {
+  API_REQ_GET_COIN_CURRENT_PRICE,
+  API_RES_COIN_CURRENT_PRICE_RETURN,
+  SUCCESS,
+  WINDOW_ALL_CLOSED,
+} from '../constants';
 import { CoinRepository } from './repository/coin-repository';
 import { Routes } from './route';
 import { coinList } from './coinList';
@@ -29,7 +34,7 @@ if (isProd) {
 
 const intervalPrice = () => {
   setInterval(async () => {
-    const { data } = await coinService.getCoinPrice(coinList);
+    const { data } = await coinService.getCoinPrice();
 
     currentPrice['KRW-BTC'] = data[0].trade_price;
     currentPrice['KRW-ETH'] = data[1].trade_price;

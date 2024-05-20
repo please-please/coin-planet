@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import { sign } from 'jsonwebtoken';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
-import { DataType } from '../coinList';
+import { coinList } from '../coinList';
 
 export class CoinRepository {
   async getJsonData(name: string) {
@@ -19,7 +19,7 @@ export class CoinRepository {
     return true;
   }
 
-  async getCoinPrice(coinList: DataType[]) {
+  async getCoinPrice() {
     return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v: any) => v.market).join(',')}`);
   }
 

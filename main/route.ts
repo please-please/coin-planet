@@ -27,6 +27,7 @@ import { v4 } from 'uuid';
 import * as queryEncode from 'querystring';
 import crypto from 'crypto';
 import * as fs from 'fs';
+
 export class Routes {
   constructor(private coinServcie: CoinService) {}
   eventRegister() {
@@ -146,9 +147,8 @@ export class Routes {
     });
 
     ipcMain.on(API_REQ_GET_COIN_CURRENT_PRICE, async (evt, arg) => {
-      const { coinList } = arg;
-      const result = await this.coinServcie.getCoinPrice(coinList);
-      evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: result });
+      const { data } = await this.coinServcie.getCoinPrice();
+      evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: data });
     });
 
     ipcMain.on(API_REQ_ORDER_COIN, async (evt, arg) => {
