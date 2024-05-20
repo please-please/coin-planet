@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
-import { getCoinPrice, getPurchaseData, orderCoin } from '../api/api';
+import { getPurchaseData, orderCoin } from '../api/api';
 import { useRouter } from 'next/router';
 import { I_coinOrderData, I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
 import { HasAsk } from '../recoil/atom';
 import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
 import { getToken, orderFirst, orderReservation } from '../utils';
+import { ipcRenderer } from 'electron';
+import { API_REQ_GET_COIN_CURRENT_PRICE, API_RES_COIN_CURRENT_PRICE_RETURN } from '../../constants';
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
@@ -99,12 +101,10 @@ function Order() {
       setLoading((pre) => ({ ...pre, order: false }));
     }, 700);
 
-    const { data } = await getCoinPrice();
-
     const coinPriceData = {};
 
-    for (let i = 0; i < data.length; i++) {
-      coinPriceData[data[i].market] = data[i].trade_price;
+    for (let i = 0; i < coinPrice.tickerData.length; i++) {
+      coinPriceData[coinPrice.tickerData[i].market] = coinPrice.tickerData[i].trade_price;
     }
 
     const body: I_orderBody = {
