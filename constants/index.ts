@@ -19,3 +19,13 @@ export const TOKEN_RETURN = 'tokenReturn';
 // status
 export const FAIL = 'fail';
 export const SUCCESS = 'success';
+
+// api
+export const API_REQ_GET_COIN_CURRENT_PRICE = 'getCoinCurrentPrice';
+export const API_REQ_ORDER_COIN = 'orderCoin';
+export const API_REQ_GET_PURCHASE_DATA = 'getPurchaseData';
+
+// api response
+export const API_RES_COIN_CURRENT_PRICE_RETURN = 'coinCurrentPriceReturn';
+export const API_RES_ORDER_COIN = 'orderCoinReturn';
+export const API_RES_GET_PURCHASE_DATA = 'purchaseDataReturn';

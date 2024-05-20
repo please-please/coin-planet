@@ -1,6 +1,6 @@
 import { TableColumnsType } from 'antd';
 
-interface DataType {
+export interface DataType {
   key: React.Key;
   name: string;
   market: string;

@@ -1,35 +1,19 @@
-import { app, ipcMain } from 'electron';
+import { app } from 'electron';
 import serve from 'electron-serve';
 import { createWindow } from './helpers';
 import * as fs from 'fs';
-import { v4 } from 'uuid';
-import { sign } from 'jsonwebtoken';
-import * as queryEncode from 'querystring';
-import crypto from 'crypto';
-import { getCoinPrice, orderCoin } from './api';
+
 import { CoinService } from './service/coin-service';
-import {
-  ASSETS_RETURN,
-  FAIL,
-  GET_SAVED_ASSETS_DATA_FILE,
-  GET_SAVED_RESERVATION_ORDER_DATA_FILE,
-  GET_SAVED_USER_DATA_FILE,
-  GET_TOKEN,
-  ORDER_FIRST,
-  ORDER_RESERVATION,
-  REPLY,
-  RESERVATION_ORDER_RETURN,
-  SAVE_FILE,
-  SUCCESS,
-  TOKEN_RETURN,
-  USER_DATA_RETURN,
-  WINDOW_ALL_CLOSED,
-} from '../constants';
+import { WINDOW_ALL_CLOSED } from '../constants';
 import { CoinRepository } from './repository/coin-repository';
+import { Routes } from './route';
+import { coinList } from './coinList';
 
 const isProd = process.env.NODE_ENV === 'production';
 const coinRepository = new CoinRepository();
 const coinService = new CoinService(coinRepository);
+const route = new Routes(coinService);
+route.eventRegister();
 
 const currentPrice = {
   'KRW-BTC': 0,
@@ -45,7 +29,8 @@ if (isProd) {
 
 const intervalPrice = () => {
   setInterval(async () => {
-    const { data } = await getCoinPrice();
+    const { data } = await coinService.getCoinPrice(coinList);
+
     currentPrice['KRW-BTC'] = data[0].trade_price;
     currentPrice['KRW-ETH'] = data[1].trade_price;
     currentPrice['KRW-XRP'] = data[2].trade_price;
@@ -123,116 +108,116 @@ app.on(WINDOW_ALL_CLOSED, () => {
   app.quit();
 });
 
-ipcMain.on(SAVE_FILE, (evt, arg) => {
-  if (arg.accessKey === '' || arg.secretKey === '') {
-    evt.sender.send(REPLY, { status: FAIL });
-    return;
-  }
+// ipcMain.on(SAVE_FILE, (evt, arg) => {
+//   if (arg.accessKey === '' || arg.secretKey === '') {
+//     evt.sender.send(REPLY, { status: FAIL });
+//     return;
+//   }
 
-  const dataFilePath = `${__dirname}/private_user_data.json`;
-  const userData = JSON.stringify(arg, null, 2);
+//   const dataFilePath = `${__dirname}/private_user_data.json`;
+//   const userData = JSON.stringify(arg, null, 2);
 
-  fs.writeFileSync(dataFilePath, userData, 'utf8');
-  evt.sender.send(REPLY, { status: SUCCESS });
-});
+//   fs.writeFileSync(dataFilePath, userData, 'utf8');
+//   evt.sender.send(REPLY, { status: SUCCESS });
+// });
 
-ipcMain.on(GET_SAVED_USER_DATA_FILE, (evt, arg) => {
-  const dataFilePath = `${__dirname}/private_user_data.json`;
+// ipcMain.on(GET_SAVED_USER_DATA_FILE, (evt, arg) => {
+//   const dataFilePath = `${__dirname}/private_user_data.json`;
 
-  const userData = fs.readFileSync(dataFilePath, 'utf8');
-  if (userData === '') {
-    evt.sender.send(USER_DATA_RETURN, { status: FAIL });
-    return;
-  }
-  evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: JSON.parse(userData) });
-});
+//   const userData = fs.readFileSync(dataFilePath, 'utf8');
+//   if (userData === '') {
+//     evt.sender.send(USER_DATA_RETURN, { status: FAIL });
+//     return;
+//   }
+//   evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: JSON.parse(userData) });
+// });
 
-ipcMain.on(ORDER_FIRST, (evt, arg) => {
-  const dataFilePath = `${__dirname}/assets_data.json`;
-  const isAssetsData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+// ipcMain.on(ORDER_FIRST, (evt, arg) => {
+//   const dataFilePath = `${__dirname}/assets_data.json`;
+//   const isAssetsData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
 
-  const newAssetsData = {
-    ...isAssetsData,
-    ...arg,
-  };
+//   const newAssetsData = {
+//     ...isAssetsData,
+//     ...arg,
+//   };
 
-  const assetsData = JSON.stringify(newAssetsData, null, 2);
-  fs.writeFileSync(dataFilePath, assetsData, 'utf8');
-});
+//   const assetsData = JSON.stringify(newAssetsData, null, 2);
+//   fs.writeFileSync(dataFilePath, assetsData, 'utf8');
+// });
 
-ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, (evt, arg) => {
-  const dataFilePath = `${__dirname}/assets_data.json`;
-  const assetsData = fs.readFileSync(dataFilePath, 'utf8');
+// ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, (evt, arg) => {
+//   const dataFilePath = `${__dirname}/assets_data.json`;
+//   const assetsData = fs.readFileSync(dataFilePath, 'utf8');
 
-  if (assetsData === '') {
-    evt.sender.send(ASSETS_RETURN, { status: FAIL });
-    return;
-  }
-  evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: JSON.parse(assetsData) });
-});
+//   if (assetsData === '') {
+//     evt.sender.send(ASSETS_RETURN, { status: FAIL });
+//     return;
+//   }
+//   evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: JSON.parse(assetsData) });
+// });
 
-ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, (evt, arg) => {
-  const dataFilePath = `${__dirname}/reservation_order_data.json`;
+// ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, (evt, arg) => {
+//   const dataFilePath = `${__dirname}/reservation_order_data.json`;
 
-  const reservationOrderData = fs.readFileSync(dataFilePath, 'utf8');
-  if (reservationOrderData === '') {
-    evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL });
-    return;
-  }
-  evt.sender.send(RESERVATION_ORDER_RETURN, {
-    status: SUCCESS,
-    reservationOrderData: JSON.parse(reservationOrderData),
-  });
-});
+//   const reservationOrderData = fs.readFileSync(dataFilePath, 'utf8');
+//   if (reservationOrderData === '') {
+//     evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL });
+//     return;
+//   }
+//   evt.sender.send(RESERVATION_ORDER_RETURN, {
+//     status: SUCCESS,
+//     reservationOrderData: JSON.parse(reservationOrderData),
+//   });
+// });
 
-ipcMain.on(ORDER_RESERVATION, (evt, arg) => {
-  const dataFilePath = `${__dirname}/reservation_order_data.json`;
-  const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+// ipcMain.on(ORDER_RESERVATION, (evt, arg) => {
+//   const dataFilePath = `${__dirname}/reservation_order_data.json`;
+//   const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
 
-  const newReservationData = {
-    ...isReservationData,
-    ...arg,
-  };
-  const reservationOrderData = JSON.stringify(newReservationData, null, 2);
-  fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
-  evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
-});
+//   const newReservationData = {
+//     ...isReservationData,
+//     ...arg,
+//   };
+//   const reservationOrderData = JSON.stringify(newReservationData, null, 2);
+//   fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
+//   evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
+// });
 
-ipcMain.on(GET_TOKEN, async (evt, arg) => {
-  const dataFilePath = `${__dirname}/private_user_data.json`;
-  const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
-  const userData = JSON.parse(userDataFile);
+// ipcMain.on(GET_TOKEN, async (evt, arg) => {
+//   const dataFilePath = `${__dirname}/private_user_data.json`;
+//   const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
+//   const userData = JSON.parse(userDataFile);
 
-  if (userData.accessKey === '' || userData.secretKey === '') {
-    evt.sender.send(TOKEN_RETURN, { status: FAIL });
-    return;
-  }
-  // console.log(userData);
-  // console.log(arg);
-  if (arg.body === undefined) {
-    const payload = {
-      access_key: userData.accessKey,
-      nonce: v4(),
-    };
+//   if (userData.accessKey === '' || userData.secretKey === '') {
+//     evt.sender.send(TOKEN_RETURN, { status: FAIL });
+//     return;
+//   }
+//   // console.log(userData);
+//   // console.log(arg);
+//   if (arg.body === undefined) {
+//     const payload = {
+//       access_key: userData.accessKey,
+//       nonce: v4(),
+//     };
 
-    const token = sign(payload, userData.secretKey);
+//     const token = sign(payload, userData.secretKey);
 
-    evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token });
-    return;
-  }
-  const query = queryEncode.encode(arg.body);
+//     evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token });
+//     return;
+//   }
+//   const query = queryEncode.encode(arg.body);
 
-  const hash = crypto.createHash('sha512');
-  const queryHash = hash.update(query, 'utf-8').digest('hex');
+//   const hash = crypto.createHash('sha512');
+//   const queryHash = hash.update(query, 'utf-8').digest('hex');
 
-  const payload = {
-    access_key: userData.accessKey,
-    nonce: v4(),
-    query_hash: queryHash,
-    query_hash_alg: 'SHA512',
-  };
+//   const payload = {
+//     access_key: userData.accessKey,
+//     nonce: v4(),
+//     query_hash: queryHash,
+//     query_hash_alg: 'SHA512',
+//   };
 
-  const token = sign(payload, userData.secretKey);
+//   const token = sign(payload, userData.secretKey);
 
-  evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token, query });
-});
+//   evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token, query });
+// });
