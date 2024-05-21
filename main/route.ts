@@ -147,18 +147,27 @@ export class Routes {
     });
 
     ipcMain.on(API_REQ_GET_COIN_CURRENT_PRICE, async (evt, arg) => {
-      const { data } = await this.coinServcie.getCoinPrice();
-      evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: data });
+      const result = await this.coinServcie.getCoinPrice();
+      if ((result.status + '')[0] !== '2') {
+        evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: FAIL, data: result.data });
+      }
+      evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: result.data });
     });
 
     ipcMain.on(API_REQ_ORDER_COIN, async (evt, arg) => {
       const result = await this.coinServcie.orderCoin(arg);
-      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result });
+      if ((result.status + '')[0] !== '2') {
+        evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
+      }
+      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
     });
 
     ipcMain.on(API_REQ_GET_PURCHASE_DATA, async (evt, arg) => {
       const result = await this.coinServcie.getPurchasData(arg);
-      evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: SUCCESS, data: result });
+      if ((result.status + '')[0] !== '2') {
+        evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: FAIL, data: result.data });
+      }
+      evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: SUCCESS, data: result.data });
     });
   }
 }
