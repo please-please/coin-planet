@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
-import { getPurchaseData, orderCoin } from '../api/api';
+import { getPurchaseData } from '../api/api';
 import { useRouter } from 'next/router';
 import { I_coinOrderData, I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
@@ -10,6 +10,7 @@ import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
 import { getToken, orderFirst, orderReservation } from '../utils';
 import { ipcRenderer } from 'electron';
 import { API_REQ_GET_COIN_CURRENT_PRICE, API_RES_COIN_CURRENT_PRICE_RETURN } from '../../constants';
+import useOrderCoin from '../hooks/main/useOrderCoin';
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
@@ -37,6 +38,7 @@ function Order() {
   const [modal, contextHolder] = Modal.useModal();
   const router = useRouter();
   const coinPrice = useGetCoinPrice();
+  const coinOrder = useOrderCoin();
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -115,91 +117,16 @@ function Order() {
       volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
     };
 
+    coinOrder
+      .orderCoin(body)
+      .then((res) => {
+        console.log('res', res);
+      })
+
+      .catch((e) => alert(e));
+
     const successCallback = (arg: any) => {
       if (arg.query) {
-        const { token } = arg;
-        orderCoin(token, body)
-          .then((res) => {
-            const { data } = res;
-            const uuid = data.uuid;
-
-            setTimeout(() => {
-              getToken(
-                () => alert('구매데이터 조회 토큰 발행실패'),
-                (arg) => {
-                  getPurchaseData({ uuid }, arg.token)
-                    .then((res) => {
-                      const writeOrder = (res) => {
-                        const { price } = res.data?.trades?.[0];
-                        const firstOrderData: I_coinOrderData = {
-                          [data.market]: {
-                            bid: [
-                              {
-                                number: 1,
-                                price: price,
-                                volume: data.volume,
-                                ord_type: data.ord_type,
-                                created_at: data.created_at,
-                                inputPrice: orderData.inputPrice,
-                              },
-                            ],
-                            ask: [],
-                          },
-                        };
-
-                        orderFirst(firstOrderData);
-
-                        // 다차수 주문
-                        if (orderData.limit > 1) {
-                          const nextOrderData: I_coinOrderData = {
-                            [data['market']]: {
-                              bid: [
-                                {
-                                  number: 2,
-                                  price: price * (100 - orderData.minus) * 0.01,
-                                  ord_type: data.ord_type,
-                                  inputPrice: orderData.inputPrice,
-                                },
-                              ],
-                              ask: [
-                                {
-                                  number: 1,
-                                  price: price * (100 + orderData.plus) * 0.01,
-                                  ord_type: data.ord_type,
-                                  created_at: '',
-                                  volume: data.volume,
-                                  inputPrice: orderData.inputPrice,
-                                },
-                              ],
-                              limit: orderData.limit,
-                            },
-                          };
-
-                          orderReservation(nextOrderData);
-                        }
-                      };
-                      if (res.data.state === 'wait') {
-                        let id = setInterval(() => {
-                          getPurchaseData({ uuid }, arg.token).then((res) => {
-                            if (res.data.state === 'done') {
-                              clearInterval(id);
-                              writeOrder(res);
-                            }
-                          });
-                        }, 500);
-                      }
-                      if (res.data.state === 'done') writeOrder(res);
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                      alert(error);
-                    });
-                },
-                { uuid },
-              );
-            }, 500);
-          })
-          .catch((e) => alert(e.response.data.error.message));
       }
     };
 
