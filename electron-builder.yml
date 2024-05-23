@@ -1,6 +1,6 @@
 appId: com.example.nextron
-productName: My Nextron App
-copyright: Copyright © 2018 Yoshihide Shiono
+productName: COINPLANET
+copyright: Copyright © COINPLANET
 directories:
   output: dist
   buildResources: resources
@@ -9,4 +9,11 @@ files:
     filter:
       - package.json
       - app
+extraResources:
+  - from: ./private_user_data.json
+    to: private_user_data.json
+  - from: ./assets_data.json
+    to: assets_data.json
+  - from: ./reservation_order_data.json
+    to: reservation_order_data.json
 publish: null

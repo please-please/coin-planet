@@ -1,11 +1,10 @@
 {
-  "name": "please",
+  "name": "COINPLANET",
   "version": "1.0.0",
   "description": "",
   "main": "app/background.js",
   "scripts": {
-    "dev": "nextron",
-    "postbuild": "cp private_user_data.json assets_data.json reservation_order_data.json dist/",
+    "dev": "NODE_ENV=development nextron",
     "build": "nextron build",
     "build:win64": "nextron build --win --x64",
     "postinstall": "electron-builder install-app-deps"
