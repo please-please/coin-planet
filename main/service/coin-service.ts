@@ -1,7 +1,4 @@
-import * as fs from 'fs';
-
 import { CoinRepository } from '../repository/coin-repository';
-import { DataType } from '../coinList';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -25,7 +22,7 @@ export class CoinService {
       const res = await this.getPurchasData({ uuid: data.uuid });
       const price = res.data.trades[0].price;
 
-      const { filePath: assetsDataFilePath, data: assetsData } = await this.coinRepository.getJsonData('assets_data');
+      const { data: assetsData } = await this.coinRepository.getJsonData('assets_data');
 
       // assets_data.json에 차수 별 매매 데이터 추가
       const newAssetsData = {
@@ -37,8 +34,7 @@ export class CoinService {
       };
 
       assetsData[symbol].bid.push(newAssetsData);
-      await this.coinRepository.writeJsonData(assetsDataFilePath, assetsData);
-      // fs.writeFileSync(assetsDataFilePath, JSON.stringify(assetsData), 'utf8');
+      await this.coinRepository.writeJsonData('assets_data', assetsData);
 
       let nextOrderFlag = true;
       if (orderData.limit <= orderData.bid[0].number) {
@@ -74,8 +70,7 @@ export class CoinService {
       // 제일 앞에꺼 빼고
       orderData[symbol].bid.shift();
 
-      await this.coinRepository.writeJsonData(`${__dirname}/reservation_order_data.json`, orderData);
-      // fs.writeFileSync(`${__dirname}/reservation_order_data.json`, JSON.stringify(orderData), 'utf8');
+      await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
       return;
     }
   }
@@ -115,7 +110,7 @@ export class CoinService {
     // 있던 데이터 빼고
     orderData[symbol].ask.pop();
 
-    await this.coinRepository.writeJsonData(`${__dirname}/reservation_order_data.json`, orderData);
+    await this.coinRepository.writeJsonData(`reservation_order_data.json`, orderData);
 
     return;
   }
@@ -128,8 +123,8 @@ export class CoinService {
     return await this.coinRepository.getJsonData('private_user_data');
   }
 
-  async saveUserData(arg) {
-    return await this.coinRepository.writeJsonData(`${__dirname}/private_user_data.json`, arg);
+  async saveJsonData(name: string, arg) {
+    return await this.coinRepository.writeJsonData(name, arg);
   }
 
   async orderCoin(arg) {
@@ -138,5 +133,13 @@ export class CoinService {
 
   async getPurchasData(arg: { uuid: string }) {
     return await this.coinRepository.getPurchasData(arg);
+  }
+
+  async getAssetsData() {
+    return await this.coinRepository.getJsonData('assets_data');
+  }
+
+  async getReservationOrderData() {
+    return await this.coinRepository.getJsonData('reservation_order_data');
   }
 }

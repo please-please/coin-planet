@@ -6,15 +6,18 @@ import * as queryEncode from 'querystring';
 import crypto from 'crypto';
 import { coinList } from '../coinList';
 
+import { prodJsonPath } from '../constants/utils';
+
 export class CoinRepository {
   async getJsonData(name: string) {
-    const filePath = `${__dirname}/${name}.json`;
+    const filePath = prodJsonPath(name);
     const dataFile = fs.readFileSync(filePath, 'utf8');
     const data = JSON.parse(dataFile);
     return { filePath, data };
   }
 
-  async writeJsonData(filePath: string, data: any) {
+  async writeJsonData(name: string, data: any) {
+    const { filePath } = await this.getJsonData(name);
     fs.writeFileSync(filePath, JSON.stringify(data), 'utf8');
     return true;
   }

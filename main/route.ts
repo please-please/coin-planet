@@ -37,7 +37,7 @@ export class Routes {
         return;
       }
 
-      const result = await this.coinServcie.saveUserData(arg);
+      const result = await this.coinServcie.saveJsonData('private_user_data', arg);
       if (!result) {
         evt.sender.send(REPLY, { status: FAIL });
         return;
@@ -45,65 +45,62 @@ export class Routes {
 
       evt.sender.send(REPLY, { status: SUCCESS });
     });
-    ipcMain.on(GET_SAVED_USER_DATA_FILE, (evt, arg) => {
-      const dataFilePath = `${__dirname}/private_user_data.json`;
 
-      const userData = fs.readFileSync(dataFilePath, 'utf8');
+    ipcMain.on(GET_SAVED_USER_DATA_FILE, async (evt, arg) => {
+      const { data: userData } = await this.coinServcie.getPrivateUserData();
+
       if (userData === '') {
-        evt.sender.send(USER_DATA_RETURN, { status: FAIL });
-        return;
+        evt.sender.send(USER_DATA_RETURN, { status: FAIL, userData: 'fail' });
       }
-      evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: JSON.parse(userData) });
+      evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: userData });
     });
 
-    ipcMain.on(ORDER_FIRST, (evt, arg) => {
-      const dataFilePath = `${__dirname}/assets_data.json`;
-      const isAssetsData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    ipcMain.on(ORDER_FIRST, async (evt, arg) => {
+      const { data: assetsData } = await this.coinServcie.getAssetsData();
 
       const newAssetsData = {
-        ...isAssetsData,
+        ...assetsData,
         ...arg,
       };
 
-      const assetsData = JSON.stringify(newAssetsData, null, 2);
-      fs.writeFileSync(dataFilePath, assetsData, 'utf8');
+      await this.coinServcie.saveJsonData('assets_data', newAssetsData);
+      // const assetsData = JSON.stringify(newAssetsData, null, 2);
+      // fs.writeFileSync(filePath, assetsData, 'utf8');
     });
 
-    ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, (evt, arg) => {
-      const dataFilePath = `${__dirname}/assets_data.json`;
-      const assetsData = fs.readFileSync(dataFilePath, 'utf8');
+    ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, async (evt, arg) => {
+      const { data: assetsData } = await this.coinServcie.getAssetsData();
 
       if (assetsData === '') {
-        evt.sender.send(ASSETS_RETURN, { status: FAIL });
-        return;
+        evt.sender.send(ASSETS_RETURN, { status: FAIL, assetsData: 'fail' });
       }
-      evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: JSON.parse(assetsData) });
+      evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: assetsData });
     });
 
-    ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, (evt, arg) => {
-      const dataFilePath = `${__dirname}/reservation_order_data.json`;
+    ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, async (evt, arg) => {
+      const { data: reservationOrderData } = await this.coinServcie.getReservationOrderData();
 
-      const reservationOrderData = fs.readFileSync(dataFilePath, 'utf8');
       if (reservationOrderData === '') {
-        evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL });
-        return;
+        evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL, reservationOrderData: 'fail' });
       }
       evt.sender.send(RESERVATION_ORDER_RETURN, {
         status: SUCCESS,
-        reservationOrderData: JSON.parse(reservationOrderData),
+        reservationOrderData: reservationOrderData,
       });
     });
 
-    ipcMain.on(ORDER_RESERVATION, (evt, arg) => {
-      const dataFilePath = `${__dirname}/reservation_order_data.json`;
-      const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
+      const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
+      // const dataFilePath = `${__dirname}/reservation_order_data.json`;
+      // const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
 
       const newReservationData = {
-        ...isReservationData,
+        ...isReservationOrderData,
         ...arg,
       };
-      const reservationOrderData = JSON.stringify(newReservationData, null, 2);
-      fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
+      await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
+      // const reservationOrderData = JSON.stringify(newReservationData, null, 2);
+      // fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
       evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
     });
 
