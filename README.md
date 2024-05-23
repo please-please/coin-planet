@@ -1,8 +1,4 @@
-
-
 ![COINPLANET](https://velog.velcdn.com/images/2pandi/post/8e271e45-8305-4066-94f4-ca786d977933/image.png)
-
-
 
 <br>
 
@@ -28,18 +24,22 @@
 
 ---
 
-![메인페이지](https://velog.velcdn.com/images/2pandi/post/06ee2ee2-99b2-4367-bbba-a5e7bf16dfdf/image.png)
-메인(종목손익 조회) 페이지
-
 <br>
+
+## 🖥️ COIN PLANET 페이지
+
+### 메인(종목 별 손익 조회) 페이지
+
+![메인페이지](https://velog.velcdn.com/images/2pandi/post/06ee2ee2-99b2-4367-bbba-a5e7bf16dfdf/image.png)
+
+### API 키 등록 페이지
 
 ![키등록페이지](https://velog.velcdn.com/images/2pandi/post/50cabef5-a82f-4dda-9246-d64b0cecab9f/image.png)
-api 키 등록 페이지
 
-<br>
+### 주문하기 페이지
 
 ![주문하기페이지](https://velog.velcdn.com/images/2pandi/post/97a3119b-fd1e-41cc-b5eb-201edaf63229/image.png)
-주문하기 페이지
+
 <br>
 
 ## 🛠 사용 방법
@@ -53,12 +53,25 @@ api 키 등록 페이지
 
 <br>
 
-## 기술스택
+## ⚒️ 기술스택
 
 ![electron](https://velog.velcdn.com/images/wndud2274/post/d08e3dfe-8f39-4c81-b980-930c740460f0/image.png)
 
 ### 사용 이유
 
-- 업비트 api 관련 문서 링크와 이유 설명
+- 이번 프로젝트는 일렉트론을 사용해 데스크탑 애플리케이션으로 개발했습니다. 초기 기획 단계에서는 웹서비스 + 서버로 구성하려고 했지만 해당 프로젝트는 실제 자산 거래가 이뤄지기 때문에 보안적인 측면에서 데스크탑 애플리케이션 개발로 결정했습니다.
+
+- (업비트 api 관련 문서 링크와 이유 설명)
 
 <br>
+
+## 🚀 업데이트 이력
+
+<details><summary>0.1.0</summary>
+
+- 차수별 자동매매
+- 5차수 고정
+- 비트코인, 이더리움, 리플만 가능
+- 현재 맥북에서만 실행 가능
+
+</details>

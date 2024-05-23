@@ -3,12 +3,6 @@ const colors = require('tailwindcss/colors');
 module.exports = {
   content: ['./renderer/pages/**/*.{js,ts,jsx,tsx}', './renderer/components/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    // colors: {
-    //   // use colors only specified
-    //   white: colors.white,
-    //   blue: colors.blue,
-    //   black: colors.black,
-    // },
     extend: {
       backgroundImage: {
         'home-image': "url('/images/main_bg.jpg')",
@@ -32,8 +26,6 @@ module.exports = {
         bronze: '#B38261',
         red: '#ff3939',
         'primary-op': 'rgba(64, 93, 246, 0.09)',
-        naver: '#03c75a',
-        kakao: '#fee102',
       },
     },
   },

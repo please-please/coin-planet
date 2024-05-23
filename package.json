@@ -1,6 +1,6 @@
 {
-  "name": "COINPLANET",
-  "version": "1.0.0",
+  "name": "COIN PLANET",
+  "version": "0.1.0",
   "description": "",
   "main": "app/background.js",
   "scripts": {

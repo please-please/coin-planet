@@ -398,7 +398,6 @@
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
     "xcode_version": "12.0",
-    "nodedir": "/Users/recl/Library/Caches/node-gyp/18.15.0",
     "standalone_static_library": 1
   }
 }
