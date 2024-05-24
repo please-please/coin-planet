@@ -22,7 +22,9 @@ export function useGetPurchaseData() {
 
   useEffect(() => {
     if (lastOrderUuid) {
-      getPurchaseData(lastOrderUuid);
+      setTimeout(() => {
+        getPurchaseData(lastOrderUuid);
+      }, 300);
     }
   }, [lastOrderUuid]);
 }
