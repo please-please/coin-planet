@@ -66,7 +66,7 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
   const browserOptions: BrowserWindowConstructorOptions = {
     ...options,
     ...state,
-    icon: __dirname + '/resources/logo.ico',
+    icon: __dirname + '/resources/maclogo.icns',
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
