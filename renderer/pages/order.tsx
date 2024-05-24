@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
-import { coinList, columns } from '../constants/coinList';
+import { I_coinData, coinList, columns } from '../constants/coinList';
 import { useRouter } from 'next/router';
 import { I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
-import { HasAsk, LastOrderUuid } from '../recoil/atom';
+import { HasAsk } from '../recoil/atom';
 import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
 import { getToken } from '../utils';
 import useOrderCoin from '../hooks/main/useOrderCoin';
@@ -21,7 +21,7 @@ interface I_orderData extends Partial<I_orderBody> {
 function Order() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({ order: false, reload: false });
-  const [coinListData, setCoinListData] = useState(coinList);
+  const [coinListData, setCoinListData] = useState<I_coinData[]>(coinList);
   const [orderData, setOrderData] = useState<I_orderData>({
     limit: 1,
     market: '',
@@ -33,13 +33,11 @@ function Order() {
   });
 
   const hasAsk = useRecoilValue(HasAsk);
-  const lastOrderUuid = useRecoilValue(LastOrderUuid);
 
   const [modal, contextHolder] = Modal.useModal();
   const router = useRouter();
   const coinPrice = useGetCoinPrice();
   const coinOrder = useOrderCoin();
-  const purchaseData = useGetPurchaseData();
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -68,8 +66,13 @@ function Order() {
     }, secondsToGo * 1000);
   };
 
+  // 기존에 종목별 매매 예약 내역이 있는지 조회
   useGetReservationOrderData();
 
+  // 주문 실행시 데이터 조회
+  useGetPurchaseData();
+
+  // 주문 실행시 주문 데이터 JSON 저장
   useSaveOrderData({
     [orderData.market]: {
       bid: [
@@ -86,10 +89,12 @@ function Order() {
     },
   });
 
+  // 등록된 API key가 없는 경우 등록 페이지로 리다이렉트
   useEffect(() => {
     getToken(countDown);
   }, []);
 
+  // 실시간 코인 종목별 가격 조회
   useEffect(() => {
     if (coinPrice.tickerData?.length) {
       const coinPriceList = coinPrice.tickerData.map((coinPriceData) => coinPriceData.trade_price);
@@ -101,12 +106,6 @@ function Order() {
       );
     }
   }, [coinPrice.tickerData]);
-
-  useEffect(() => {
-    if (lastOrderUuid) {
-      purchaseData.getPurchaseData(lastOrderUuid);
-    }
-  }, [lastOrderUuid]);
 
   const reload = () => {
     setLoading((pre) => ({ ...pre, reload: true }));

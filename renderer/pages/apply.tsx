@@ -1,19 +1,17 @@
-import electron from 'electron';
+import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, Input, Typography } from 'antd';
-import { GET_SAVED_USER_DATA_FILE, REPLY, SAVE_FILE, SUCCESS, USER_DATA_RETURN } from '../../constants';
+import { GET_SAVED_USER_DATA_FILE, SUCCESS, USER_DATA_RETURN } from '../../constants';
 import { saveUserKey } from '../utils';
-
-const ipcRenderer = electron.ipcRenderer;
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
 function Apply() {
-  const [accessKey, setAccessKey] = useState('');
-  const [secretKey, setSecretKey] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [saveDisabled, setSaveDisabled] = useState(false);
+  const [accessKey, setAccessKey] = useState<string>('');
+  const [secretKey, setSecretKey] = useState<string>('');
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [saveDisabled, setSaveDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     ipcRenderer.send(GET_SAVED_USER_DATA_FILE, {});
@@ -36,7 +34,7 @@ function Apply() {
     setSaveDisabled(false);
   };
 
-  const handleSecretKeyInputFocus = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSecretKeyInputFocus = (_: React.ChangeEvent<HTMLInputElement>) => {
     setSecretKey('');
     setSaveDisabled(false);
   };

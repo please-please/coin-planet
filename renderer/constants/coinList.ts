@@ -1,12 +1,12 @@
 import { TableColumnsType } from 'antd';
 
-interface DataType {
+export interface I_coinData {
   key: React.Key;
   name: string;
   market: string;
   price: number | string;
 }
-export const columns: TableColumnsType<DataType> = [
+export const columns: TableColumnsType<I_coinData> = [
   {
     title: '종목이름',
     dataIndex: 'name',
@@ -21,7 +21,7 @@ export const columns: TableColumnsType<DataType> = [
   },
 ];
 
-export const coinList: DataType[] = [
+export const coinList: I_coinData[] = [
   {
     key: '1',
     name: '비트코인',

@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
-import electron from 'electron';
+import { ipcRenderer } from 'electron';
 import { useRecoilState } from 'recoil';
 import { HasAsk, MyReservations } from '../../recoil/atom';
 import { FAIL, GET_SAVED_RESERVATION_ORDER_DATA_FILE, RESERVATION_ORDER_RETURN } from '../../../constants';
-
-const ipcRenderer = electron.ipcRenderer;
 
 export const useGetReservationOrderData = () => {
   const [, setReservationData] = useRecoilState(MyReservations);

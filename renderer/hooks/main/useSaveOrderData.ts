@@ -9,15 +9,14 @@ export default function useSaveOrderData(orderData: I_coinOrderData) {
 
   React.useEffect(() => {
     if (lastpuchaseData) {
-      const newOrderData = { ...orderData };
       const market = Object.keys(orderData)[0];
-      const bidData = newOrderData[market].bid[0];
+      const bidData = orderData[market].bid[0];
 
       bidData.number = 1;
       bidData.price = +lastpuchaseData?.trades[0].price;
       bidData.created_at = lastpuchaseData?.trades[0].created_at;
 
-      saveFirstOrder(newOrderData);
+      saveFirstOrder(orderData);
 
       const reservationData: I_coinOrderData = {
         [market]: {
@@ -39,7 +38,7 @@ export default function useSaveOrderData(orderData: I_coinOrderData) {
               inputPrice: bidData.inputPrice,
             },
           ],
-          limit: newOrderData[0].limit,
+          limit: orderData[0].limit,
         },
       };
 

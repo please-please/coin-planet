@@ -1,11 +1,9 @@
-import electron from 'electron';
+import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { I_assetsData } from '../../pages/main';
 import { MyAssets } from '../../recoil/atom';
 import { ASSETS_RETURN, GET_SAVED_ASSETS_DATA_FILE, SUCCESS } from '../../../constants';
-
-const ipcRenderer = electron.ipcRenderer;
 
 export const useGetAssetData = () => {
   const [isFetched, setIsFetched] = useState<boolean>();
