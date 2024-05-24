@@ -7,3 +7,7 @@ dist
 .env.*
 package-lock.json
 pnpm-lock.yaml
+
+assets_data.json
+private_user_data.json
+reservation_order_data.json
