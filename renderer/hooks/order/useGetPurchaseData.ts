@@ -14,7 +14,6 @@ export function useGetPurchaseData() {
 
     ipcRenderer.once(API_RES_GET_PURCHASE_DATA, (_, arg) => {
       if (arg.status === SUCCESS) {
-        console.log(arg.data);
         setLastPurchaseData(arg.data);
       }
     });

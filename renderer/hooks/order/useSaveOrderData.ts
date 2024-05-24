@@ -15,6 +15,7 @@ export function useSaveOrderData(orderData: I_coinOrderData) {
       bidData.number = 1;
       bidData.price = +lastpuchaseData?.trades[0]?.price;
       bidData.created_at = lastpuchaseData?.trades[0]?.created_at;
+      bidData.volume = lastpuchaseData?.trades[0].volume;
 
       saveFirstOrder(orderData);
 

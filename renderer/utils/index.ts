@@ -45,7 +45,6 @@ export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerDa
   for (let key of Object.keys(totalData)) {
     totalData[key] = assetData[key]?.bid?.map((item) => {
       const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
-
       const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
       const profitLossRate = (marketData.trade_price - +item.price) / +marketData.prev_closing_price;
       const shortProfitLossRate = shortenRate(profitLossRate);
@@ -101,7 +100,6 @@ export const saveFirstOrder = (firstOrderData: I_coinOrderData) => {
 export const saveOrderReservation = (nextOrderData: I_coinOrderData) => {
   ipcRenderer.send(ORDER_RESERVATION, nextOrderData);
   ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
-    console.log(arg);
     if (arg.status === FAIL) return alert('에러: reservation order 저장 실패');
     alert('주문 저장 성공');
   });

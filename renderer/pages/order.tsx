@@ -82,7 +82,6 @@ function Order() {
       bid: [
         {
           inputPrice: orderData.inputPrice,
-          volume: orderData.volume,
           ord_type: orderData.ord_type,
           biddingRate: orderData.biddingRate,
           askingRate: orderData.askingRate,

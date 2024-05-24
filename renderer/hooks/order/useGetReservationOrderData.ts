@@ -15,7 +15,6 @@ export const useGetReservationOrderData = () => {
     ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
       if (arg.status === FAIL) return alert('차수주문 내역 조회 실패');
       const { reservationOrderData } = arg;
-      console.log(reservationOrderData);
       setReservationData(reservationOrderData);
 
       const markets = Object.keys(reservationOrderData);
