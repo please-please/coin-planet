@@ -79,7 +79,6 @@ const intervalPrice = () => {
   if (userData.accessKey === '' || userData.secretKey === '') {
     if (isProd) {
       await mainWindow.loadURL('app://./apply.html');
-      mainWindow.webContents.openDevTools();
     } else {
       const port = process.argv[2];
       await mainWindow.loadURL(`http://localhost:${port}/apply`);
@@ -88,7 +87,6 @@ const intervalPrice = () => {
   } else {
     if (isProd) {
       await mainWindow.loadURL('app://./main.html');
-      mainWindow.webContents.openDevTools();
     } else {
       const port = process.argv[2];
       await mainWindow.loadURL(`http://localhost:${port}/main`);
