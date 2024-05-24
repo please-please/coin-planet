@@ -16,6 +16,19 @@ export interface I_coinOrderResponseData {
   volume: string | number;
 }
 
+export interface I_purchaseData extends I_coinOrderResponseData {
+  trades: {
+    market: string;
+    uuid: string;
+    price: string | number;
+    volume: string | number;
+    funds: string | number;
+    side: string;
+    created_at: string;
+  }[];
+  time_in_force?: string;
+}
+
 export interface I_orderBody
   extends Pick<I_coinOrderResponseData, 'market' | 'side' | 'ord_type' | 'price' | 'volume'> {
   identifier?: string;
@@ -35,11 +48,14 @@ export interface I_tickerData {
   timestamp: number;
 }
 
-interface I_bidData extends Pick<I_coinOrderResponseData, 'price' | 'ord_type'> {
-  number: number;
+interface I_bidData extends Pick<I_coinOrderResponseData, 'ord_type'> {
+  number?: number;
+  price?: number;
   inputPrice: number;
   volume?: I_coinOrderResponseData['volume'];
   created_at?: I_coinOrderResponseData['created_at'];
+  biddingRate?: number;
+  askingRate?: number;
 }
 
 interface I_askData extends I_bidData {}

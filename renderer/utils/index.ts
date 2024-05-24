@@ -95,14 +95,14 @@ export const getToken = (failCallback: () => void, successCallback?: (arg: any) 
   });
 };
 
-export const orderFirst = (firstOrderData: I_coinOrderData) => {
+export const saveFirstOrder = (firstOrderData: I_coinOrderData) => {
   ipcRenderer.send(ORDER_FIRST, firstOrderData);
 };
 
-export const orderReservation = (nextOrderData: I_coinOrderData) => {
+export const saveOrderReservation = (nextOrderData: I_coinOrderData) => {
   ipcRenderer.send(ORDER_RESERVATION, nextOrderData);
   ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
-    if (arg.status === FAIL) return alert('에러: reservation order 실패');
-    alert('주문 성공');
+    if (arg.status === FAIL) return alert('에러: reservation order 저장 실패');
+    alert('주문 저장 성공');
   });
 };

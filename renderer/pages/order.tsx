@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
 import { coinList, columns } from '../constants/coinList';
-import { getPurchaseData } from '../api/api';
 import { useRouter } from 'next/router';
-import { I_coinOrderData, I_orderBody } from '../api/interface';
+import { I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
-import { HasAsk } from '../recoil/atom';
+import { HasAsk, LastOrderUuid } from '../recoil/atom';
 import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
-import { getToken, orderFirst, orderReservation } from '../utils';
-import { ipcRenderer } from 'electron';
-import { API_REQ_GET_COIN_CURRENT_PRICE, API_RES_COIN_CURRENT_PRICE_RETURN } from '../../constants';
+import { getToken } from '../utils';
 import useOrderCoin from '../hooks/main/useOrderCoin';
+import useGetPurchaseData from '../hooks/main/useGetPurchaseData';
+import useSaveOrderData from '../hooks/main/useSaveOrderData';
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
-  plus: number;
-  minus: number;
+  askingRate: number;
+  biddingRate: number;
   inputPrice: number;
 }
 
@@ -28,17 +27,19 @@ function Order() {
     market: '',
     side: 'bid',
     ord_type: 'limit',
-    minus: 5,
-    plus: 5,
+    askingRate: 5,
+    biddingRate: 5,
     inputPrice: 0,
   });
 
   const hasAsk = useRecoilValue(HasAsk);
+  const lastOrderUuid = useRecoilValue(LastOrderUuid);
 
   const [modal, contextHolder] = Modal.useModal();
   const router = useRouter();
   const coinPrice = useGetCoinPrice();
   const coinOrder = useOrderCoin();
+  const purchaseData = useGetPurchaseData();
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -69,6 +70,22 @@ function Order() {
 
   useGetReservationOrderData();
 
+  useSaveOrderData({
+    [orderData.market]: {
+      bid: [
+        {
+          inputPrice: orderData.inputPrice,
+          volume: orderData.volume,
+          ord_type: orderData.ord_type,
+          biddingRate: orderData.biddingRate,
+          askingRate: orderData.askingRate,
+        },
+      ],
+      ask: [],
+      limit: orderData.limit,
+    },
+  });
+
   useEffect(() => {
     getToken(countDown);
   }, []);
@@ -84,6 +101,12 @@ function Order() {
       );
     }
   }, [coinPrice.tickerData]);
+
+  useEffect(() => {
+    if (lastOrderUuid) {
+      purchaseData.getPurchaseData(lastOrderUuid);
+    }
+  }, [lastOrderUuid]);
 
   const reload = () => {
     setLoading((pre) => ({ ...pre, reload: true }));
@@ -112,25 +135,12 @@ function Order() {
     const body: I_orderBody = {
       market: orderData.market,
       side: orderData.side,
+      volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
       price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
       ord_type: orderData.ord_type,
-      volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
     };
 
-    coinOrder
-      .orderCoin(body)
-      .then((res) => {
-        console.log('res', res);
-      })
-
-      .catch((e) => alert(e));
-
-    const successCallback = (arg: any) => {
-      if (arg.query) {
-      }
-    };
-
-    getToken(() => alert('토큰 생성 실패'), successCallback, body);
+    coinOrder.orderCoin(body);
   };
 
   const onLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {

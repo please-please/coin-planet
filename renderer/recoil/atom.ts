@@ -1,4 +1,5 @@
 import { atom } from 'recoil';
+import { I_coinOrderResponseData, I_purchaseData } from '../api/interface';
 
 export const MyAssets = atom({
   key: 'MyAssets',
@@ -10,14 +11,6 @@ export const MyReservations = atom({
   default: [],
 });
 
-export const MyUserData = atom({
-  key: 'MyUserData',
-  default: {
-    accessKey: '',
-    secretKey: '',
-  },
-});
-
 export const HasAsk = atom<{ [key: string]: boolean }>({
   key: 'HasAsk',
   default: {
@@ -25,4 +18,14 @@ export const HasAsk = atom<{ [key: string]: boolean }>({
     'KRW-ETH': false,
     'KRW-XRP': false,
   },
+});
+
+export const LastOrderUuid = atom<I_coinOrderResponseData['uuid']>({
+  key: 'LastOrderUuid',
+  default: '',
+});
+
+export const LastPurchaseData = atom<I_purchaseData | undefined>({
+  key: 'LastPurchaseData',
+  default: undefined,
 });
