@@ -8,9 +8,8 @@ import {
   SAVE_FILE,
   TOKEN_RETURN,
 } from '../../constants';
-import { I_coinOrderData, I_orderBody, I_tickerData } from '../api/interface';
+import { I_coinOrderData, I_tickerData } from '../api/interface';
 import { coinList } from '../constants/coinList';
-import { I_assetsData } from '../pages/main';
 import electron from 'electron';
 
 interface I_keys {
@@ -37,7 +36,7 @@ const shortenRate = (number: number) => {
   return shortRate;
 };
 
-export const getProfitLoss = (assetData: I_assetsData, tickerData: I_tickerData[]): I_profitLoss => {
+export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerData[]): I_profitLoss => {
   const totalData = {};
   for (let i = 0; i < coinList.length; i++) {
     totalData[coinList[i].market] = [];

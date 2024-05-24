@@ -10,6 +10,7 @@ import { getToken } from '../utils';
 import useOrderCoin from '../hooks/main/useOrderCoin';
 import useGetPurchaseData from '../hooks/main/useGetPurchaseData';
 import useSaveOrderData from '../hooks/main/useSaveOrderData';
+import { I_hasAsk } from '../recoil/interface';
 
 interface I_orderData extends Partial<I_orderBody> {
   limit: number;
@@ -32,7 +33,7 @@ function Order() {
     inputPrice: 0,
   });
 
-  const hasAsk = useRecoilValue(HasAsk);
+  const hasAsk = useRecoilValue<I_hasAsk>(HasAsk);
 
   const [modal, contextHolder] = Modal.useModal();
   const router = useRouter();

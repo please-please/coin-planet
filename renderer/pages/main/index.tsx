@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { TableColumnsType, Table, Typography, Button } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { MyAssets } from '../../recoil/atom';
-import { I_assetBid } from '../../recoil/interface';
 import { coinList } from '../../constants/coinList';
 import { getProfitLoss, getTotalProfitLoss } from '../../utils';
 import { useGetAssetData, useGetCoinPrice } from '../../hooks';
+import { I_coinOrderData } from '../../api/interface';
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -24,12 +24,6 @@ interface I_tableSource extends I_initialTableData {
   [key: string]: React.Key | string | number | number[];
 }
 
-export interface I_assetsData {
-  [symbol: string]: {
-    bid: I_assetBid[];
-  };
-}
-
 function Main() {
   const [initialTableData, setInitialTableData] = useState<I_initialTableData[]>(DEFAULT_TABLE_DATA);
   const [tableSource, setTableSource] = useState<I_tableSource[]>();
@@ -37,7 +31,7 @@ function Main() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetched, setIsFetched] = useState<boolean>(false);
 
-  const myAssets = useRecoilValue<I_assetsData>(MyAssets);
+  const myAssets = useRecoilValue<I_coinOrderData>(MyAssets);
 
   const coinPrice = useGetCoinPrice();
   const assetData = useGetAssetData();

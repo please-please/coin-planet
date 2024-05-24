@@ -1,13 +1,13 @@
 import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { I_assetsData } from '../../pages/main';
 import { MyAssets } from '../../recoil/atom';
 import { ASSETS_RETURN, GET_SAVED_ASSETS_DATA_FILE, SUCCESS } from '../../../constants';
+import { I_coinOrderData } from '../../api/interface';
 
 export const useGetAssetData = () => {
   const [isFetched, setIsFetched] = useState<boolean>();
-  const [, setMyAssets] = useRecoilState<I_assetsData>(MyAssets);
+  const [, setMyAssets] = useRecoilState<I_coinOrderData>(MyAssets);
 
   const reload = () => {
     setIsFetched(false);
