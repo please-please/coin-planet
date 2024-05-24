@@ -58,7 +58,7 @@ export class CoinRepository {
     const queryHash = hash.update(query, 'utf-8').digest('hex');
 
     const payload = {
-      access_key: userData.access_key,
+      access_key: userData.accessKey,
       nonce: v4(),
       query_hash: queryHash,
       query_hash_alg: 'SHA512',

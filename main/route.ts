@@ -101,7 +101,6 @@ export class Routes {
 
     ipcMain.on(API_REQ_ORDER_COIN, async (evt: Electron.IpcMainEvent, arg: I_orderBody) => {
       const result = await this.coinServcie.orderCoin(arg);
-      console.log(result);
       if ((result.status + '')[0] !== '2') {
         evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
       }
