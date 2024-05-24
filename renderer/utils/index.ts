@@ -101,6 +101,7 @@ export const saveFirstOrder = (firstOrderData: I_coinOrderData) => {
 export const saveOrderReservation = (nextOrderData: I_coinOrderData) => {
   ipcRenderer.send(ORDER_RESERVATION, nextOrderData);
   ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
+    console.log(arg);
     if (arg.status === FAIL) return alert('에러: reservation order 저장 실패');
     alert('주문 저장 성공');
   });

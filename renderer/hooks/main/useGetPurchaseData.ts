@@ -10,8 +10,6 @@ export default function useGetPurchaseData() {
   const lastOrderUuid = useRecoilValue(LastOrderUuid);
 
   const getPurchaseData = (uuid: I_coinOrderResponseData['uuid']) => {
-    console.log('uuid 보냇음');
-
     ipcRenderer.send(API_REQ_GET_PURCHASE_DATA, { uuid });
 
     ipcRenderer.once(API_RES_GET_PURCHASE_DATA, (_, arg) => {

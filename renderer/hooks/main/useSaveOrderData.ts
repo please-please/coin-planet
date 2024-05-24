@@ -13,8 +13,8 @@ export default function useSaveOrderData(orderData: I_coinOrderData) {
       const bidData = orderData[market].bid[0];
 
       bidData.number = 1;
-      bidData.price = +lastpuchaseData?.trades[0].price;
-      bidData.created_at = lastpuchaseData?.trades[0].created_at;
+      bidData.price = +lastpuchaseData?.trades[0]?.price;
+      bidData.created_at = lastpuchaseData?.trades[0]?.created_at;
 
       saveFirstOrder(orderData);
 
@@ -23,7 +23,7 @@ export default function useSaveOrderData(orderData: I_coinOrderData) {
           bid: [
             {
               number: 2,
-              price: (+lastpuchaseData?.trades[0].price * (100 - bidData.biddingRate)) / 100,
+              price: (+lastpuchaseData?.trades[0]?.price * (100 - bidData.biddingRate)) / 100,
               ord_type: bidData.ord_type,
               inputPrice: bidData.inputPrice,
             },
@@ -31,14 +31,14 @@ export default function useSaveOrderData(orderData: I_coinOrderData) {
           ask: [
             {
               number: 1,
-              price: (+lastpuchaseData?.trades[0].price * (100 + bidData.askingRate)) / 100,
+              price: (+lastpuchaseData?.trades[0]?.price * (100 + bidData.askingRate)) / 100,
               ord_type: bidData.ord_type,
               created_at: '',
-              volume: bidData.inputPrice / (+lastpuchaseData?.trades[0].price * (100 + bidData.askingRate)) / 100,
+              volume: bidData.inputPrice / (+lastpuchaseData?.trades[0]?.price * (100 + bidData.askingRate)) / 100,
               inputPrice: bidData.inputPrice,
             },
           ],
-          limit: orderData[0].limit,
+          limit: orderData[0]?.limit,
         },
       };
 
