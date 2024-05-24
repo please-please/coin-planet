@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import { coinList } from '../coinList';
 
 import { prodJsonPath } from '../constants/utils';
+import { I_orderBody } from '../../constants/interface';
 
 export class CoinRepository {
   async getJsonData(name: string) {
@@ -26,7 +27,7 @@ export class CoinRepository {
     return await axios.get(`https://api.upbit.com/v1/ticker?markets=${coinList.map((v: any) => v.market).join(',')}`);
   }
 
-  async orderCoin(body: any) {
+  async orderCoin(body) {
     const { data: userData } = await this.getJsonData('private_user_data');
     const query = queryEncode.encode(body);
 
@@ -50,19 +51,20 @@ export class CoinRepository {
   }
 
   async getPurchasData(body: { uuid: string }) {
+    const { data: userData } = await this.getJsonData('private_user_data');
     const query = queryEncode.encode(body);
 
     const hash = crypto.createHash('sha512');
     const queryHash = hash.update(query, 'utf-8').digest('hex');
 
     const payload = {
-      access_key: 'qNVJMiRTRK3Nr24cMswV7OUI6cBeZ52lLOOrPAkp',
+      access_key: userData.access_key,
       nonce: v4(),
       query_hash: queryHash,
       query_hash_alg: 'SHA512',
     };
 
-    const token = sign(payload, 'JTJuKZtxvfHZtx52ftjbEFaNLzobWaz4P1Btpsed');
+    const token = sign(payload, userData.secretKey);
 
     try {
       const response = await axios.get(`https://api.upbit.com/v1/order?${query}`, {

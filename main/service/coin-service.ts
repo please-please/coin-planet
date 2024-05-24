@@ -1,3 +1,4 @@
+import { I_orderBody } from '../../constants/interface';
 import { CoinRepository } from '../repository/coin-repository';
 
 export class CoinService {

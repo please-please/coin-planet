@@ -11,22 +11,15 @@ import {
   GET_SAVED_ASSETS_DATA_FILE,
   GET_SAVED_RESERVATION_ORDER_DATA_FILE,
   GET_SAVED_USER_DATA_FILE,
-  GET_TOKEN,
   ORDER_FIRST,
-  ORDER_RESERVATION,
   REPLY,
   RESERVATION_ORDER_RETURN,
   SAVE_FILE,
   SUCCESS,
-  TOKEN_RETURN,
   USER_DATA_RETURN,
 } from '../constants';
 import { CoinService } from './service/coin-service';
-import { sign } from 'jsonwebtoken';
-import { v4 } from 'uuid';
-import * as queryEncode from 'querystring';
-import crypto from 'crypto';
-import * as fs from 'fs';
+import { I_orderBody } from '../constants/interface';
 
 export class Routes {
   constructor(private coinServcie: CoinService) {}
@@ -64,8 +57,6 @@ export class Routes {
       };
 
       await this.coinServcie.saveJsonData('assets_data', newAssetsData);
-      // const assetsData = JSON.stringify(newAssetsData, null, 2);
-      // fs.writeFileSync(filePath, assetsData, 'utf8');
     });
 
     ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, async (evt, arg) => {
@@ -89,59 +80,16 @@ export class Routes {
       });
     });
 
-    ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
-      const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
-      // const dataFilePath = `${__dirname}/reservation_order_data.json`;
-      // const isReservationData = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    // ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
+    //   const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
 
-      const newReservationData = {
-        ...isReservationOrderData,
-        ...arg,
-      };
-      await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
-      // const reservationOrderData = JSON.stringify(newReservationData, null, 2);
-      // fs.writeFileSync(dataFilePath, reservationOrderData, 'utf8');
-      evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
-    });
-
-    ipcMain.on(GET_TOKEN, async (evt, arg) => {
-      const dataFilePath = `${__dirname}/private_user_data.json`;
-      const userDataFile = fs.readFileSync(dataFilePath, 'utf8');
-      const userData = JSON.parse(userDataFile);
-
-      if (userData.accessKey === '' || userData.secretKey === '') {
-        evt.sender.send(TOKEN_RETURN, { status: FAIL });
-        return;
-      }
-      // console.log(userData);
-      // console.log(arg);
-      if (arg.body === undefined) {
-        const payload = {
-          access_key: userData.accessKey,
-          nonce: v4(),
-        };
-
-        const token = sign(payload, userData.secretKey);
-
-        evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token });
-        return;
-      }
-      const query = queryEncode.encode(arg.body);
-
-      const hash = crypto.createHash('sha512');
-      const queryHash = hash.update(query, 'utf-8').digest('hex');
-
-      const payload = {
-        access_key: userData.accessKey,
-        nonce: v4(),
-        query_hash: queryHash,
-        query_hash_alg: 'SHA512',
-      };
-
-      const token = sign(payload, userData.secretKey);
-
-      evt.sender.send(TOKEN_RETURN, { status: SUCCESS, token, query });
-    });
+    //   const newReservationData = {
+    //     ...isReservationOrderData,
+    //     ...arg,
+    //   };
+    //   await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
+    //   evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
+    // });
 
     ipcMain.on(API_REQ_GET_COIN_CURRENT_PRICE, async (evt, arg) => {
       const result = await this.coinServcie.getCoinPrice();
@@ -151,8 +99,9 @@ export class Routes {
       evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: result.data });
     });
 
-    ipcMain.on(API_REQ_ORDER_COIN, async (evt, arg) => {
+    ipcMain.on(API_REQ_ORDER_COIN, async (evt: Electron.IpcMainEvent, arg: I_orderBody) => {
       const result = await this.coinServcie.orderCoin(arg);
+      console.log(result);
       if ((result.status + '')[0] !== '2') {
         evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
       }
