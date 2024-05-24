@@ -12,6 +12,7 @@ import {
   GET_SAVED_RESERVATION_ORDER_DATA_FILE,
   GET_SAVED_USER_DATA_FILE,
   ORDER_FIRST,
+  ORDER_RESERVATION,
   REPLY,
   RESERVATION_ORDER_RETURN,
   SAVE_FILE,
@@ -62,34 +63,34 @@ export class Routes {
     ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, async (evt, arg) => {
       const { data: assetsData } = await this.coinServcie.getAssetsData();
 
-      if (assetsData === '') {
-        evt.sender.send(ASSETS_RETURN, { status: FAIL, assetsData: 'fail' });
-      }
+      // if (assetsData === '') {
+      //   evt.sender.send(ASSETS_RETURN, { status: FAIL, assetsData: 'fail' });
+      // }
       evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: assetsData });
     });
 
     ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, async (evt, arg) => {
       const { data: reservationOrderData } = await this.coinServcie.getReservationOrderData();
 
-      if (reservationOrderData === '') {
-        evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL, reservationOrderData: 'fail' });
-      }
+      // if (reservationOrderData === '') {
+      //   evt.sender.send(RESERVATION_ORDER_RETURN, { status: FAIL, reservationOrderData: 'fail' });
+      // }
       evt.sender.send(RESERVATION_ORDER_RETURN, {
         status: SUCCESS,
         reservationOrderData: reservationOrderData,
       });
     });
 
-    // ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
-    //   const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
+    ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
+      const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
 
-    //   const newReservationData = {
-    //     ...isReservationOrderData,
-    //     ...arg,
-    //   };
-    //   await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
-    //   evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
-    // });
+      const newReservationData = {
+        ...isReservationOrderData,
+        ...arg,
+      };
+      await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
+      evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
+    });
 
     ipcMain.on(API_REQ_GET_COIN_CURRENT_PRICE, async (evt, arg) => {
       const result = await this.coinServcie.getCoinPrice();
