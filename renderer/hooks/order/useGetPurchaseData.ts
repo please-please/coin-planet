@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { I_coinOrderResponseData } from '../../api/interface';
 import { ipcRenderer } from 'electron';
 import { API_REQ_GET_PURCHASE_DATA, API_RES_GET_PURCHASE_DATA, SUCCESS } from '../../../constants';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { LastOrderUuid, LastPurchaseData } from '../../recoil/atom';
 
-export default function useGetPurchaseData() {
+export function useGetPurchaseData() {
   const [, setLastPurchaseData] = useRecoilState(LastPurchaseData);
   const lastOrderUuid = useRecoilValue(LastOrderUuid);
 

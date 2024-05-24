@@ -1,4 +1,4 @@
-import { API_RES_ORDER_COIN, SUCCESS } from './../../../constants/index';
+import { API_RES_ORDER_COIN, SUCCESS } from '../../../constants/index';
 import { ipcRenderer } from 'electron';
 import { API_REQ_ORDER_COIN } from '../../../constants';
 import { I_orderBody } from '../../api/interface';
@@ -6,7 +6,7 @@ import React from 'react';
 import { useRecoilState } from 'recoil';
 import { LastOrderUuid } from '../../recoil/atom';
 
-export default function useOrderCoin() {
+export function useOrderCoin() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const [, setLastOrderUuid] = useRecoilState(LastOrderUuid);

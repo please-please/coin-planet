@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 import { I_coinOrderData } from '../../api/interface';
 import { saveFirstOrder, saveOrderReservation } from '../../utils';
 
-export default function useSaveOrderData(orderData: I_coinOrderData) {
+export function useSaveOrderData(orderData: I_coinOrderData) {
   const lastpuchaseData = useRecoilValue(LastPurchaseData);
 
   React.useEffect(() => {

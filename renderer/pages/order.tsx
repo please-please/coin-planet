@@ -5,11 +5,14 @@ import { useRouter } from 'next/router';
 import { I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
 import { HasAsk } from '../recoil/atom';
-import { useGetCoinPrice, useGetReservationOrderData } from '../hooks';
+import {
+  useGetCoinPrice,
+  useGetPurchaseData,
+  useGetReservationOrderData,
+  useOrderCoin,
+  useSaveOrderData,
+} from '../hooks';
 import { getToken } from '../utils';
-import useOrderCoin from '../hooks/main/useOrderCoin';
-import useGetPurchaseData from '../hooks/main/useGetPurchaseData';
-import useSaveOrderData from '../hooks/main/useSaveOrderData';
 import { I_hasAsk } from '../recoil/interface';
 
 interface I_orderData extends Partial<I_orderBody> {
