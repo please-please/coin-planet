@@ -1,11 +1,8 @@
 {
   "name": "COINPLANET",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "",
   "main": "app/background.js",
-  "build": {
-    "icon": "resources/maclogo.icns"
-  },
   "scripts": {
     "dev": "NODE_ENV=development nextron",
     "build": "nextron build",

@@ -75,3 +75,10 @@
 - 현재 맥북에서만 실행 가능
 
 </details>
+
+<details><summary>0.1.2</summary>
+
+- dmg 파일 릴리즈
+- 기타 버그 수정
+
+</details>
