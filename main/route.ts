@@ -125,7 +125,6 @@ export class Routes {
 
     ipcMain.on(API_REQ_JSON_SAVE, async (evt, arg) => {
       const result = await this.coinServcie.saveInitJsonData(arg);
-
       if (!result) {
         evt.sender.send(API_RES_JSON_SAVE, { status: FAIL, data: result });
         return;

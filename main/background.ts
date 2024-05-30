@@ -24,7 +24,7 @@ if (isProd) {
   app.setPath('userData', `${app.getPath('userData')}`);
 }
 
-const intervalPrice = () => {
+const autoMonitoring = () => {
   setInterval(async () => {
     const { data } = await coinService.getCoinPrice();
 
@@ -94,7 +94,7 @@ const intervalPrice = () => {
     }
   }
 
-  intervalPrice();
+  autoMonitoring();
 })();
 
 app.on(WINDOW_ALL_CLOSED, () => {
