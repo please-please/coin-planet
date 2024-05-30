@@ -187,4 +187,19 @@ export class CoinService {
       return false;
     }
   }
+
+  async saveInitJsonData(arg) {
+    try {
+      const beforeAssetsData = JSON.parse(arg.assetsData);
+      const beforeReservationOrderData = JSON.parse(arg.reservationOrderData);
+      const beforePrivateUserData = JSON.parse(arg.privateUserData);
+      await this.saveJsonData('assets_data', beforeAssetsData);
+      await this.saveJsonData('reservation_order_data', beforeReservationOrderData);
+      await this.saveJsonData('private_user_data', beforePrivateUserData);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
