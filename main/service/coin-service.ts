@@ -180,7 +180,7 @@ export class CoinService {
           defaultPath: `${array[i]['name']}.json`,
           filters: [{ name: 'JSON Files', extensions: ['json'] }],
         });
-        fs.writeFileSync(savePath, array[i]['data']);
+        fs.writeFileSync(savePath, JSON.stringify(array[i]['data'], null, 2));
       }
       return true;
     } catch (e) {
