@@ -1,4 +1,6 @@
 import {
+  API_REQ_JSON_EXPORT,
+  API_RES_JSON_EXPORT,
   FAIL,
   GET_TOKEN,
   ORDER_FIRST,
@@ -105,5 +107,12 @@ export const saveOrderReservation = (nextOrderData: I_coinOrderData) => {
   ipcRenderer.once(RESERVATION_ORDER_RETURN, (_, arg) => {
     if (arg.status === FAIL) return alert('에러: reservation order 저장 실패');
     alert('주문 저장 성공');
+  });
+};
+
+export const downloadJSON = () => {
+  ipcRenderer.send(API_REQ_JSON_EXPORT);
+  ipcRenderer.once(API_RES_JSON_EXPORT, (_, arg) => {
+    if (arg.status === FAIL) return alert('에러: 데이터 저장 실패');
   });
 };

@@ -3,7 +3,7 @@ import { TableColumnsType, Table, Typography, Button } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { MyAssets } from '../../recoil/atom';
 import { coinList } from '../../constants/coinList';
-import { getProfitLoss, getTotalProfitLoss } from '../../utils';
+import { downloadJSON, getProfitLoss, getTotalProfitLoss } from '../../utils';
 import { useGetAssetData, useGetCoinPrice } from '../../hooks';
 import { I_coinOrderData } from '../../api/interface';
 
@@ -133,14 +133,14 @@ function Main() {
   return (
     <React.Fragment>
       <Typography.Title level={2}>종목손익</Typography.Title>
-      <Button
-        style={{ float: 'right', height: '50px', marginBottom: '1rem' }}
-        type="primary"
-        onClick={clickReloadHandler}
-        loading={isLoading}
-      >
-        새로고침
-      </Button>
+      <div className="buttons">
+        <Button style={{ height: '50px' }} type="primary" onClick={() => downloadJSON()} loading={isLoading}>
+          데이터 다운로드
+        </Button>
+        <Button style={{ height: '50px' }} type="primary" onClick={clickReloadHandler} loading={isLoading}>
+          새로고침
+        </Button>
+      </div>
       <Table
         title={() => new Date(coinPrice.tickerData?.[0].timestamp).toLocaleString() + ' 조회 기준'}
         columns={columns}

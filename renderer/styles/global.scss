@@ -7,6 +7,14 @@
 @import 'font';
 @import 'styles/variables';
 
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  gap: 1em;
+  margin-bottom: 1rem;
+}
+
 .logo {
   height: 10em;
   cursor: pointer;
