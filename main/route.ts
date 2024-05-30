@@ -3,10 +3,12 @@ import {
   API_REQ_GET_COIN_CURRENT_PRICE,
   API_REQ_GET_PURCHASE_DATA,
   API_REQ_JSON_EXPORT,
+  API_REQ_JSON_SAVE,
   API_REQ_ORDER_COIN,
   API_RES_COIN_CURRENT_PRICE_RETURN,
   API_RES_GET_PURCHASE_DATA,
   API_RES_JSON_EXPORT,
+  API_RES_JSON_SAVE,
   API_RES_ORDER_COIN,
   ASSETS_RETURN,
   FAIL,
@@ -119,6 +121,16 @@ export class Routes {
         return;
       }
       evt.sender.send(API_RES_JSON_EXPORT, { status: SUCCESS, data: result });
+    });
+
+    ipcMain.on(API_REQ_JSON_SAVE, async (evt, arg) => {
+      const result = await this.coinServcie.saveInitJsonData(arg);
+
+      if (!result) {
+        evt.sender.send(API_RES_JSON_SAVE, { status: FAIL, data: result });
+        return;
+      }
+      evt.sender.send(API_RES_JSON_SAVE, { status: SUCCESS, data: result });
     });
   }
 }
