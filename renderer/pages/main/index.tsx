@@ -104,7 +104,7 @@ function Main() {
         }
       }
       if (newTableSource[i].profitLoss?.length) {
-        newTableSource[i].totalProfitLoss = getTotalProfitLoss(newTableSource[i].profitLoss, coinPrice.tickerData[i]);
+        newTableSource[i].totalProfitLoss = getTotalProfitLoss(newTableSource[i].profitLoss);
       }
 
       setColumns(newTableColumn);

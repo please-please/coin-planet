@@ -46,29 +46,32 @@ export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerDa
     totalData[key] = assetData[key]?.bid?.map((item) => {
       const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
       const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
-      const profitLossRate = (marketData.trade_price - +item.price) / +marketData.prev_closing_price;
+      // 매수금액
+      const purchaseAmount = +item.price * +item.volume;
+      // 평가손익
+      const evaluatedProfitLoss = marketData.trade_price * +item.volume - purchaseAmount;
+      // 손익율
+      const profitLossRate = (evaluatedProfitLoss / purchaseAmount) * 100;
+
       const shortProfitLossRate = shortenRate(profitLossRate);
 
-      return [profitLoss, shortProfitLossRate, +item.volume];
+      return [profitLoss, shortProfitLossRate, +item.volume, +item.price];
     });
   }
 
   return totalData;
 };
 
-export const getTotalProfitLoss = (profitLoss: number[], tickerData: I_tickerData): [number, number] => {
-  const closingPrice = tickerData.prev_closing_price;
-  // 손익액 합게
-  const total = +profitLoss.reduce((p, c) => p + c[0], 0);
-  // 손익액 합계 / 구매량 합계 / 현재가 -> 전체 손익율
-  const profitLossRate = +(
-    +profitLoss.reduce((p, c) => p + c[0], 0) /
-    profitLoss.reduce((p, c) => p + c[2], 0) /
-    closingPrice
-  );
+export const getTotalProfitLoss = (profitLoss: number[]): [number, number] => {
+  // 전체 매수 금액
+  const totalPurchaseAmount = +profitLoss.reduce((p, c) => p + c[2] * c[3], 0);
+  // 평가 손익
+  const evaluatedProfitLoss = +profitLoss.reduce((p, c) => p + c[0], 0);
+  // 손익율
+  const profitLossRate = (evaluatedProfitLoss / totalPurchaseAmount) * 100;
   const shortProfitLossRate = shortenRate(profitLossRate);
 
-  return [total, shortProfitLossRate] as [number, number];
+  return [evaluatedProfitLoss, shortProfitLossRate] as [number, number];
 };
 
 export const saveUserKey = (
