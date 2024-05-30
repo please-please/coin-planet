@@ -2,6 +2,8 @@ import { dialog } from 'electron';
 import { I_orderBody } from '../../constants/interface';
 import { CoinRepository } from '../repository/coin-repository';
 import * as fs from 'fs';
+import * as archiver from 'archiver';
+import * as unzipper from 'unzipper';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -159,30 +161,36 @@ export class CoinService {
     const { data: assetsData } = await this.getAssetsData();
     const { data: reservationOrderData } = await this.getReservationOrderData();
     const { data: privateUserData } = await this.getPrivateUserData();
-
-    const array = [
-      {
-        name: 'assets_data',
-        data: assetsData,
-      },
-      {
-        name: 'reservation_order_data',
-        data: reservationOrderData,
-      },
-      {
-        name: 'private_user_data',
-        data: privateUserData,
-      },
-    ];
     try {
-      for (let i = 0; i < array.length; i++) {
-        const { filePath: savePath } = await dialog.showSaveDialog({
-          defaultPath: `${array[i]['name']}.json`,
-          filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      const { filePath } = await dialog.showSaveDialog({
+        title: 'Save compressed file',
+        defaultPath: 'out.zip',
+        filters: [{ name: 'ZIP Files', extensions: ['zip'] }],
+      });
+
+      const files = [
+        { name: 'assets_data.json', content: JSON.stringify(assetsData) },
+        { name: 'reservation_order_data.json', content: JSON.stringify(reservationOrderData) },
+        { name: 'private_user_data.json', content: JSON.stringify(privateUserData) },
+      ];
+
+      if (filePath) {
+        const outputStream = fs.createWriteStream(filePath);
+        const archive = archiver.create('zip', { zlib: { level: 9 } });
+
+        outputStream.on('close', function () {
+          console.log(archive.pointer() + ' total bytes');
+          console.log('Archiver has been finalized and the output file descriptor has closed.');
         });
-        fs.writeFileSync(savePath, JSON.stringify(array[i]['data'], null, 2));
+
+        archive.pipe(outputStream);
+
+        files.forEach((file) => {
+          archive.append(file.content, { name: file.name });
+        });
+
+        await archive.finalize();
       }
-      return true;
     } catch (e) {
       return false;
     }
@@ -190,13 +198,29 @@ export class CoinService {
 
   async saveInitJsonData(arg) {
     try {
-      const beforeAssetsData = JSON.parse(arg.assetsData);
-      const beforeReservationOrderData = JSON.parse(arg.reservationOrderData);
-      const beforePrivateUserData = JSON.parse(arg.privateUserData);
-      await this.saveJsonData('assets_data', beforeAssetsData);
-      await this.saveJsonData('reservation_order_data', beforeReservationOrderData);
-      await this.saveJsonData('private_user_data', beforePrivateUserData);
+      // const beforeAssetsData = JSON.parse(arg.assetsData);
+      // const beforeReservationOrderData = JSON.parse(arg.reservationOrderData);
+      // const beforePrivateUserData = JSON.parse(arg.privateUserData);
+      // await this.saveJsonData('assets_data', beforeAssetsData);
+      // await this.saveJsonData('reservation_order_data', beforeReservationOrderData);
+      // await this.saveJsonData('private_user_data', beforePrivateUserData);
 
+      // const { filePaths: outputDir } = await dialog.showOpenDialog({
+      //   title: 'Select directory to extract to',
+      //   properties: ['openDirectory', 'createDirectory'],
+      // });
+
+      // if (outputDir && outputDir.length > 0) {
+      //   fs.createReadStream(zipPath)
+      //     .pipe(unzipper.Extract({ path: outputDir[0] }))
+      //     .on('close', () => {
+      //       console.log('Extraction complete.');
+      //     })
+      //     .on('error', (err) => {
+      //       console.error('Extraction error:', err);
+      //     });
+      //   return true;
+      // }
       return true;
     } catch (e) {
       return false;
