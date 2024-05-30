@@ -2,9 +2,11 @@ import { ipcMain } from 'electron';
 import {
   API_REQ_GET_COIN_CURRENT_PRICE,
   API_REQ_GET_PURCHASE_DATA,
+  API_REQ_JSON_EXPORT,
   API_REQ_ORDER_COIN,
   API_RES_COIN_CURRENT_PRICE_RETURN,
   API_RES_GET_PURCHASE_DATA,
+  API_RES_JSON_EXPORT,
   API_RES_ORDER_COIN,
   ASSETS_RETURN,
   FAIL,
@@ -108,6 +110,15 @@ export class Routes {
         evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: FAIL, data: result.data });
       }
       evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: SUCCESS, data: result.data });
+    });
+
+    ipcMain.on(API_REQ_JSON_EXPORT, async (evt, arg) => {
+      const result = await this.coinServcie.downloadJsonData();
+      if (!result) {
+        evt.sender.send(API_RES_JSON_EXPORT, { status: FAIL, data: result });
+        return;
+      }
+      evt.sender.send(API_RES_JSON_EXPORT, { status: SUCCESS, data: result });
     });
   }
 }

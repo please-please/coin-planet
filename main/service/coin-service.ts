@@ -1,5 +1,7 @@
+import { dialog } from 'electron';
 import { I_orderBody } from '../../constants/interface';
 import { CoinRepository } from '../repository/coin-repository';
+import * as fs from 'fs';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -151,5 +153,38 @@ export class CoinService {
 
   async getReservationOrderData() {
     return await this.coinRepository.getJsonData('reservation_order_data');
+  }
+
+  async downloadJsonData() {
+    const { data: assetsData } = await this.getAssetsData();
+    const { data: reservationOrderData } = await this.getReservationOrderData();
+    const { data: privateUserData } = await this.getPrivateUserData();
+
+    const array = [
+      {
+        name: 'assets_data',
+        data: assetsData,
+      },
+      {
+        name: 'reservation_order_data',
+        data: reservationOrderData,
+      },
+      {
+        name: 'private_user_data',
+        data: privateUserData,
+      },
+    ];
+    try {
+      for (let i = 0; i < array.length; i++) {
+        const { filePath: savePath } = await dialog.showSaveDialog({
+          defaultPath: `${array[i]['name']}.json`,
+          filters: [{ name: 'JSON Files', extensions: ['json'] }],
+        });
+        fs.writeFileSync(savePath, array[i]['data']);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
