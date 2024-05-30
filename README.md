@@ -45,8 +45,8 @@
 ## 🛠 사용 방법
 
 1. [🛠 COIN PLANET 사용 방법](링크)
-   - [설치](링크)
-   - [키 등록](링크)
+   - [다운로드 및 설치](https://helpful-pincushion-92b.notion.site/COIN-PLANET-5f447d3e7f304200b7ed5f36e07e4c35?pvs=4)
+   - [키 등록](https://helpful-pincushion-92b.notion.site/Open-API-Key-82262ebc36c5435bb3ccbfd33091a19e?pvs=4)
    - [매매 등록](링크)
    - [매매 기록 확인](링크)
    - [종료](링크)
@@ -73,5 +73,12 @@
 - 5차수 고정
 - 비트코인, 이더리움, 리플만 가능
 - 현재 맥북에서만 실행 가능
+
+</details>
+
+<details><summary>0.1.2</summary>
+
+- dmg 파일 릴리즈
+- 기타 버그 수정
 
 </details>
