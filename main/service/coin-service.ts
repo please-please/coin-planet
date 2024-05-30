@@ -4,6 +4,7 @@ import { CoinRepository } from '../repository/coin-repository';
 import * as fs from 'fs';
 import * as archiver from 'archiver';
 import * as unzipper from 'unzipper';
+import * as path from 'path';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -198,29 +199,21 @@ export class CoinService {
 
   async saveInitJsonData(arg) {
     try {
-      // const beforeAssetsData = JSON.parse(arg.assetsData);
-      // const beforeReservationOrderData = JSON.parse(arg.reservationOrderData);
-      // const beforePrivateUserData = JSON.parse(arg.privateUserData);
-      // await this.saveJsonData('assets_data', beforeAssetsData);
-      // await this.saveJsonData('reservation_order_data', beforeReservationOrderData);
-      // await this.saveJsonData('private_user_data', beforePrivateUserData);
+      const extractedPath =
+        process.env.NODE_ENV === 'development' ? `${__dirname}/../` : path.join(__dirname, '../../');
 
-      // const { filePaths: outputDir } = await dialog.showOpenDialog({
-      //   title: 'Select directory to extract to',
-      //   properties: ['openDirectory', 'createDirectory'],
-      // });
-
-      // if (outputDir && outputDir.length > 0) {
-      //   fs.createReadStream(zipPath)
-      //     .pipe(unzipper.Extract({ path: outputDir[0] }))
-      //     .on('close', () => {
-      //       console.log('Extraction complete.');
-      //     })
-      //     .on('error', (err) => {
-      //       console.error('Extraction error:', err);
-      //     });
-      //   return true;
-      // }
+      try {
+        fs.createReadStream(arg)
+          .pipe(unzipper.Extract({ path: extractedPath }))
+          .on('close', () => {
+            return true;
+          })
+          .on('error', (err) => {
+            return false;
+          });
+      } catch (e) {
+        return false;
+      }
       return true;
     } catch (e) {
       return false;
