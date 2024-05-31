@@ -191,7 +191,9 @@ export class CoinService {
         });
 
         await archive.finalize();
+        return true;
       }
+      return false;
     } catch (e) {
       return false;
     }
