@@ -26,7 +26,7 @@
 
 <br>
 
-## 🖥️ COIN PLANET 페이지
+## 🖥️ COIN PLANET 페이지
 
 ### 메인(종목 별 손익 조회) 페이지
 
