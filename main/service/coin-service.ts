@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as archiver from 'archiver';
 import * as unzipper from 'unzipper';
 import * as path from 'path';
+import { promisify } from 'util';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -216,7 +217,6 @@ export class CoinService {
       } catch (e) {
         return false;
       }
-      return true;
     } catch (e) {
       return false;
     }
