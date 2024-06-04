@@ -47,9 +47,8 @@
 1. [🛠 COIN PLANET 사용 방법](링크)
    - [다운로드 및 설치](https://helpful-pincushion-92b.notion.site/COIN-PLANET-5f447d3e7f304200b7ed5f36e07e4c35?pvs=4)
    - [키 등록](https://helpful-pincushion-92b.notion.site/Open-API-Key-82262ebc36c5435bb3ccbfd33091a19e?pvs=4)
-   - [매매 등록](링크)
-   - [매매 기록 확인](링크)
-   - [종료](링크)
+   - [매매 등록](https://helpful-pincushion-92b.notion.site/ec04fdccbab1414fba7c0f3b88956cb1?pvs=4)
+   - [매매 기록 확인](https://helpful-pincushion-92b.notion.site/f1b4f0785e804992bbe73788e9e2a6cd?pvs=4)
 
 <br>
 
@@ -79,6 +78,14 @@
 <details><summary>0.1.2</summary>
 
 - dmg 파일 릴리즈
+- 기타 버그 수정
+
+</details>
+
+<details><summary>0.2.0</summary>
+
+- 매수/매도 퍼센트 입력 기능 추가
+- 자동감시주문 주기 10초 -> 1초로 수정
 - 기타 버그 수정
 
 </details>
