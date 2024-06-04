@@ -1,4 +1,4 @@
-import { API_RES_ORDER_COIN, SUCCESS } from '../../../constants/index';
+import { API_RES_ORDER_COIN, FAIL, SUCCESS } from '../../../constants/index';
 import { ipcRenderer } from 'electron';
 import { API_REQ_ORDER_COIN } from '../../../constants';
 import { I_orderBody } from '../../api/interface';
@@ -17,10 +17,9 @@ export function useOrderCoin() {
     ipcRenderer.send(API_REQ_ORDER_COIN, body);
 
     ipcRenderer.once(API_RES_ORDER_COIN, (_, arg) => {
-      if (arg.status === SUCCESS) {
-        setLastOrderUuid(arg.data.uuid);
-        setIsLoading(false);
-      }
+      if (arg.status === FAIL) return alert('error: API_RES_ORDER_COIN 실패');
+      setLastOrderUuid(arg.data.uuid);
+      setIsLoading(false);
     });
   };
 
