@@ -7,6 +7,37 @@
 @import 'font';
 @import 'styles/variables';
 
+.order_buttons {
+  display: flex;
+  width: 100%;
+  gap: 1em;
+  justify-content: end;
+}
+
+.order_area {
+  width: 100%;
+  height: fit-content;
+  display: grid;
+  gap: 1em;
+  margin-bottom: 1em;
+
+  .order_options {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+
+    input {
+      height: 3em;
+    }
+  }
+
+  button {
+    align-self: stretch;
+    height: 50px;
+  }
+}
+
 .file_input {
   visibility: hidden;
 }
