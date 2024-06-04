@@ -1,11 +1,11 @@
 import { LastPurchaseData } from '../../recoil/atom';
 import React from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { I_coinOrderData } from '../../api/interface';
 import { saveFirstOrder, saveOrderReservation } from '../../utils';
 
 export function useSaveOrderData(orderData: I_coinOrderData) {
-  const lastpuchaseData = useRecoilValue(LastPurchaseData);
+  const [lastpuchaseData, setLastpuchaseData] = useRecoilState(LastPurchaseData);
 
   React.useEffect(() => {
     if (lastpuchaseData) {
@@ -15,7 +15,7 @@ export function useSaveOrderData(orderData: I_coinOrderData) {
       bidData.number = 1;
       bidData.price = +lastpuchaseData?.trades[0]?.price;
       bidData.created_at = lastpuchaseData?.trades[0]?.created_at;
-      bidData.volume = lastpuchaseData?.trades[0].volume;
+      bidData.volume = lastpuchaseData?.trades[0]?.volume;
 
       saveFirstOrder(orderData);
 
@@ -47,6 +47,7 @@ export function useSaveOrderData(orderData: I_coinOrderData) {
         },
       };
 
+      setLastpuchaseData(undefined);
       saveOrderReservation(reservationData);
     }
   }, [lastpuchaseData]);
