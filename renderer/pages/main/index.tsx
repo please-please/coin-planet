@@ -148,10 +148,22 @@ function Main() {
     <React.Fragment>
       <Typography.Title level={2}>종목손익</Typography.Title>
       <div className="buttons">
-        <Button style={{ height: '50px' }} type="dashed" onClick={() => downloadJSON()} loading={isLoading}>
+        <Button
+          style={{ height: '50px' }}
+          disabled={!assetData.isFetched}
+          type="default"
+          onClick={() => downloadJSON()}
+          loading={isLoading}
+        >
           데이터 다운로드
         </Button>
-        <Button style={{ height: '50px' }} type="dashed" onClick={clickUploadHandler} loading={isLoading}>
+        <Button
+          style={{ height: '50px' }}
+          disabled={assetData.isFetched}
+          type="default"
+          onClick={clickUploadHandler}
+          loading={isLoading}
+        >
           데이터 업로드
         </Button>
         <Button style={{ height: '50px' }} type="primary" onClick={clickReloadHandler} loading={isLoading}>

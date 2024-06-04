@@ -32,7 +32,7 @@ const shortenRate = (number: number) => {
 
   let shortRate = 0;
   let i = 2;
-  while (shortRate === 0) {
+  while (shortRate === 0 && i < 5) {
     shortRate = +number.toFixed(i);
     i++;
   }
