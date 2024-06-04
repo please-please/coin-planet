@@ -201,26 +201,21 @@ export class CoinService {
   }
 
   async saveInitJsonData(arg) {
-    try {
-      const extractedPath =
-        process.env.NODE_ENV === 'development' ? `${__dirname}/../` : path.join(__dirname, '../../');
+    const extractedPath = process.env.NODE_ENV === 'development' ? `${__dirname}/../` : path.join(__dirname, '../../');
 
-      try {
-        fs.createReadStream(arg)
-          .pipe(unzipper.Extract({ path: extractedPath }))
-          .on('close', () => {
-            return true;
-          })
-          .on('error', (err) => {
-            return false;
-          })
-          .promise();
-        return true;
-      } catch (e) {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
+    return Promise.resolve(
+      fs
+        .createReadStream(arg)
+        .pipe(unzipper.Extract({ path: extractedPath }))
+        .on('close', () => {
+          return true;
+        })
+        .on('error', (err) => {
+          return false;
+        })
+        .promise(),
+    ).then((res) => {
+      return true;
+    });
   }
 }
