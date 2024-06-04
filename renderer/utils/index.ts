@@ -115,7 +115,6 @@ export const saveOrderReservation = (nextOrderData: I_coinOrderData) => {
 export const downloadJSON = () => {
   ipcRenderer.send(API_REQ_JSON_EXPORT);
   ipcRenderer.once(API_RES_JSON_EXPORT, (_, arg) => {
-    console.log(arg);
     if (arg.status === FAIL) return alert('에러: 데이터 저장 실패');
     return alert('데이터 저장 성공');
   });
@@ -124,7 +123,6 @@ export const downloadJSON = () => {
 export const uploadJSON = (file: File, successCallback: () => void) => {
   ipcRenderer.send(API_REQ_JSON_SAVE, file.path);
   ipcRenderer.once(API_RES_JSON_SAVE, (_, arg) => {
-    console.log(arg);
     if (arg.status === FAIL) return alert('에러: 파일 업로드 실패');
     return successCallback();
   });

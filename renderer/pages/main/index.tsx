@@ -129,12 +129,7 @@ function Main() {
   };
 
   useEffect(() => {
-    console.log('coinprice is fetched', coinPrice.isFetched);
-    console.log('assetdata is fetched', assetData.isFetched);
-    if (coinPrice.isFetched && assetData.isFetched) {
-      console.log('isfetched');
-      setIsFetched(true);
-    }
+    if (coinPrice.isFetched && assetData.isFetched) setIsFetched(true);
   }, [coinPrice.isFetched, assetData.isFetched]);
 
   useEffect(() => {
