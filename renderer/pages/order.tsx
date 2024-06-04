@@ -83,6 +83,7 @@ function Order() {
 
   const order = async () => {
     if (hasAsk[orderData.market]) return alert('미판매된 자동 매도 차수가 있습니다.\n전 차수 매도 후 주문해 주세요.');
+    if (orderData.limit <= 1) return alert('2차수 이상만 주문 가능합니다.');
 
     setLoading((pre) => ({ ...pre, order: true }));
     setTimeout(() => {
