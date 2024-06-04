@@ -206,7 +206,8 @@ export class CoinService {
         process.env.NODE_ENV === 'development' ? `${__dirname}/../` : path.join(__dirname, '../../');
 
       try {
-        fs.createReadStream(arg)
+        return fs
+          .createReadStream(arg)
           .pipe(unzipper.Extract({ path: extractedPath }))
           .on('close', () => {
             return true;
