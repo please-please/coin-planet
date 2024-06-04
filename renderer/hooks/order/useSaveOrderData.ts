@@ -27,6 +27,8 @@ export function useSaveOrderData(orderData: I_coinOrderData) {
               price: (+lastpuchaseData?.trades[0]?.price * (100 - bidData.biddingRate)) / 100,
               ord_type: bidData.ord_type,
               inputPrice: bidData.inputPrice,
+              biddingRate: bidData.biddingRate,
+              askingRate: bidData.askingRate,
             },
           ],
           ask: [
@@ -37,6 +39,8 @@ export function useSaveOrderData(orderData: I_coinOrderData) {
               created_at: '',
               volume: bidData.inputPrice / (+lastpuchaseData?.trades[0]?.price * (100 + bidData.askingRate)) / 100,
               inputPrice: bidData.inputPrice,
+              biddingRate: bidData.biddingRate,
+              askingRate: bidData.askingRate,
             },
           ],
           limit: orderData[0]?.limit,
