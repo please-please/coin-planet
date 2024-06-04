@@ -7,6 +7,10 @@
 @import 'font';
 @import 'styles/variables';
 
+.file_input {
+  visibility: hidden;
+}
+
 .buttons {
   width: 100%;
   display: flex;

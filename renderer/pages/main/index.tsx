@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TableColumnsType, Table, Typography, Button } from 'antd';
 import { useRecoilValue } from 'recoil';
 import { MyAssets } from '../../recoil/atom';
 import { coinList } from '../../constants/coinList';
-import { downloadJSON, getProfitLoss, getTotalProfitLoss } from '../../utils';
+import { downloadJSON, getProfitLoss, getTotalProfitLoss, uploadJSON } from '../../utils';
 import { useGetAssetData, useGetCoinPrice } from '../../hooks';
 import { I_coinOrderData } from '../../api/interface';
 
@@ -31,10 +31,16 @@ function Main() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetched, setIsFetched] = useState<boolean>(false);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const myAssets = useRecoilValue<I_coinOrderData>(MyAssets);
 
   const coinPrice = useGetCoinPrice();
   const assetData = useGetAssetData();
+
+  const clickUploadHandler = () => {
+    inputRef.current.click();
+  };
 
   const reload = async () => {
     setIsFetched(false);
@@ -44,12 +50,22 @@ function Main() {
     coinPrice.reload();
   };
 
+  const changeInputHandler: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const file = inputRef.current.files[0];
+    if (file) {
+      const callback = () => {
+        reload();
+      };
+      uploadJSON(file, callback);
+    }
+  };
+
   const clickReloadHandler = () => {
     reload()
       .then(() => {
         setIsFetched(true);
       })
-      .catch((e) => alert('새로고침 실패'));
+      .catch(() => alert('새로고침 실패'));
   };
 
   const initialTableDataSetter = () => {
@@ -113,7 +129,10 @@ function Main() {
   };
 
   useEffect(() => {
+    console.log('coinprice is fetched', coinPrice.isFetched);
+    console.log('assetdata is fetched', assetData.isFetched);
     if (coinPrice.isFetched && assetData.isFetched) {
+      console.log('isfetched');
       setIsFetched(true);
     }
   }, [coinPrice.isFetched, assetData.isFetched]);
@@ -134,8 +153,11 @@ function Main() {
     <React.Fragment>
       <Typography.Title level={2}>종목손익</Typography.Title>
       <div className="buttons">
-        <Button style={{ height: '50px' }} type="primary" onClick={() => downloadJSON()} loading={isLoading}>
+        <Button style={{ height: '50px' }} type="dashed" onClick={() => downloadJSON()} loading={isLoading}>
           데이터 다운로드
+        </Button>
+        <Button style={{ height: '50px' }} type="dashed" onClick={clickUploadHandler} loading={isLoading}>
+          데이터 업로드
         </Button>
         <Button style={{ height: '50px' }} type="primary" onClick={clickReloadHandler} loading={isLoading}>
           새로고침
@@ -149,6 +171,7 @@ function Main() {
         pagination={false}
         bordered
       />
+      <input onChange={changeInputHandler} ref={inputRef} className="file_input" type="file" accept=".zip" />
     </React.Fragment>
   );
 }
