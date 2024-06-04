@@ -5,97 +5,20 @@ import * as fs from 'fs';
 import * as archiver from 'archiver';
 import * as unzipper from 'unzipper';
 import * as path from 'path';
-import { promisify } from 'util';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
   async autoMonitoringBidOrder(orderData: any, currentPrice: any, symbol: string) {
-    if (orderData.bid.length && orderData.bid[0].price >= currentPrice[symbol]) {
-      if (orderData.bid[0].number === orderData.bid[0].limit) {
-        console.log('마지막 차수');
-        return;
-      }
-
-      const body: I_orderBody = {
-        market: symbol,
-        side: 'bid',
-        volume: (orderData.bid[0].inputPrice / currentPrice[symbol]).toFixed(8),
-        price: Math.ceil(currentPrice[symbol] / 1000) * 1000,
-        ord_type: 'limit',
-      };
-
-      // 매수 하고
-      const { data } = await this.coinRepository.orderCoin(body);
-
-      setTimeout(async () => {
-        const res = await this.getPurchasData({ uuid: data.uuid });
-        const price = res.data.trades[0].price;
-
-        const { data: assetsData } = await this.coinRepository.getJsonData('assets_data');
-
-        // assets_data.json에 차수 별 매매 데이터 추가
-        const newAssetsData = {
-          inputPrice: orderData.bid[0].inputPrice,
-          ord_type: 'limit',
-          biddingRate: 5,
-          askingRate: 5,
-          number: orderData.bid[0].number,
-          price: price, // 내가 구매한 금액
-          // volume: data.volume, // 내가 구매한 수량
-          created_at: data.created_at,
-        };
-
-        assetsData[symbol].bid.push(newAssetsData);
-        await this.coinRepository.writeJsonData('assets_data', assetsData);
-
-        let nextOrderFlag = true;
-        if (assetsData[symbol].limit <= orderData.bid[0].number) {
-          // 마지막 차수까지 매수 된거임
-          nextOrderFlag = false;
-        }
-
-        if (nextOrderFlag) {
-          const newOrderData = {
-            number: orderData.bid[0].number + 1,
-            price: +price * (100 - 5) * 0.01,
-            ord_type: 'limit',
-            inputPrice: orderData.bid[0].inputPrice,
-          };
-
-          const newAskOrderData = {
-            number: orderData.ask[orderData.ask.length - 1].number + 1,
-            price: +price * (100 + 5) * 0.01,
-            ord_type: 'limit',
-            createdAt: '',
-            volume: data.volume,
-            inputPrice: orderData.ask[orderData.ask.length - 1].inputPrice,
-          };
-
-          orderData[symbol].bid.push(newOrderData);
-
-          // 매도는 새로 추가
-          orderData[symbol].ask.push(newAskOrderData);
-        }
-
-        // 제일 앞에꺼 빼고
-        orderData[symbol].bid.shift();
-
-        await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
-        return;
-      }, 500);
-    }
-  }
-
-  async autoMonitoringAskOrder(orderData: any, currentPrice: any, symbol: string) {
-    if (orderData.ask[orderData.ask.length - 1].number === 1) {
-      console.log('일단 첫번째 차수는 매도 안되게 설정');
+    if (orderData[symbol].bid[0].number === orderData[symbol].bid[0].limit) {
+      console.log('마지막 차수');
       return;
     }
-    const body: any = {
+
+    const body: I_orderBody = {
       market: symbol,
-      side: 'ask',
-      volume: orderData.ask[orderData.ask.length - 1].volume,
-      price: Math.floor(currentPrice[symbol] / 1000) * 1000,
+      side: 'bid',
+      volume: (orderData[symbol].bid[0].inputPrice / currentPrice[symbol]).toFixed(8),
+      price: Math.ceil(currentPrice[symbol] / 1000) * 1000,
       ord_type: 'limit',
     };
 
@@ -104,31 +27,108 @@ export class CoinService {
 
     setTimeout(async () => {
       const res = await this.getPurchasData({ uuid: data.uuid });
-      const price = res.data.trades[0].price;
+      const price = Number(res.data.trades[0].price);
 
-      const { filePath: assetsDataFilePath, data: assetsData } = await this.coinRepository.getJsonData('assets_data');
+      const { data: assetsData } = await this.coinRepository.getJsonData('assets_data');
+      const biddingRate = assetsData[symbol].bid[0].biddingRate;
+      const askingRate = assetsData[symbol].bid[0].askingRate;
 
       // assets_data.json에 차수 별 매매 데이터 추가
       const newAssetsData = {
-        number: orderData.ask[orderData.ask.length - 1].number,
+        inputPrice: orderData[symbol].bid[0].inputPrice,
+        ord_type: 'limit',
+        biddingRate: biddingRate,
+        askingRate: askingRate,
+        number: orderData[symbol].bid[0].number,
+        price: price, // 내가 구매한 금액
+        // volume: data.volume, // 내가 구매한 수량
+        created_at: data.created_at,
+      };
+
+      assetsData[symbol].bid.push(newAssetsData);
+      await this.coinRepository.writeJsonData('assets_data', assetsData);
+
+      let nextOrderFlag = true;
+      if (assetsData[symbol].limit <= orderData[symbol].bid[0].number) {
+        // 마지막 차수까지 매수 된거임
+        nextOrderFlag = false;
+      }
+
+      if (nextOrderFlag) {
+        const newOrderData = {
+          number: orderData[symbol].bid[0].number + 1,
+          price: +price * (100 - biddingRate) * 0.01,
+          ord_type: 'limit',
+          inputPrice: orderData[symbol].bid[0].inputPrice,
+        };
+
+        orderData[symbol].bid.push(newOrderData);
+      }
+      const newAskOrderData = {
+        number: orderData[symbol].ask[orderData[symbol].ask.length - 1].number + 1,
+        price: price * (100 + askingRate) * 0.01,
+        ord_type: 'limit',
+        createdAt: '',
+        volume: data.volume,
+        inputPrice: orderData[symbol].ask[orderData[symbol].ask.length - 1].inputPrice,
+      };
+
+      // 매도는 새로 추가
+      orderData[symbol].ask.push(newAskOrderData);
+
+      // 제일 앞에꺼 빼고
+      orderData[symbol].bid.shift();
+
+      await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
+      return;
+    }, 700);
+  }
+
+  async autoMonitoringAskOrder(orderData: any, currentPrice: any, symbol: string) {
+    if (orderData[symbol].ask[orderData[symbol].ask.length - 1].number === 1) {
+      console.log('일단 첫번째 차수는 매도 안되게 설정');
+      return;
+    }
+    const body: any = {
+      market: symbol,
+      side: 'ask',
+      volume: orderData[symbol].ask[orderData[symbol].ask.length - 1].volume,
+      price:
+        symbol === 'KRW-XRP' ? Math.floor(currentPrice[symbol] - 10) : Math.floor(currentPrice[symbol] / 1000) * 1000,
+      ord_type: 'limit',
+    };
+
+    // 매수 하고
+    const { data } = await this.coinRepository.orderCoin(body);
+
+    setTimeout(async () => {
+      const res = await this.getPurchasData({ uuid: data.uuid });
+      const price = Number(res.data.trades[0].price);
+
+      const { filePath: assetsDataFilePath, data: assetsData } = await this.coinRepository.getJsonData('assets_data');
+      const biddingRate = assetsData[symbol].bid[0].biddingRate;
+      const askingRate = assetsData[symbol].bid[0].askingRate;
+      // assets_data.json에 차수 별 매매 데이터 추가
+      const newAssetsData = {
+        number: orderData[symbol].ask[orderData[symbol].ask.length - 1].number,
         price: price, // 내가 판 금액
         volume: data.volume, // 내가 판 수량
-        biddingRate: 5,
-        askingRate: 5,
+        biddingRate: biddingRate,
+        askingRate: askingRate,
         ord_type: 'limit',
         created_at: data.created_at,
       };
 
       assetsData[symbol].ask.push(newAssetsData);
-      await this.coinRepository.writeJsonData(assetsDataFilePath, assetsData);
+      await this.coinRepository.writeJsonData('assets_data', assetsData);
 
       // 있던 데이터 빼고
       orderData[symbol].ask.pop();
 
-      await this.coinRepository.writeJsonData(`reservation_order_data.json`, orderData);
+      await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
 
       return;
-    }, 500);
+    }, 700);
   }
 
   async getCoinPrice() {
