@@ -18,7 +18,7 @@ export class CoinService {
       market: symbol,
       side: 'bid',
       volume: (orderData[symbol].bid[0].inputPrice / currentPrice[symbol]).toFixed(8),
-      price: Math.ceil(currentPrice[symbol] / 1000) * 1000,
+      price: currentPrice[symbol] * 1.05,
       ord_type: 'limit',
     };
 
@@ -41,7 +41,7 @@ export class CoinService {
         askingRate: askingRate,
         number: orderData[symbol].bid[0].number,
         price: price, // 내가 구매한 금액
-        // volume: data.volume, // 내가 구매한 수량
+        volume: data.volume, // 내가 구매한 수량
         created_at: data.created_at,
       };
 
@@ -93,8 +93,7 @@ export class CoinService {
       market: symbol,
       side: 'ask',
       volume: orderData[symbol].ask[orderData[symbol].ask.length - 1].volume,
-      price:
-        symbol === 'KRW-XRP' ? Math.floor(currentPrice[symbol] - 10) : Math.floor(currentPrice[symbol] / 1000) * 1000,
+      price: currentPrice[symbol] * 0.95,
       ord_type: 'limit',
     };
 
