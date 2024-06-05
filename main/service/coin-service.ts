@@ -18,7 +18,7 @@ export class CoinService {
       market: symbol,
       side: 'bid',
       volume: (orderData[symbol].bid[0].inputPrice / currentPrice[symbol]).toFixed(8),
-      price: currentPrice[symbol] * 1.05,
+      price: currentPrice[symbol] * 1.03,
       ord_type: 'limit',
     };
 
@@ -93,7 +93,7 @@ export class CoinService {
       market: symbol,
       side: 'ask',
       volume: orderData[symbol].ask[orderData[symbol].ask.length - 1].volume,
-      price: currentPrice[symbol] * 0.95,
+      price: currentPrice[symbol] * 0.97,
       ord_type: 'limit',
     };
 
