@@ -100,7 +100,10 @@ function Order() {
       market: orderData.market,
       side: orderData.side,
       volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
-      price: coinPriceData[orderData.market] * 1.05,
+      price:
+        Number((coinPriceData[orderData.market] + '')[0]) +
+        1 +
+        '0'.repeat((coinPriceData[orderData.market] + '').split('.')[0].length - 1),
       ord_type: orderData.ord_type,
     };
 
