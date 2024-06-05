@@ -100,7 +100,7 @@ function Order() {
       market: orderData.market,
       side: orderData.side,
       volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
-      price: Math.ceil(coinPriceData[orderData.market] / 100) * 100,
+      price: coinPriceData[orderData.market] * 1.05,
       ord_type: orderData.ord_type,
     };
 
