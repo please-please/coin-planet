@@ -157,13 +157,7 @@ function Main() {
         >
           데이터 다운로드
         </Button>
-        <Button
-          style={{ height: '50px' }}
-          disabled={assetData.isFetched}
-          type="default"
-          onClick={clickUploadHandler}
-          loading={isLoading}
-        >
+        <Button style={{ height: '50px' }} type="default" onClick={clickUploadHandler} loading={isLoading}>
           데이터 업로드
         </Button>
         <Button style={{ height: '50px' }} type="primary" onClick={clickReloadHandler} loading={isLoading}>
