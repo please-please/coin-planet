@@ -10,8 +10,12 @@ cache:
 init:
   - git config --global core.autocrlf input
 
+environment:
+  matrix:
+    - nodejs_version: '14'
+
 install:
-  - ps: Install-Product node 10 x64
+  - ps: Install-Product node $env:nodejs_version
   - yarn
 
 build_script:
