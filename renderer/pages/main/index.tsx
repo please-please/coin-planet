@@ -87,7 +87,7 @@ function Main() {
 
   const tableSourceSetter = () => {
     const newTableSource = [...initialTableData];
-    const newTableColumn = [...columns];
+    let newTableColumn = [...columns];
     for (let i = 0; i < initialTableData.length; i++) {
       if (initialTableData[i].profitLoss?.length) {
         for (let j = 0; j < initialTableData[i].profitLoss.length; j++) {
@@ -116,6 +116,16 @@ function Main() {
                 fixed: 'right',
                 render: () => <a>전량 매도</a>,
               });
+          } else {
+            const indexToDelete = newTableColumn.findIndex((v) => v.title === '전량 매도');
+            newTableColumn = newTableColumn.filter((_, i) => i !== indexToDelete);
+            newTableColumn.push({
+              title: '전량 매도',
+              dataIndex: 'sellAll',
+              width: '8rem',
+              fixed: 'right',
+              render: () => <a>전량 매도</a>,
+            });
           }
         }
       }
