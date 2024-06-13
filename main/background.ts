@@ -63,7 +63,7 @@ const autoMonitoring = () => {
     if (xrpData.ask.length && xrpData.ask[xrpData.ask.length - 1].price <= currentPrice['KRW-XRP']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-XRP');
     }
-  }, 1000);
+  }, 2000);
 };
 
 (async () => {
