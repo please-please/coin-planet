@@ -49,6 +49,9 @@ export class CoinService {
       assetsData[symbol].bid.push(newAssetsData);
       await this.coinRepository.writeJsonData('assets_data', assetsData);
 
+      // 매매기록 저장
+      // await this.coinRepository.writeJsonData('trade_history', 'dfd');
+
       let nextOrderFlag = true;
       if (assetsData[symbol].limit <= orderData[symbol].bid[0].number) {
         // 마지막 차수까지 매수 된거임
@@ -78,7 +81,9 @@ export class CoinService {
       orderData[symbol].ask.push(newAskOrderData);
 
       // 제일 앞에꺼 빼고
-      orderData[symbol].bid.shift();
+      const beforeBidData = orderData[symbol].bid.shift();
+      orderData[symbol]['beforeData'] = [];
+      orderData[symbol]['beforeData'].push(beforeBidData);
 
       await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
       return;
@@ -125,6 +130,10 @@ export class CoinService {
 
       // 있던 데이터 빼고
       orderData[symbol].ask.pop();
+
+      const beforeBidData = orderData[symbol]['beforeData'].pop();
+      orderData[symbol].bid.shift();
+      orderData[symbol].bid.unshift(beforeBidData);
 
       await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
 
@@ -218,5 +227,10 @@ export class CoinService {
     ).then((res) => {
       return true;
     });
+  }
+
+  async allAskingOrder(symbol: string) {
+    // 내가 갖고있는 현재 수량 가져와서
+    //
   }
 }
