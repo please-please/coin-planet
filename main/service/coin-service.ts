@@ -1,5 +1,5 @@
 import { dialog } from 'electron';
-import { I_orderBody } from '../../constants/interface';
+import { I_orderArg, I_orderBody } from '../../constants/interface';
 import { CoinRepository } from '../repository/coin-repository';
 import * as fs from 'fs';
 import * as archiver from 'archiver';
@@ -82,7 +82,10 @@ export class CoinService {
 
       // 제일 앞에꺼 빼고
       const beforeBidData = orderData[symbol].bid.shift();
-      orderData[symbol]['beforeData'] = [];
+      if (!orderData[symbol]['beforeData']) {
+        orderData[symbol]['beforeData'] = [];
+      }
+
       orderData[symbol]['beforeData'].push(beforeBidData);
 
       await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
@@ -131,9 +134,9 @@ export class CoinService {
       // 있던 데이터 빼고
       orderData[symbol].ask.pop();
 
+      // 최근 매수 데이터 가져오고
       const beforeBidData = orderData[symbol]['beforeData'].pop();
-      orderData[symbol].bid.shift();
-      orderData[symbol].bid.unshift(beforeBidData);
+      orderData[symbol].bid = [beforeBidData];
 
       await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
 
@@ -227,6 +230,37 @@ export class CoinService {
     ).then((res) => {
       return true;
     });
+  }
+
+  async firstOrderCoin(arg: I_orderArg) {
+    const body: I_orderBody = {
+      market: arg.market,
+      side: arg.side,
+      volume: (arg.inputPrice / arg.coinPriceData[arg.market]).toFixed(8),
+      price:
+        Number((arg.coinPriceData[arg.market] + '')[0]) +
+        1 +
+        '0'.repeat((arg.coinPriceData[arg.market] + '').split('.')[0].length - 1),
+      ord_type: arg.ord_type,
+    };
+
+    const { data } = await this.orderCoin(body);
+    const res = await this.getPurchasData({ uuid: data.uuid });
+    const price = Number(res.data.trades[0].price);
+
+    // const newAssetsData = {
+    //   inputPrice: orderData[symbol].bid[0].inputPrice,
+    //   ord_type: 'limit',
+    //   biddingRate: biddingRate,
+    //   askingRate: askingRate,
+    //   number: orderData[symbol].bid[0].number,
+    //   price: price, // 내가 구매한 금액
+    //   volume: data.volume, // 내가 구매한 수량
+    //   created_at: data.created_at,
+    // };
+
+    // assetsData[symbol].bid.push(newAssetsData);
+    // await this.coinRepository.writeJsonData('assets_data', assetsData);
   }
 
   async allAskingOrder(symbol: string) {
