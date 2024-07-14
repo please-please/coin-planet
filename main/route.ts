@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import {
+  API_REQ_FIRST_ORDER_ASK,
   API_REQ_GET_COIN_CURRENT_PRICE,
   API_REQ_GET_PURCHASE_DATA,
   API_REQ_JSON_EXPORT,
@@ -130,6 +131,16 @@ export class Routes {
         return;
       }
       evt.sender.send(API_RES_JSON_SAVE, { status: SUCCESS, data: result });
+    });
+
+    ipcMain.on(API_REQ_FIRST_ORDER_ASK, async (evt, arg) => {
+      // 이거 그대로 쓸거면 추가 할 필요가 없음
+      // upbit api에 일괄매도 관련 기능있으면 그걸로 처리하려고 하는데 될까
+      const result = await this.coinServcie.orderCoin(arg);
+      if ((result.status + '')[0] !== '2') {
+        evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
+      }
+      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
     });
   }
 }

@@ -26,6 +26,7 @@ export const API_REQ_ORDER_COIN = 'orderCoin';
 export const API_REQ_GET_PURCHASE_DATA = 'getPurchaseData';
 export const API_REQ_JSON_EXPORT = 'jsonExport';
 export const API_REQ_JSON_SAVE = 'beforeJsonSave';
+export const API_REQ_FIRST_ORDER_ASK = 'firstOrderAsk';
 
 // api response
 export const API_RES_COIN_CURRENT_PRICE_RETURN = 'coinCurrentPriceReturn';
