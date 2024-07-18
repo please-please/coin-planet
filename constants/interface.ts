@@ -54,3 +54,11 @@ export interface I_coinOrderData {
     limit?: number;
   };
 }
+
+// export interface I_orderArg {
+//   market: string;
+//   side: 'bid' | 'ask';
+//   inputPrice: number;
+//   coinPriceData: { [key: string]: number };
+//   ord_type: 'limit' | 'price' | 'market' | 'best';
+// }
