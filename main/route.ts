@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import {
+  API_ORDER_COIN_REQUEST,
   API_REQ_FIRST_ORDER_ASK,
   API_REQ_GET_COIN_CURRENT_PRICE,
   API_REQ_GET_PURCHASE_DATA,
@@ -26,6 +27,7 @@ import {
 } from '../constants';
 import { CoinService } from './service/coin-service';
 import { I_orderBody } from '../constants/interface';
+import { orderRequest } from './interface/type';
 
 export class Routes {
   constructor(private coinServcie: CoinService) {}
@@ -141,6 +143,13 @@ export class Routes {
         evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
       }
       evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
+    });
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ipcMain.on(API_ORDER_COIN_REQUEST, async (evt, arg: orderRequest) => {
+      await this.coinServcie.orderCoin(arg);
     });
   }
 }

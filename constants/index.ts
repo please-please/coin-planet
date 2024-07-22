@@ -34,3 +34,7 @@ export const API_RES_ORDER_COIN = 'orderCoinReturn';
 export const API_RES_GET_PURCHASE_DATA = 'purchaseDataReturn';
 export const API_RES_JSON_EXPORT = 'jsonExportReturn';
 export const API_RES_JSON_SAVE = 'jsonSaveReturn';
+
+// refac
+export const API_ORDER_COIN_REQUEST = 'orderCoinRequest';
+export const API_ORDER_COIN_RESPONSE = 'orderCoinResponse';
