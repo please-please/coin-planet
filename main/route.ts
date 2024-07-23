@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import {
   API_ORDER_COIN_REQUEST,
+  API_ORDER_COIN_RESPONSE,
   API_REQ_FIRST_ORDER_ASK,
   API_REQ_GET_COIN_CURRENT_PRICE,
   API_REQ_GET_PURCHASE_DATA,
@@ -101,13 +102,13 @@ export class Routes {
       evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: result.data });
     });
 
-    ipcMain.on(API_REQ_ORDER_COIN, async (evt: Electron.IpcMainEvent, arg: I_orderBody) => {
-      const result = await this.coinServcie.orderCoin(arg);
-      if ((result.status + '')[0] !== '2') {
-        evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
-      }
-      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
-    });
+    // ipcMain.on(API_REQ_ORDER_COIN, async (evt: Electron.IpcMainEvent, arg: I_orderBody) => {
+    //   const result = await this.coinServcie.orderCoin(arg);
+    //   if ((result.status + '')[0] !== '2') {
+    //     evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
+    //   }
+    //   evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
+    // });
 
     ipcMain.on(API_REQ_GET_PURCHASE_DATA, async (evt, arg) => {
       const result = await this.coinServcie.getPurchasData(arg);
@@ -149,7 +150,11 @@ export class Routes {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ipcMain.on(API_ORDER_COIN_REQUEST, async (evt, arg: orderRequest) => {
-      await this.coinServcie.orderCoin(arg);
+      const result = await this.coinServcie.orderCoin(arg);
+      if ((result.status + '')[0] !== '2') {
+        evt.sender.send(API_ORDER_COIN_RESPONSE, { status: FAIL, data: result });
+      }
+      evt.sender.send(API_ORDER_COIN_RESPONSE, { status: SUCCESS, data: result });
     });
   }
 }

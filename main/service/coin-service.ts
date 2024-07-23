@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as archiver from 'archiver';
 import * as unzipper from 'unzipper';
 import * as path from 'path';
+import { orderRequest } from '../interface/type';
 
 export class CoinService {
   constructor(private coinRepository: CoinRepository) {}
@@ -156,9 +157,9 @@ export class CoinService {
     return await this.coinRepository.writeJsonData(name, arg);
   }
 
-  async orderCoin(arg) {
-    return await this.coinRepository.orderCoin(arg);
-  }
+  // async orderCoin(arg) {
+  //   return await this.coinRepository.orderCoin(arg);
+  // }
 
   async getPurchasData(arg: { uuid: string }) {
     return await this.coinRepository.getPurchasData(arg);
@@ -232,39 +233,139 @@ export class CoinService {
     });
   }
 
-  async firstOrderCoin(arg: I_orderArg) {
-    const body: I_orderBody = {
-      market: arg.market,
-      side: arg.side,
-      volume: (arg.inputPrice / arg.coinPriceData[arg.market]).toFixed(8),
-      price:
-        Number((arg.coinPriceData[arg.market] + '')[0]) +
-        1 +
-        '0'.repeat((arg.coinPriceData[arg.market] + '').split('.')[0].length - 1),
-      ord_type: arg.ord_type,
-    };
+  // async firstOrderCoin(arg: I_orderArg) {
+  //   const body: I_orderBody = {
+  //     market: arg.market,
+  //     side: arg.side,
+  //     volume: (arg.inputPrice / arg.coinPriceData[arg.market]).toFixed(8),
+  //     price:
+  //       Number((arg.coinPriceData[arg.market] + '')[0]) +
+  //       1 +
+  //       '0'.repeat((arg.coinPriceData[arg.market] + '').split('.')[0].length - 1),
+  //     ord_type: arg.ord_type,
+  //   };
 
-    const { data } = await this.orderCoin(body);
-    const res = await this.getPurchasData({ uuid: data.uuid });
-    const price = Number(res.data.trades[0].price);
+  //   const { data } = await this.orderCoin(body);
+  //   const res = await this.getPurchasData({ uuid: data.uuid });
+  //   const price = Number(res.data.trades[0].price);
 
-    // const newAssetsData = {
-    //   inputPrice: orderData[symbol].bid[0].inputPrice,
-    //   ord_type: 'limit',
-    //   biddingRate: biddingRate,
-    //   askingRate: askingRate,
-    //   number: orderData[symbol].bid[0].number,
-    //   price: price, // 내가 구매한 금액
-    //   volume: data.volume, // 내가 구매한 수량
-    //   created_at: data.created_at,
-    // };
+  //   // const newAssetsData = {
+  //   //   inputPrice: orderData[symbol].bid[0].inputPrice,
+  //   //   ord_type: 'limit',
+  //   //   biddingRate: biddingRate,
+  //   //   askingRate: askingRate,
+  //   //   number: orderData[symbol].bid[0].number,
+  //   //   price: price, // 내가 구매한 금액
+  //   //   volume: data.volume, // 내가 구매한 수량
+  //   //   created_at: data.created_at,
+  //   // };
 
-    // assetsData[symbol].bid.push(newAssetsData);
-    // await this.coinRepository.writeJsonData('assets_data', assetsData);
-  }
+  //   // assetsData[symbol].bid.push(newAssetsData);
+  //   // await this.coinRepository.writeJsonData('assets_data', assetsData);
+  // }
 
   async allAskingOrder(symbol: string) {
     // 내가 갖고있는 현재 수량 가져와서
     //
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  async orderCoin(arg: orderRequest) {
+    const { data } = await this.getCoinPrice();
+    const coinList = ['KRW-BTC', 'KRW-ETH', 'KRW-XRP'];
+
+    const symbolPrice = data(coinList.indexOf(arg.symbol)).trade_price;
+    const { data: orderData } = await this.getReservationOrderData();
+
+    return await this.bidOrderCoin(orderData, symbolPrice, arg.symbol);
+  }
+
+  async bidOrderCoin(orderData: any, symbolPrice: any, symbol: string) {
+    if (orderData[symbol].bid[0].number === orderData[symbol].bid[0].limit) {
+      console.log('마지막 차수');
+      return;
+    }
+
+    const body: I_orderBody = {
+      market: symbol,
+      side: 'bid',
+      volume: (orderData[symbol].bid[0].inputPrice / symbolPrice).toFixed(8),
+      price: Number((symbolPrice + '')[0]) + 1 + '0'.repeat((symbolPrice + '').split('.')[0].length - 1),
+      ord_type: 'limit',
+    };
+    try {
+      // 매수 하고
+      const result = await this.coinRepository.orderCoin(body);
+      const { data } = result;
+      setTimeout(async () => {
+        const res = await this.getPurchasData({ uuid: data.uuid });
+        const price = Number(res.data.trades[0].price);
+
+        const { data: assetsData } = await this.coinRepository.getJsonData('assets_data');
+        const biddingRate = assetsData[symbol].bid[0].biddingRate;
+        const askingRate = assetsData[symbol].bid[0].askingRate;
+
+        // assets_data.json에 차수 별 매매 데이터 추가
+        const newAssetsData = {
+          inputPrice: orderData[symbol].bid[0].inputPrice,
+          ord_type: 'limit',
+          biddingRate: biddingRate,
+          askingRate: askingRate,
+          number: orderData[symbol].bid[0].number,
+          price: price, // 내가 구매한 금액
+          volume: data.volume, // 내가 구매한 수량
+          created_at: data.created_at,
+        };
+
+        assetsData[symbol].bid.push(newAssetsData);
+        await this.coinRepository.writeJsonData('assets_data', assetsData);
+
+        // 매매기록 저장
+        // await this.coinRepository.writeJsonData('trade_history', 'dfd');
+
+        let nextOrderFlag = true;
+        if (assetsData[symbol].limit <= orderData[symbol].bid[0].number) {
+          // 마지막 차수까지 매수 된거임
+          nextOrderFlag = false;
+        }
+
+        if (nextOrderFlag) {
+          const newOrderData = {
+            number: orderData[symbol].bid[0].number + 1,
+            price: +price * (100 - biddingRate) * 0.01,
+            ord_type: 'limit',
+            inputPrice: orderData[symbol].bid[0].inputPrice,
+          };
+
+          orderData[symbol].bid.push(newOrderData);
+        }
+        const newAskOrderData = {
+          number: orderData[symbol].ask[orderData[symbol].ask.length - 1].number + 1,
+          price: price * (100 + askingRate) * 0.01,
+          ord_type: 'limit',
+          createdAt: '',
+          volume: data.volume,
+          inputPrice: orderData[symbol].ask[orderData[symbol].ask.length - 1].inputPrice,
+        };
+
+        // 매도는 새로 추가
+        orderData[symbol].ask.push(newAskOrderData);
+
+        // 제일 앞에꺼 빼고
+        const beforeBidData = orderData[symbol].bid.shift();
+        if (!orderData[symbol]['beforeData']) {
+          orderData[symbol]['beforeData'] = [];
+        }
+
+        orderData[symbol]['beforeData'].push(beforeBidData);
+
+        await this.coinRepository.writeJsonData(`reservation_order_data`, orderData);
+      }, 700);
+      return result;
+    } catch (e) {
+      return e.message;
+    }
   }
 }

@@ -28,26 +28,31 @@ export class CoinRepository {
   }
 
   async orderCoin(body) {
-    const { data: userData } = await this.getJsonData('private_user_data');
-    const query = queryEncode.encode(body);
+    try {
+      const { data: userData } = await this.getJsonData('private_user_data');
+      const query = queryEncode.encode(body);
 
-    const hash = crypto.createHash('sha512');
-    const queryHash = hash.update(query, 'utf-8').digest('hex');
+      const hash = crypto.createHash('sha512');
+      const queryHash = hash.update(query, 'utf-8').digest('hex');
 
-    const payload = {
-      access_key: userData.accessKey,
-      nonce: v4(),
-      query_hash: queryHash,
-      query_hash_alg: 'SHA512',
-    };
+      const payload = {
+        access_key: userData.accessKey,
+        nonce: v4(),
+        query_hash: queryHash,
+        query_hash_alg: 'SHA512',
+      };
 
-    const token = sign(payload, userData.secretKey);
+      const token = sign(payload, userData.secretKey);
 
-    return await axios.post('https://api.upbit.com/v1/orders', body, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      return await axios.post('https://api.upbit.com/v1/orders', body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      return e;
+    }
   }
 
   async getPurchasData(body: { uuid: string }) {

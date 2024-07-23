@@ -4,6 +4,7 @@ export type orderRequest = {
   symbol: string;
   biddingRate: number;
   askingRate: number;
+  side: 'bid' | 'ask';
   isFirstAsk?: boolean;
   isRePurchase?: boolean;
 };
