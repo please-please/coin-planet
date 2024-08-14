@@ -17,6 +17,7 @@ interface I_initialTableData {
   profitLossComparedPreviousDay?: number;
   totalProfitLoss?: [number, number];
   profitLoss?: number[];
+
   [key: string]: React.Key | string | number | number[];
 }
 
@@ -30,6 +31,8 @@ function Main() {
   const [columns, setColumns] = useState<TableColumnsType<I_initialTableData>>(DEFAULT_TABLE_COLUMN);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetched, setIsFetched] = useState<boolean>(false);
+
+  const [totalProfit, setTotalProfit] = useState<number>(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,9 +88,17 @@ function Main() {
     setInitialTableData(newTableData);
   };
 
+  const totalProfitData = () => {
+    const profitLoss = getProfitLoss(myAssets, coinPrice.tickerData);
+    const profitValues = Object.values(profitLoss.totalProfit);
+    const sumProfit = profitValues.reduce((acc, cur) => acc + cur, 0);
+    setTotalProfit(sumProfit);
+  };
+
   const tableSourceSetter = () => {
     const newTableSource = [...initialTableData];
     let newTableColumn = [...columns];
+
     for (let i = 0; i < initialTableData.length; i++) {
       if (initialTableData[i].profitLoss?.length) {
         for (let j = 0; j < initialTableData[i].profitLoss.length; j++) {
@@ -127,6 +138,11 @@ function Main() {
               render: () => <a>전량 매도</a>,
             });
           }
+
+          newTableColumn.push({
+            title: '실현 손익',
+            // totalProfit :
+          });
         }
       }
       if (newTableSource[i].profitLoss?.length) {
@@ -145,6 +161,7 @@ function Main() {
   useEffect(() => {
     if (isFetched) {
       initialTableDataSetter();
+      totalProfitData();
     }
   }, [isFetched]);
 
@@ -157,6 +174,7 @@ function Main() {
   return (
     <React.Fragment>
       <Typography.Title level={2}>종목손익</Typography.Title>
+      <Typography.Title level={3}>{`전체 손익 : ${totalProfit.toFixed(0)}원`}</Typography.Title>
       <div className="buttons">
         <Button
           style={{ height: '50px' }}
