@@ -46,7 +46,23 @@ export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerDa
     totalData[coinList[i].market] = [];
   }
 
+  const totalProfit = {};
   for (let key of Object.keys(totalData)) {
+    for (let i = 0; i < assetData[key].bid.length; i++) {
+      const bid = assetData[key].bid;
+      for (let j = 0; j < assetData[key].ask.length; j++) {
+        const ask = assetData[key].ask;
+        if (bid[i].number === ask[j].number && bid[i].volume === ask[j].volume) {
+          const profit = (ask[j].price - bid[i].price) * +bid[i].volume;
+          if (!totalProfit[key]) {
+            totalProfit[key] = profit;
+          } else {
+            totalProfit[key] += profit;
+          }
+        }
+      }
+    }
+
     totalData[key] = assetData[key]?.bid?.map((item) => {
       const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
       const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
@@ -62,7 +78,7 @@ export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerDa
       return [profitLoss, shortProfitLossRate, +item.volume, +item.price];
     });
   }
-
+  totalData['totalProfit'] = totalProfit;
   return totalData;
 };
 
