@@ -40,4 +40,10 @@ export const coinList: I_coinData[] = [
     market: 'KRW-XRP',
     price: 0,
   },
+  {
+    key: '4',
+    name: '도지',
+    market: 'KRW-DOGE',
+    price: 0,
+  },
 ];

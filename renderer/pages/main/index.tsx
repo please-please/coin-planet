@@ -95,6 +95,8 @@ function Main() {
     setTotalProfit(sumProfit);
   };
 
+  const allSellHandler = () => {};
+
   const tableSourceSetter = () => {
     const newTableSource = [...initialTableData];
     let newTableColumn = [...columns];
@@ -125,7 +127,7 @@ function Main() {
                 dataIndex: 'sellAll',
                 width: '8rem',
                 fixed: 'right',
-                render: () => <a>전량 매도</a>,
+                render: () => <Button>전량222매도</Button>,
               });
           } else {
             const indexToDelete = newTableColumn.findIndex((v) => v.title === '전량 매도');
@@ -135,7 +137,7 @@ function Main() {
               dataIndex: 'sellAll',
               width: '8rem',
               fixed: 'right',
-              render: () => <a>전량 매도</a>,
+              render: () => <Button>전량222매도</Button>,
             });
           }
 

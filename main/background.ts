@@ -16,6 +16,7 @@ const currentPrice = {
   'KRW-BTC': 0,
   'KRW-ETH': 0,
   'KRW-XRP': 0,
+  'KRW-DOGE': 0,
 };
 
 if (isProd) {
@@ -31,12 +32,14 @@ const autoMonitoring = () => {
     currentPrice['KRW-BTC'] = data[0].trade_price;
     currentPrice['KRW-ETH'] = data[1].trade_price;
     currentPrice['KRW-XRP'] = data[2].trade_price;
+    currentPrice['KRW-DOGE'] = data[3].trade_price;
 
     const { data: orderData } = await coinService.getReservationOrderData();
 
     const btcData = orderData['KRW-BTC'];
     const ethData = orderData['KRW-ETH'];
     const xrpData = orderData['KRW-XRP'];
+    const dogeData = orderData['KRW-DOGE'];
 
     // reservation_order_data.json에 저장된 가격보다 현재가가 낮거나 같으면 시작
     if (btcData.bid.length && btcData.bid[0].price >= currentPrice['KRW-BTC']) {
@@ -51,6 +54,10 @@ const autoMonitoring = () => {
       await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-XRP');
     }
 
+    if (dogeData.bid.length && dogeData.bid[0].price >= currentPrice['KRW-DOGE']) {
+      await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-DOGE');
+    }
+
     // 매도
     if (btcData.ask.length && btcData.ask[btcData.ask.length - 1].price <= currentPrice['KRW-BTC']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-BTC');
@@ -63,7 +70,11 @@ const autoMonitoring = () => {
     if (xrpData.ask.length && xrpData.ask[xrpData.ask.length - 1].price <= currentPrice['KRW-XRP']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-XRP');
     }
-  }, 2000);
+
+    if (dogeData.ask.length && dogeData.ask[dogeData.ask.length - 1].price <= currentPrice['KRW-DOGE']) {
+      await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-DOGE');
+    }
+  }, 1000);
 };
 
 (async () => {
