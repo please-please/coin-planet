@@ -74,7 +74,7 @@ const autoMonitoring = () => {
     if (dogeData.ask.length && dogeData.ask[dogeData.ask.length - 1].price <= currentPrice['KRW-DOGE']) {
       await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-DOGE');
     }
-  }, 1000);
+  }, 2000);
 };
 
 (async () => {
