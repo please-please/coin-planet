@@ -185,15 +185,20 @@ export class CoinService {
 
       return;
     }
+
     const body: any = {
       market: symbol,
       side: 'ask',
       volume: orderData[symbol].ask[orderData[symbol].ask.length - 1].volume,
       price:
-        Number((currentPrice[symbol] + '')[0]) - 1 + '0'.repeat((currentPrice[symbol] + '').split('.')[0].length - 1),
+        Number((currentPrice[symbol] + '')[0]) === 1
+          ? 1 + '0'.repeat((currentPrice[symbol] + '').split('.')[0].length - 1)
+          : Number((currentPrice[symbol] + '')[0]) -
+            1 +
+            '0'.repeat((currentPrice[symbol] + '').split('.')[0].length - 1),
       ord_type: 'limit',
     };
-
+    console.log(body);
     // 매수 하고
     const { data } = await this.coinRepository.orderCoin(body);
 

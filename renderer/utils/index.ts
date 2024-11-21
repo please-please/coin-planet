@@ -42,43 +42,43 @@ const shortenRate = (number: number) => {
 
 export const getProfitLoss = (assetData: I_coinOrderData, tickerData: I_tickerData[]): I_profitLoss => {
   const totalData = {};
-  for (let i = 0; i < coinList.length; i++) {
-    totalData[coinList[i].market] = [];
-  }
+  // for (let i = 0; i < coinList.length; i++) {
+  //   totalData[coinList[i].market] = [];
+  // }
 
-  const totalProfit = {};
-  for (let key of Object.keys(totalData)) {
-    for (let i = 0; i < assetData[key].bid.length; i++) {
-      const bid = assetData[key].bid;
-      for (let j = 0; j < assetData[key].ask.length; j++) {
-        const ask = assetData[key].ask;
-        if (bid[i].number === ask[j].number && bid[i].volume === ask[j].volume) {
-          const profit = (ask[j].price - bid[i].price) * +bid[i].volume;
-          if (!totalProfit[key]) {
-            totalProfit[key] = profit;
-          } else {
-            totalProfit[key] += profit;
-          }
-        }
-      }
-    }
+  // const totalProfit = {};
+  // for (let key of Object.keys(totalData)) {
+  //   for (let i = 0; i < assetData[key].bid.length; i++) {
+  //     const bid = assetData[key].bid;
+  //     for (let j = 0; j < assetData[key].ask.length; j++) {
+  //       const ask = assetData[key].ask;
+  //       if (bid[i].number === ask[j].number && bid[i].volume === ask[j].volume) {
+  //         const profit = (ask[j].price - bid[i].price) * +bid[i].volume;
+  //         if (!totalProfit[key]) {
+  //           totalProfit[key] = profit;
+  //         } else {
+  //           totalProfit[key] += profit;
+  //         }
+  //       }
+  //     }
+  //   }
 
-    totalData[key] = assetData[key]?.bid?.map((item) => {
-      const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
-      const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
-      // 매수금액
-      const purchaseAmount = +item.price * +item.volume;
-      // 평가손익
-      const evaluatedProfitLoss = marketData.trade_price * +item.volume - purchaseAmount;
-      // 손익율
-      const profitLossRate = (evaluatedProfitLoss / purchaseAmount) * 100;
+  //   totalData[key] = assetData[key]?.bid?.map((item) => {
+  //     const marketData = tickerData[tickerData.findIndex((v) => v.market === key)];
+  //     const profitLoss = +((marketData.trade_price - +item.price) * +item.volume).toFixed(2);
+  //     // 매수금액
+  //     const purchaseAmount = +item.price * +item.volume;
+  //     // 평가손익
+  //     const evaluatedProfitLoss = marketData.trade_price * +item.volume - purchaseAmount;
+  //     // 손익율
+  //     const profitLossRate = (evaluatedProfitLoss / purchaseAmount) * 100;
 
-      const shortProfitLossRate = shortenRate(profitLossRate);
+  //     const shortProfitLossRate = shortenRate(profitLossRate);
 
-      return [profitLoss, shortProfitLossRate, +item.volume, +item.price];
-    });
-  }
-  totalData['totalProfit'] = totalProfit;
+  //     return [profitLoss, shortProfitLossRate, +item.volume, +item.price];
+  //   });
+  // }
+  totalData['totalProfit'] = 1000;
   return totalData;
 };
 
