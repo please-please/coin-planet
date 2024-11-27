@@ -4,7 +4,7 @@
   "description": "",
   "main": "app/background.js",
   "scripts": {
-    "dev": "NODE_ENV=development nextron",
+    "dev": "nextron --renderer-port 8889",
     "build": "nextron build",
     "build:win64": "nextron build --win --x64",
     "postinstall": "electron-builder install-app-deps"
