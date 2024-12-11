@@ -7,12 +7,16 @@ import crypto from 'crypto';
 import { coinList } from '../coinList';
 
 import { prodJsonPath } from '../constants/utils';
-import { I_orderBody } from '../../constants/interface';
 
 export class CoinRepository {
   async getJsonData(name: string) {
     const filePath = prodJsonPath(name);
+    if (!fs.existsSync(filePath)) {
+      return { filePath, data: null };
+    }
+
     const dataFile = fs.readFileSync(filePath, 'utf8');
+
     const data = JSON.parse(dataFile);
     return { filePath, data };
   }
@@ -28,26 +32,31 @@ export class CoinRepository {
   }
 
   async orderCoin(body) {
-    const { data: userData } = await this.getJsonData('private_user_data');
-    const query = queryEncode.encode(body);
+    try {
+      const { data: userData } = await this.getJsonData('private_user_data');
 
-    const hash = crypto.createHash('sha512');
-    const queryHash = hash.update(query, 'utf-8').digest('hex');
+      const query = queryEncode.encode(body);
 
-    const payload = {
-      access_key: userData.accessKey,
-      nonce: v4(),
-      query_hash: queryHash,
-      query_hash_alg: 'SHA512',
-    };
+      const hash = crypto.createHash('sha512');
+      const queryHash = hash.update(query, 'utf-8').digest('hex');
 
-    const token = sign(payload, userData.secretKey);
+      const payload = {
+        access_key: userData.accessKey,
+        nonce: v4(),
+        query_hash: queryHash,
+        query_hash_alg: 'SHA512',
+      };
 
-    return await axios.post('https://api.upbit.com/v1/orders', body, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const token = sign(payload, userData.secretKey);
+
+      return await axios.post('https://api.upbit.com/v1/orders', body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      return { data: { error: error.message } };
+    }
   }
 
   async getPurchasData(body: { uuid: string }) {
@@ -77,5 +86,14 @@ export class CoinRepository {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async getCurrentPrice(arg: string[]) {
+    return await axios.get(`https://api.upbit.com/v1/ticker?markets=${arg.join(',')}`);
+  }
+
+  async deleteJsonData(arg: string) {
+    const filePath = prodJsonPath(arg);
+    fs.unlinkSync(filePath as fs.PathLike);
   }
 }
