@@ -80,7 +80,7 @@ export class Routes {
     // 현재가 조회하기 && 업비트 연결 테스트
     ipcMain.on(GET_CURRENT_PRICE, async (evt, arg: string[]) => {
       const result = await this.service.getCurrentPrice(arg);
-      evt.sender.send(GET_CURRENT_PRICE_RETURN, { market: result.market, price: result.trade_price });
+      evt.sender.send(GET_CURRENT_PRICE_RETURN, result);
     });
 
     // 로그 raw data 조회하기 && 구매내역 조회하기
