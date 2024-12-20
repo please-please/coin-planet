@@ -10,6 +10,7 @@ import {
   REPLY,
   RESERVATION_ORDER_RETURN,
   SAVE_FILE,
+  SAVE_FILE_RETURN,
   TOKEN_RETURN,
 } from '../../constants';
 import { I_coinOrderData, I_tickerData } from '../api/interface';
@@ -101,7 +102,7 @@ export const saveUserKey = (
   failCallback: () => void,
 ) => {
   ipcRenderer.send(SAVE_FILE, keys);
-  ipcRenderer.once(REPLY, (_, arg) => {
+  ipcRenderer.once(SAVE_FILE_RETURN, (_, arg) => {
     callback();
     if (arg.status === FAIL) return failCallback();
     successCallback();

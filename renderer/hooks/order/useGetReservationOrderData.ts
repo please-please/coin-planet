@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { ipcRenderer } from 'electron';
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { HasAsk, MyReservations } from '../../recoil/atom';
 import { FAIL, GET_SAVED_RESERVATION_ORDER_DATA_FILE, RESERVATION_ORDER_RETURN } from '../../../constants';
 import { I_coinOrderData } from '../../api/interface';
 import { I_hasAsk } from '../../recoil/interface';
 
 export const useGetReservationOrderData = () => {
-  const [, setReservationData] = useRecoilState<I_coinOrderData[]>(MyReservations);
-  const [, setHasAsk] = useRecoilState<I_hasAsk>(HasAsk);
+  const setReservationData = useSetRecoilState<I_coinOrderData[]>(MyReservations);
+  const setHasAsk = useSetRecoilState<I_hasAsk>(HasAsk);
 
   useEffect(() => {
     ipcRenderer.send(GET_SAVED_RESERVATION_ORDER_DATA_FILE);

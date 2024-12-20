@@ -24,9 +24,9 @@ interface I_orderData extends Partial<I_orderBody> {
 
 function Order() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [loading, setLoading] = useState<{ [key: string]: boolean }>({ order: false, reload: false });
+  const [loading, setLoading] = useState({ order: false, reload: false });
   const [coinListData, setCoinListData] = useState<I_coinData[]>(coinList);
-  const [orderData, setOrderData] = useState<I_orderData>({
+  const [orderData, _setOrderData] = useState<I_orderData>({
     limit: 0,
     market: '',
     side: 'bid',
@@ -43,6 +43,10 @@ function Order() {
   const router = useRouter();
   const coinPrice = useGetCoinPrice();
   const coinOrder = useOrderCoin();
+
+  const setOrderData = (key: keyof I_orderData, value: I_orderData[typeof key]) => {
+    _setOrderData((pre) => ({ ...pre, [key]: value }));
+  };
 
   const countDown = () => {
     let secondsToGo = 5;
@@ -110,25 +114,9 @@ function Order() {
     coinOrder.orderCoin(body);
   };
 
-  const onLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOrderData({ ...orderData, limit: Number(e.target.value) });
-  };
-
-  const onPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOrderData({ ...orderData, inputPrice: Number(e.target.value) });
-  };
-
-  const onBiddingRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOrderData({ ...orderData, biddingRate: Number(e.target.value) });
-  };
-
-  const onAskingRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOrderData({ ...orderData, askingRate: Number(e.target.value) });
-  };
-
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
-    setOrderData({ ...orderData, market: coinListData[Number(newSelectedRowKeys[0]) - 1]?.market ?? '' });
+    setOrderData('market', coinListData[Number(newSelectedRowKeys[0]) - 1]?.market ?? '');
   };
 
   const rowSelection = {
@@ -187,10 +175,16 @@ function Order() {
       <Typography.Title level={2}>주문하기</Typography.Title>
       <div className="order_area">
         <div className="order_options">
-          <Input placeholder="구매금액" onChange={onPriceChange}></Input>
-          <Input placeholder="차수입력" onChange={onLimitChange}></Input>
-          <Input placeholder="자동매수 하락율(%)" onChange={onBiddingRateChange}></Input>
-          <Input placeholder="자동매도 증가율(%)" onChange={onAskingRateChange}></Input>
+          <Input placeholder="구매금액" onChange={(e) => setOrderData('inputPrice', Number(e.target.value))} />
+          <Input placeholder="차수입력" onChange={(e) => setOrderData('limit', Number(e.target.value))} />
+          <Input
+            placeholder="자동매수 하락율(%)"
+            onChange={(e) => setOrderData('biddingRate', Number(e.target.value))}
+          />
+          <Input
+            placeholder="자동매도 증가율(%)"
+            onChange={(e) => setOrderData('askingRate', Number(e.target.value))}
+          />
         </div>
         <Button type="primary" onClick={order} disabled={!isValidOrderInput} loading={loading.order}>
           주문하기
