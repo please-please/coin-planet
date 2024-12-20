@@ -129,13 +129,11 @@ export class Service {
   async getCurrentPrice(arg: string[]) {
     const { data } = await this.coinRepository.getCurrentPrice(arg);
 
-    data.map((el) => {
-      return {
-        market: el.market,
-        trade_price: el.trade_price,
-      };
+    const result = [];
+    data.forEach((el) => {
+      result.push({ market: el.market, trade_price: el.trade_price });
     });
-    return data;
+    return result;
   }
 
   async getPurchaseData(arg: settingArg) {
