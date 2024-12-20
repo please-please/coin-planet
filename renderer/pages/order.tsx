@@ -85,8 +85,6 @@ function Order() {
     coinPrice.reload();
   };
 
-  console.log(coinPrice);
-
   const order = async () => {
     console.log('called order');
     // if (hasAsk[orderData.market]) return alert('미판매된 자동 매도 차수가 있습니다.\n전 차수 매도 후 주문해 주세요.');

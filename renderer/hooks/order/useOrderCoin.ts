@@ -1,6 +1,5 @@
-import { API_RES_ORDER_COIN, FAIL } from '../../../constants/index';
+import { FAIL, ORDER_BID, ORDER_BID_RETURN } from '../../../constants/index';
 import { ipcRenderer } from 'electron';
-import { API_REQ_ORDER_COIN } from '../../../constants';
 import { I_orderBody } from '../../api/interface';
 import React from 'react';
 import { useSetRecoilState } from 'recoil';
@@ -14,9 +13,9 @@ export function useOrderCoin() {
   const orderCoin = (body: I_orderBody) => {
     setIsLoading(true);
 
-    ipcRenderer.send(API_REQ_ORDER_COIN, body);
+    ipcRenderer.send(ORDER_BID, body);
 
-    ipcRenderer.once(API_RES_ORDER_COIN, (_, arg) => {
+    ipcRenderer.once(ORDER_BID_RETURN, (_, arg) => {
       if (arg.status === FAIL) return alert('error: API_RES_ORDER_COIN 실패');
       setLastOrderUuid(arg.data.uuid);
       setIsLoading(false);
