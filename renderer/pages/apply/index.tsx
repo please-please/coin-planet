@@ -37,7 +37,6 @@ function Apply() {
     const init = () => {
       ipcRenderer.send(GET_SAVED_USER_DATA_FILE, {});
       ipcRenderer.on(USER_DATA_RETURN, (_, arg) => {
-        console.log('argggg', arg);
         if (arg.status === SUCCESS) {
           const newKeys = {
             accessKey: arg?.userData?.accessKey,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, Typography } from 'antd';
-import { I_coinData, coinList, columns } from '../constants/coinList';
+import { I_coinListItem, COIN_LIST, columns } from '../constants/coinList';
 import { useRouter } from 'next/router';
 import { I_orderBody } from '../api/interface';
 import { useRecoilValue } from 'recoil';
@@ -25,7 +25,7 @@ interface I_orderData extends Partial<I_orderBody> {
 function Order() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState({ order: false, reload: false });
-  const [coinListData, setCoinListData] = useState<I_coinData[]>(coinList);
+  const [coinListData, setCoinListData] = useState<I_coinListItem[]>(COIN_LIST);
   const [orderData, _setOrderData] = useState<I_orderData>({
     limit: 0,
     market: '',
@@ -85,33 +85,36 @@ function Order() {
     coinPrice.reload();
   };
 
+  console.log(coinPrice);
+
   const order = async () => {
-    if (hasAsk[orderData.market]) return alert('미판매된 자동 매도 차수가 있습니다.\n전 차수 매도 후 주문해 주세요.');
-    if (orderData.limit <= 1) return alert('2차수 이상만 주문 가능합니다.');
+    console.log('called order');
+    // if (hasAsk[orderData.market]) return alert('미판매된 자동 매도 차수가 있습니다.\n전 차수 매도 후 주문해 주세요.');
+    // if (orderData.limit <= 1) return alert('2차수 이상만 주문 가능합니다.');
 
-    setLoading((pre) => ({ ...pre, order: true }));
-    setTimeout(() => {
-      setLoading((pre) => ({ ...pre, order: false }));
-    }, 700);
+    // setLoading((pre) => ({ ...pre, order: true }));
+    // setTimeout(() => {
+    //   setLoading((pre) => ({ ...pre, order: false }));
+    // }, 700);
 
-    const coinPriceData = {};
+    // const coinPriceData = {};
 
-    for (let i = 0; i < coinPrice.tickerData.length; i++) {
-      coinPriceData[coinPrice.tickerData[i].market] = coinPrice.tickerData[i].trade_price;
-    }
+    // for (let i = 0; i < coinPrice.tickerData.length; i++) {
+    //   coinPriceData[coinPrice.tickerData[i].market] = coinPrice.tickerData[i].trade_price;
+    // }
 
-    const body: I_orderBody = {
-      market: orderData.market,
-      side: orderData.side,
-      volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
-      price:
-        Number((coinPriceData[orderData.market] + '')[0]) +
-        1 +
-        '0'.repeat((coinPriceData[orderData.market] + '').split('.')[0].length - 1),
-      ord_type: orderData.ord_type,
-    };
+    // const body: I_orderBody = {
+    //   market: orderData.market,
+    //   side: orderData.side,
+    //   volume: (orderData.inputPrice / coinPriceData[orderData.market]).toFixed(8),
+    //   price:
+    //     Number((coinPriceData[orderData.market] + '')[0]) +
+    //     1 +
+    //     '0'.repeat((coinPriceData[orderData.market] + '').split('.')[0].length - 1),
+    //   ord_type: orderData.ord_type,
+    // };
 
-    coinOrder.orderCoin(body);
+    // coinOrder.orderCoin(body);
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -157,7 +160,7 @@ function Order() {
       const coinPriceList = coinPrice.tickerData.map((coinPriceData) => coinPriceData.trade_price);
 
       setCoinListData(
-        coinList.map((e, i) => {
+        COIN_LIST.map((e, i) => {
           return { ...e, price: coinPriceList[i].toLocaleString() };
         }),
       );
