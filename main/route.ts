@@ -13,6 +13,7 @@ import {
   GET_ORDER_DATA_RETURN,
   GET_PURCHASE_DATA_LOG,
   GET_PURCHASE_DATA_LOG_RETURN,
+  GET_SAVED_USER_DATA_FILE,
   GET_SETTING,
   GET_SETTING_RETURN,
   ORDER_BID,
@@ -26,6 +27,7 @@ import {
   SET_COIN_SETTING,
   SET_COIN_SETTING_RETURN,
   SUCCESS,
+  USER_DATA_RETURN,
 } from '../constants';
 
 import { Service } from './service/service';
@@ -34,6 +36,14 @@ import { orderArg, settingArg, settingDataType } from './interface';
 export class Routes {
   constructor(private service: Service) {}
   eventRegister() {
+    ipcMain.on(GET_SAVED_USER_DATA_FILE, async (evt, arg) => {
+      const { data: userData } = await this.service.getPrivateUserData();
+
+      if (userData === '') {
+        evt.sender.send(USER_DATA_RETURN, { status: FAIL, userData: 'fail' });
+      }
+      evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: userData });
+    });
     // 코인 별 세팅하기
     ipcMain.on(SET_COIN_SETTING, async (evt, arg: settingArg) => {
       const result = await this.service.setCoinSetting(arg);
