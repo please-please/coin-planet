@@ -120,10 +120,11 @@ export class Service {
   }
 
   async getSetting() {
+    const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
     const boosting = storeData.boosting;
     const watching = storeData.watching;
 
-    return { status: 200, data: { boosting, watching } };
+    return { status: 200, data: { boosting, watching, settingData } };
   }
 
   async getCurrentPrice(arg: string[]) {
@@ -415,8 +416,6 @@ export class Service {
 
   async setCoinSetting(arg: settingArg) {
     const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
-    arg['watching'] = false;
-    arg['boosting'] = false;
     const data = settingData ? { ...settingData, [arg.market]: arg } : { [arg.market]: arg };
 
     await this.coinRepository.writeJsonData('setting_data', data);

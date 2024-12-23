@@ -10,6 +10,8 @@ export interface settingArg {
   askingRate?: number;
   inputPrice?: number;
   limit?: number;
+  watching?: boolean;
+  boosting?: boolean;
 }
 
 export interface marketData {
