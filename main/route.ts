@@ -16,6 +16,8 @@ import {
   GET_SAVED_USER_DATA_FILE,
   GET_SETTING,
   GET_SETTING_RETURN,
+  ORDER_AND_SETTING,
+  ORDER_AND_SETTING_RETURN,
   ORDER_BID,
   ORDER_BID_RETURN,
   RESET_ALL_DATA,
@@ -48,6 +50,16 @@ export class Routes {
     ipcMain.on(SET_COIN_SETTING, async (evt, arg: settingArg) => {
       const result = await this.service.setCoinSetting(arg);
       evt.sender.send(SET_COIN_SETTING_RETURN, result);
+    });
+
+    // 1차 매수 후 -> 코인 별 세팅하기
+    ipcMain.on(ORDER_AND_SETTING, async (evt, arg: { settingData: settingArg; orderData: orderArg }) => {
+      const result = await this.service.orderAndSetting(arg);
+      if (result.status === 200) {
+        evt.sender.send(ORDER_AND_SETTING_RETURN, result);
+      } else {
+        evt.sender.send(ORDER_AND_SETTING_RETURN, result);
+      }
     });
 
     // 주문하기 (매수)

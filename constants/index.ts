@@ -41,6 +41,7 @@ export const API_RES_JSON_SAVE = 'jsonSaveReturn';
 
 // request
 export const SET_COIN_SETTING = 'set_coin_setting';
+export const ORDER_AND_SETTING = 'order_and_setting';
 export const ORDER_BID = 'order_bid';
 export const CHANGE_WATCHING = 'change_watching';
 export const CHANGE_BOOSTING = 'change_boosting';
@@ -55,6 +56,7 @@ export const GET_COIN_LIST = 'get_coin_list';
 
 // response
 export const SET_COIN_SETTING_RETURN = 'set_coin_setting_return';
+export const ORDER_AND_SETTING_RETURN = 'order_and_setting_return';
 export const ORDER_BID_RETURN = 'order_bid_return';
 export const CHANGE_WATCHING_RETURN = 'change_watching_return';
 export const CHANGE_BOOSTING_RETURN = 'change_boosting_return';

@@ -414,14 +414,15 @@ export class Service {
 
   async setCoinSetting(arg: settingArg) {
     const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
-    const data = settingData ? { ...settingData, [arg.market]: arg } : { [arg.market]: arg };
 
-    await this.coinRepository.writeJsonData('setting_data', data);
-    return { status: 200, data };
+    settingData[arg.market] = arg;
+
+    await this.coinRepository.writeJsonData('setting_data', settingData);
+    return { status: 200, settingData };
   }
 
   async getCoinList() {
-    return await this.coinRepository.getCoinList();
+    const coinList = await this.coinRepository.getCoinList();
   }
 
   async getCoinPrice() {
@@ -442,5 +443,16 @@ export class Service {
 
   async saveErrorLog(errorData) {
     return await this.coinRepository.writeJsonData('error_log', errorData);
+  }
+
+  async orderAndSetting(arg: { settingData: settingArg; orderData: orderArg }) {
+    try {
+      await this.order(arg.orderData);
+      await this.setCoinSetting(arg.settingData);
+      return { status: 200 };
+    } catch (e) {
+      await this.saveErrorLog(e.message);
+      return { status: 400 };
+    }
   }
 }

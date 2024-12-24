@@ -12,6 +12,7 @@ export interface settingArg {
   limit?: number;
   watching?: boolean;
   boosting?: boolean;
+  firstOrder?: boolean;
 }
 
 export interface marketData {
