@@ -121,10 +121,8 @@ export class Service {
 
   async getSetting() {
     const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
-    const boosting = storeData.boosting;
-    const watching = storeData.watching;
 
-    return { status: 200, data: { boosting, watching, settingData } };
+    return { status: 200, data: settingData };
   }
 
   async getCurrentPrice(arg: string[]) {

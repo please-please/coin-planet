@@ -71,7 +71,7 @@ export class Routes {
       evt.sender.send(CHANGE_BOOSTING_RETURN, result);
     });
 
-    //부스팅 기능 (1차 매도 후 재매수), 실시간 감시 기능 on/off 유무 조회하기 (코인별로 리턴)
+    // 코인 세팅 불러오기
     ipcMain.on(GET_SETTING, async (evt, arg) => {
       const result = await this.service.getSetting();
       evt.sender.send(GET_SETTING_RETURN, result);
