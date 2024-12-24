@@ -45,9 +45,10 @@ const autoMonitoring = () => {
             const { data: orderData } = await coinService.getReservationOrderData({ market: market });
             if (orderData.bid.length && orderData.bid[0].price >= currentPrice) {
               await coinService.autoMonitoringBidOrder(orderData, currentPrice, market);
-            }
-            if (orderData.ask.length && orderData.ask[orderData.ask.length - 1].price <= currentPrice) {
+            } else if (orderData.ask.length && orderData.ask[orderData.ask.length - 1].price <= currentPrice) {
               await coinService.autoMonitoringAskOrder(orderData, currentPrice, market);
+            } else {
+              continue;
             }
           } catch (e) {
             continue;

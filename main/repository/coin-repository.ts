@@ -96,4 +96,8 @@ export class CoinRepository {
     const filePath = prodJsonPath(arg);
     fs.unlinkSync(filePath as fs.PathLike);
   }
+
+  async getCoinList() {
+    return coinList;
+  }
 }

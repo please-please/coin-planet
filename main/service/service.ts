@@ -420,7 +420,9 @@ export class Service {
     return { status: 200, data };
   }
 
-  async getCoinList() {}
+  async getCoinList() {
+    return await this.coinRepository.getCoinList();
+  }
 
   async getCoinPrice() {
     return await this.coinRepository.getCoinPrice();
