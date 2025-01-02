@@ -15,3 +15,5 @@ export const TOP_NAV_MENU = [
     path: 'order',
   },
 ];
+
+export const MIN_INPUT_PRICE = 20000;

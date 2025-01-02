@@ -374,7 +374,8 @@ button {
     .ant-table-content {
       .ant-table-cell {
         &.ant-table-cell-row-hover {
-          background: $primary-op;
+          // background: $primary-op;
+          background-color: transparent;
           &.ant-table-cell-fix-left {
             background: $gray-100;
           }

@@ -5,9 +5,7 @@ export const WINDOW_ALL_CLOSED = 'window-all-closed';
 export const GET_SAVED_USER_DATA_FILE = 'getSavedUserDataFile';
 export const ORDER_FIRST = 'orderFirst';
 export const GET_SAVED_ASSETS_DATA_FILE = 'getSavedAssetsDataFile';
-export const GET_SAVED_RESERVATION_ORDER_DATA_FILE = 'getSavedReservationOrderDataFile';
 export const ORDER_RESERVATION = 'orderReservation';
-export const GET_TOKEN = 'getToken';
 
 // response
 export const REPLY = 'reply';
