@@ -96,6 +96,7 @@ export class Service {
           resolve();
         }, 1000);
       });
+      settingData[arg.market].firstOrder = true;
       settingData[arg.market].watching = true;
       await this.coinRepository.writeJsonData('setting_data', settingData);
     } catch (e) {
@@ -447,8 +448,8 @@ export class Service {
 
   async orderAndSetting(arg: { settingData: settingArg; orderData: orderArg }) {
     try {
-      await this.order(arg.orderData);
       await this.setCoinSetting(arg.settingData);
+      await this.order(arg.orderData);
       return { status: 200 };
     } catch (e) {
       await this.saveErrorLog(e.message);
