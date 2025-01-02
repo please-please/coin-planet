@@ -449,7 +449,11 @@ export class Service {
   async orderAndSetting(arg: { settingData: settingArg; orderData: orderArg }) {
     try {
       await this.setCoinSetting(arg.settingData);
-      await this.order(arg.orderData);
+
+      setTimeout(async () => {
+        await this.order(arg.orderData);
+      }, 500);
+
       return { status: 200 };
     } catch (e) {
       await this.saveErrorLog(e.message);
