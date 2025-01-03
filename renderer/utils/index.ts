@@ -190,7 +190,7 @@ export const order1stAndSaveSetting = (
   successCallback: () => void,
 ) => {
   ipcRenderer.send(ORDER_AND_SETTING, arg);
-  ipcRenderer.once(ORDER_AND_SETTING_RETURN, (_, arg) => {
+  ipcRenderer.once(ORDER_AND_SETTING_RETURN, () => {
     successCallback();
   });
 };

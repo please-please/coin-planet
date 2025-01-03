@@ -136,6 +136,7 @@ function Order() {
     }, 800);
 
     coinPrice.reload();
+    refetchCoinSetting();
   };
 
   const closeModal = () => {
