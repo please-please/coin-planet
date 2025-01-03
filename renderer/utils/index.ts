@@ -185,9 +185,12 @@ export const getUserKeys = (failCallback: () => void) => {
   });
 };
 
-export const order1stAndSaveSetting = (arg: { settingData: I_saveCoinSettingArg; orderData: I_orderArg }) => {
+export const order1stAndSaveSetting = (
+  arg: { settingData: I_saveCoinSettingArg; orderData: I_orderArg },
+  successCallback: () => void,
+) => {
   ipcRenderer.send(ORDER_AND_SETTING, arg);
   ipcRenderer.once(ORDER_AND_SETTING_RETURN, (_, arg) => {
-    console.log(arg);
+    successCallback();
   });
 };

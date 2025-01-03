@@ -3,15 +3,9 @@ import { Button, Form, Input, message, Modal, Popover, Switch, Table, Typography
 import { COIN_LIST } from '../../constants/coinList';
 import { useRouter } from 'next/router';
 import { I_orderBody } from '../../api/interface';
-import { useGetCoinPrice, useOrderCoin } from '../../hooks';
-import {
-  getCoinSetting,
-  getUserKeys,
-  numberToKoreanWithFormat,
-  order1stAndSaveSetting,
-  saveCoinSetting,
-} from '../../utils';
-import { I_coinDataItem, I_coinSettingData, I_orderInputError, I_saveCoinSettingArg } from '../../constants/interface';
+import { useGetCoinPrice, useGetCoinSetting } from '../../hooks';
+import { getUserKeys, numberToKoreanWithFormat, order1stAndSaveSetting, saveCoinSetting } from '../../utils';
+import { I_coinDataItem, I_orderInputError, I_saveCoinSettingArg } from '../../constants/interface';
 import style from './index.module.scss';
 import { SwitchChangeEventHandler } from 'antd/es/switch';
 import { MIN_INPUT_PRICE } from '../../constants';
@@ -47,14 +41,13 @@ function Order() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState<I_coinDataItem>();
   const [settingChanged, setSettingChanged] = useState(false);
-  const [coinSettingData, setCoinSettingData] = useState<I_coinSettingData>();
 
   const [modal, modalContextHolder] = Modal.useModal();
   const [messageApi, messageContextHolder] = message.useMessage();
 
   const router = useRouter();
   const coinPrice = useGetCoinPrice();
-  const coinOrder = useOrderCoin();
+  const { coinSettingData, refetch: refetchCoinSetting } = useGetCoinSetting();
 
   const columns = [
     {
@@ -201,8 +194,11 @@ function Order() {
             settingData: { market: selectedCoin.market, ...orderData },
             orderData: { market: selectedCoin.market, inputPrice: orderData.inputPrice },
           };
-          console.log(arg);
-          order1stAndSaveSetting(arg);
+          console.log(JSON.stringify(arg));
+          order1stAndSaveSetting(arg, () => {
+            refetchCoinSetting();
+            closeModal();
+          });
         },
       });
       return;
@@ -210,6 +206,7 @@ function Order() {
 
     saveCoinSetting(orderData, () => {
       messageApi.open({ type: 'success', content: '세팅이 저장되었습니다.' });
+      refetchCoinSetting();
       closeModal();
     });
   };
@@ -264,13 +261,6 @@ function Order() {
       setTableSource(coinData);
     }
   }, [coinPrice.tickerData, coinSettingData]);
-
-  // 코인별 세팅 데이터 조회
-  useEffect(() => {
-    getCoinSetting((data) => {
-      setCoinSettingData(data);
-    });
-  }, []);
 
   return (
     <React.Fragment>
@@ -393,8 +383,3 @@ function Order() {
 }
 
 export default Order;
-
-/**
-  키값 불러오는거 체크
-  
- */
