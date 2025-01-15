@@ -100,24 +100,44 @@ export class Service {
       settingData[arg.market].watching = true;
       await this.coinRepository.writeJsonData('setting_data', settingData);
     } catch (e) {
-      console.log(e.message);
+      const { data: errorLog } = await this.coinRepository.getJsonData('error_log');
+      const created_at = new Date().toLocaleString();
+      errorLog[created_at] = { error: e.message, method: 'order' };
+      await this.coinRepository.writeJsonData('error_log', errorLog);
+      return { status: 400, error: e.message };
     }
 
     return { status: 200 };
   }
 
   async changeWatching(arg: settingArg) {
-    const settingData = await this.coinRepository.getJsonData('setting_data');
-    settingData[arg.market].watching = !settingData[arg.market].watching;
-    await this.coinRepository.writeJsonData('setting_data', settingData);
-    return { status: 200, data: settingData[arg.market].watching };
+    try {
+      const settingData = await this.coinRepository.getJsonData('setting_data');
+      settingData[arg.market].watching = !settingData[arg.market].watching;
+      await this.coinRepository.writeJsonData('setting_data', settingData);
+      return { status: 200, data: settingData[arg.market].watching };
+    } catch (e) {
+      const { data: errorLog } = await this.coinRepository.getJsonData('error_log');
+      const created_at = new Date().toLocaleString();
+      errorLog[created_at] = { error: e.message, method: 'changeWatching' };
+      await this.coinRepository.writeJsonData('error_log', errorLog);
+      return { status: 400, error: e.message };
+    }
   }
 
   async changeBoosting(arg: settingArg) {
-    const settingData = await this.coinRepository.getJsonData('setting_data');
-    settingData[arg.market].boosting = !settingData[arg.market].boosting;
-    await this.coinRepository.writeJsonData('setting_data', settingData);
-    return { status: 200, data: settingData[arg.market].boosting };
+    try {
+      const settingData = await this.coinRepository.getJsonData('setting_data');
+      settingData[arg.market].boosting = !settingData[arg.market].boosting;
+      await this.coinRepository.writeJsonData('setting_data', settingData);
+      return { status: 200, data: settingData[arg.market].boosting };
+    } catch (e) {
+      const { data: errorLog } = await this.coinRepository.getJsonData('error_log');
+      const created_at = new Date().toLocaleString();
+      errorLog[created_at] = { error: e.message, method: 'changeBoosting' };
+      await this.coinRepository.writeJsonData('error_log', errorLog);
+      return { status: 400, error: e.message };
+    }
   }
 
   async getSetting() {
@@ -414,12 +434,20 @@ export class Service {
   }
 
   async setCoinSetting(arg: settingArg) {
-    const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
+    try {
+      const { data: settingData } = await this.coinRepository.getJsonData('setting_data');
 
-    settingData[arg.market] = arg;
+      settingData[arg.market] = arg;
 
-    await this.coinRepository.writeJsonData('setting_data', settingData);
-    return { status: 200, settingData };
+      await this.coinRepository.writeJsonData('setting_data', settingData);
+      return { status: 200, settingData };
+    } catch (e) {
+      const { data: errorLog } = await this.coinRepository.getJsonData('error_log');
+      const created_at = new Date().toLocaleString();
+      errorLog[created_at] = { error: e.message, method: 'setCoinSetting' };
+      await this.coinRepository.writeJsonData('error_log', errorLog);
+      return { status: 400, error: e.message };
+    }
   }
 
   async getCoinList() {
