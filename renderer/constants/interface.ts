@@ -34,3 +34,33 @@ export interface I_orderArg {
   market: string;
   inputPrice: number;
 }
+
+/** api */
+export interface I_purchaseDataItem {
+  id: string;
+  symbol: string;
+  orderType: 'bid' | 'ask';
+  inputPrice: number;
+  biddingRate: number;
+  askingRate: number;
+  number: number;
+  price: number;
+  volume: string;
+  created_at: string;
+}
+
+export interface I_getPurchaseDataLogReturn {
+  status: number;
+  data: {
+    [market: string]: {
+      bid: I_purchaseDataItem[];
+      ask: I_purchaseDataItem[];
+    };
+  };
+}
+
+/** data */
+
+export interface I_sortedPurchaseData {
+  [key: string]: I_purchaseDataItem[];
+}
