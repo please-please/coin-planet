@@ -8,7 +8,7 @@ function Main() {
 
   console.log(sortedPurchaseData, 'sortedPurchaseData');
 
-  const [selectedKey, setSelectedKey] = useState<string>();
+  const [selectedKey, setSelectedKey] = useState<string>(COIN_LIST[0].market);
 
   // TODO: 코인리스트 교체
   // useGetCoinList();
