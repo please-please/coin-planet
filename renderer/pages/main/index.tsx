@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
-import { Typography, Menu } from 'antd';
+import { Typography, Menu, Popover, Button } from 'antd';
 import { useGetSortedPurchaseData } from '../../hooks';
 import { COIN_LIST } from '../../constants/coinList';
 
 function Main() {
   const { sortedPurchaseData, refetch } = useGetSortedPurchaseData();
 
-  console.log(sortedPurchaseData, 'sortedPurchaseData');
-
   const [selectedKey, setSelectedKey] = useState<string>(COIN_LIST[0].market);
 
   // TODO: 코인리스트 교체
   // useGetCoinList();
-
-  // const reload = async () => {
-  //   setIsFetched(false);
-  //   setIsLoading(true);
-  //   setTimeout(() => setIsLoading(false), 800);
-  //   assetData.reload();
-  //   coinPrice.reload();
-  // };
 
   // const clickUploadHandler = () => {
   //   inputRef.current.click();
@@ -35,15 +25,19 @@ function Main() {
   //   }
   // };
 
-  // const clickReloadHandler = () => {
-  //   reload()
-  //     .then(() => {
-  //       setIsFetched(true);
-  //     })
-  //     .catch(() => alert('새로고침 실패'));
-  // };
+  const [isLoading, setIsLoading] = useState(false);
 
-  // const allSellHandler = () => {};
+  const reload = async () => {
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 800);
+    refetch();
+  };
+
+  const clickReloadHandler = () => {
+    reload()
+      .then(() => {})
+      .catch(() => alert('새로고침 실패'));
+  };
 
   return (
     <React.Fragment>
@@ -55,9 +49,9 @@ function Main() {
         <Button type="default" onClick={clickUploadHandler} loading={isLoading}>
           데이터 업로드
         </Button> */}
-        {/* <Button type="primary" onClick={clickReloadHandler} loading={isLoading}>
+        <Button type="primary" onClick={clickReloadHandler} loading={isLoading}>
           새로고침
-        </Button> */}
+        </Button>
       </div>
       <div style={{ display: 'flex' }}>
         <Menu
@@ -77,21 +71,23 @@ function Main() {
                 className={ele.orderType === 'ask' ? 'justify-self-end' : ''}
                 style={{ width: '50%', padding: '0 10px' }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    height: '30px',
-                    width: '100%',
-                    borderRadius: '8px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: `${ele.orderType === 'ask' ? '#d2b892' : '#729178'}`,
-                    color: `${ele.orderType === 'ask' ? 'black' : 'white'}`,
-                    marginBottom: '5px',
-                  }}
-                >
-                  {ele.volume}
-                </div>
+                <Popover placement="right" content={new Date(ele.created_at).toLocaleString()}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      height: '30px',
+                      width: '100%',
+                      borderRadius: '8px',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: `${ele.orderType === 'ask' ? '#d2b892' : '#729178'}`,
+                      color: `${ele.orderType === 'ask' ? 'black' : 'white'}`,
+                      marginBottom: '5px',
+                    }}
+                  >
+                    {ele.volume}
+                  </div>
+                </Popover>
               </div>
             ))
           ) : (
