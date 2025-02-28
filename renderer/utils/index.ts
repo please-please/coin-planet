@@ -4,17 +4,24 @@ import {
   API_RES_JSON_EXPORT,
   API_RES_JSON_SAVE,
   FAIL,
-  GET_TOKEN,
+  GET_SAVED_USER_DATA_FILE,
+  GET_SETTING,
+  GET_SETTING_RETURN,
+  ORDER_AND_SETTING,
+  ORDER_AND_SETTING_RETURN,
   ORDER_FIRST,
   ORDER_RESERVATION,
-  REPLY,
   RESERVATION_ORDER_RETURN,
   SAVE_FILE,
+  SAVE_FILE_RETURN,
+  SET_COIN_SETTING,
+  SET_COIN_SETTING_RETURN,
   TOKEN_RETURN,
+  USER_DATA_RETURN,
 } from '../../constants';
 import { I_coinOrderData, I_tickerData } from '../api/interface';
-import { coinList } from '../constants/coinList';
 import electron from 'electron';
+import { I_coinSettingData, I_orderArg, I_saveCoinSettingArg } from '../constants/interface';
 
 interface I_keys {
   accessKey: string;
@@ -101,18 +108,10 @@ export const saveUserKey = (
   failCallback: () => void,
 ) => {
   ipcRenderer.send(SAVE_FILE, keys);
-  ipcRenderer.once(REPLY, (_, arg) => {
+  ipcRenderer.once(SAVE_FILE_RETURN, (_, arg) => {
     callback();
     if (arg.status === FAIL) return failCallback();
     successCallback();
-  });
-};
-
-export const getToken = (failCallback: () => void, successCallback?: (arg: any) => void, body?: any) => {
-  ipcRenderer.send(GET_TOKEN, body ? { body } : {});
-  ipcRenderer.once(TOKEN_RETURN, (_, arg) => {
-    if (arg.status === FAIL) return failCallback();
-    if (successCallback) successCallback(arg);
   });
 };
 
@@ -141,5 +140,57 @@ export const uploadJSON = (file: File, successCallback: () => void) => {
   ipcRenderer.once(API_RES_JSON_SAVE, (_, arg) => {
     if (arg.status === FAIL) return alert('에러: 파일 업로드 실패');
     return successCallback();
+  });
+};
+
+///
+
+export const numberToKoreanWithFormat = (number: number): string => {
+  if (number < 10000) return number.toString();
+
+  const man = Math.floor(number / 10000);
+  const remainder = number % 10000;
+
+  if (remainder === 0) return `${man}만`;
+
+  return `${man}만 ${remainder}`;
+};
+
+export const saveCoinSetting = (arg: I_saveCoinSettingArg, successCallback: () => void, failCallback?: () => void) => {
+  ipcRenderer.send(SET_COIN_SETTING, arg);
+  ipcRenderer.once(SET_COIN_SETTING_RETURN, (_, arg) => {
+    if (arg.status === 200) {
+      return successCallback();
+    }
+    failCallback?.();
+    alert('에러: 세팅 저장 실패');
+  });
+};
+
+export const getCoinSetting = (successCallback: (data: I_coinSettingData) => void) => {
+  ipcRenderer.send(GET_SETTING);
+  ipcRenderer.once(GET_SETTING_RETURN, (_, arg) => {
+    if (arg.status === 200) {
+      successCallback(arg.data);
+    }
+  });
+};
+
+export const getUserKeys = (failCallback: () => void) => {
+  ipcRenderer.send(GET_SAVED_USER_DATA_FILE);
+  ipcRenderer.once(USER_DATA_RETURN, (_, arg) => {
+    if (!arg.userData.accessKey || !arg.userData.secretKey) {
+      failCallback();
+    }
+  });
+};
+
+export const order1stAndSaveSetting = (
+  arg: { settingData: I_saveCoinSettingArg; orderData: I_orderArg },
+  successCallback: () => void,
+) => {
+  ipcRenderer.send(ORDER_AND_SETTING, arg);
+  ipcRenderer.once(ORDER_AND_SETTING_RETURN, () => {
+    successCallback();
   });
 };

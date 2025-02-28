@@ -9,6 +9,10 @@ a:hover {
   color: $primary-dark;
 }
 
+.ant-form-item {
+  margin-bottom: 5px;
+}
+
 .ant-table-body {
   &::-webkit-scrollbar {
     width: 5px;
@@ -61,15 +65,6 @@ a:hover {
   height: 60px;
   top: 0;
   right: 0;
-}
-
-.ant-modal-confirm-paragraph {
-  .ant-modal-confirm-title {
-    font-weight: normal;
-  }
-  .ant-modal-confirm-content {
-    margin-top: 20px !important;
-  }
 }
 
 .screen-modal {
@@ -280,11 +275,6 @@ a:hover {
   }
 }
 
-.ant-modal-title {
-  font-weight: normal !important;
-  font-size: 20px !important;
-}
-
 .ant-table-empty {
   .ant-table-placeholder {
     height: calc(100vh - 440px);
@@ -304,7 +294,7 @@ a:hover {
         font-size: 15px !important;
         color: $primary-deepDark !important;
         font-weight: normal !important;
-        background: $gray-100;
+        background: $primary-light;
         text-align: center;
       }
     }
@@ -351,14 +341,6 @@ a:hover {
   }
 }
 
-.ant-input-affix-wrapper,
-.ant-input-group-wrapper,
-.ant-input,
-.ant-picker,
-.ant-card-bordered {
-  border-color: $gray-300 !important;
-}
-
 .dashboardCard {
   .ant-card-body {
     padding: 14px !important;
@@ -374,32 +356,6 @@ a:hover {
   }
   100% {
     background-position: 0% 50%;
-  }
-}
-
-.ant-modal-confirm-btns {
-  button {
-    border-radius: 4px;
-    min-width: 84px;
-    min-height: 46px;
-    font-size: 18px;
-    &:first-child:not(.ant-btn-primary) {
-      background-color: rgba(106, 127, 151, 0.2);
-      color: $secondary;
-
-      &:hover {
-        color: $secondary !important;
-        border: none !important;
-        background-color: rgba(106, 127, 151, 0.3) !important;
-      }
-    }
-    &:last-child {
-      background-color: $primary !important;
-
-      &:hover {
-        background-color: rgba($primary, 0.8) !important;
-      }
-    }
   }
 }
 

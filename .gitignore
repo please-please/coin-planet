@@ -11,3 +11,7 @@ pnpm-lock.yaml
 assets_data.json
 private_user_data.json
 reservation_order_data.json
+setting_data.json
+error_log.json
+
+*order_data*.json

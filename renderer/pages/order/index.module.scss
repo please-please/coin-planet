@@ -1,0 +1,11 @@
+@import 'styles/variables';
+
+.refreshButtonWrapper {
+  display: flex;
+  justify-content: end;
+}
+
+.detailButton {
+  color: $primary-dark;
+  font-weight: 700;
+}

@@ -1,146 +1,148 @@
 import { ipcMain } from 'electron';
 import {
-  API_REQ_FIRST_ORDER_ASK,
-  API_REQ_GET_COIN_CURRENT_PRICE,
-  API_REQ_GET_PURCHASE_DATA,
-  API_REQ_JSON_EXPORT,
-  API_REQ_JSON_SAVE,
-  API_REQ_ORDER_COIN,
-  API_RES_COIN_CURRENT_PRICE_RETURN,
-  API_RES_GET_PURCHASE_DATA,
-  API_RES_JSON_EXPORT,
-  API_RES_JSON_SAVE,
-  API_RES_ORDER_COIN,
-  ASSETS_RETURN,
+  CHANGE_BOOSTING,
+  CHANGE_BOOSTING_RETURN,
+  CHANGE_WATCHING,
+  CHANGE_WATCHING_RETURN,
   FAIL,
-  GET_SAVED_ASSETS_DATA_FILE,
-  GET_SAVED_RESERVATION_ORDER_DATA_FILE,
+  GET_COIN_LIST,
+  GET_COIN_LIST_RETURN,
+  GET_CURRENT_PRICE,
+  GET_CURRENT_PRICE_RETURN,
+  GET_ORDER_DATA,
+  GET_ORDER_DATA_RETURN,
+  GET_PURCHASE_DATA_LOG,
+  GET_PURCHASE_DATA_LOG_RETURN,
   GET_SAVED_USER_DATA_FILE,
-  ORDER_FIRST,
-  ORDER_RESERVATION,
-  REPLY,
-  RESERVATION_ORDER_RETURN,
+  GET_SETTING,
+  GET_SETTING_RETURN,
+  ORDER_AND_SETTING,
+  ORDER_AND_SETTING_RETURN,
+  ORDER_BID,
+  ORDER_BID_RETURN,
+  RESET_ALL_DATA,
+  RESET_ALL_DATA_RETURN,
+  RESET_PURCHASE_DATA,
+  RESET_PURCHASE_DATA_RETURN,
   SAVE_FILE,
+  SAVE_FILE_RETURN,
+  SET_COIN_SETTING,
+  SET_COIN_SETTING_RETURN,
   SUCCESS,
   USER_DATA_RETURN,
 } from '../constants';
-import { CoinService } from './service/coin-service';
-import { I_orderBody } from '../constants/interface';
+
+import { Service } from './service/service';
+import { orderArg, settingArg, settingDataType } from './interface';
 
 export class Routes {
-  constructor(private coinServcie: CoinService) {}
+  constructor(private service: Service) {}
   eventRegister() {
-    ipcMain.on(SAVE_FILE, async (evt, arg) => {
-      if (arg.accessKey === '' || arg.secretKey === '') {
-        evt.sender.send(REPLY, { status: FAIL });
-        return;
-      }
-
-      const result = await this.coinServcie.saveJsonData('private_user_data', arg);
-      if (!result) {
-        evt.sender.send(REPLY, { status: FAIL });
-        return;
-      }
-
-      evt.sender.send(REPLY, { status: SUCCESS });
-    });
-
     ipcMain.on(GET_SAVED_USER_DATA_FILE, async (evt, arg) => {
-      const { data: userData } = await this.coinServcie.getPrivateUserData();
+      const { data: userData } = await this.service.getPrivateUserData();
 
       if (userData === '') {
         evt.sender.send(USER_DATA_RETURN, { status: FAIL, userData: 'fail' });
       }
       evt.sender.send(USER_DATA_RETURN, { status: SUCCESS, userData: userData });
     });
-
-    ipcMain.on(ORDER_FIRST, async (evt, arg) => {
-      const { data: assetsData } = await this.coinServcie.getAssetsData();
-
-      const newAssetsData = {
-        ...assetsData,
-        ...arg,
-      };
-
-      await this.coinServcie.saveJsonData('assets_data', newAssetsData);
+    // 코인 별 세팅하기
+    ipcMain.on(SET_COIN_SETTING, async (evt, arg: settingArg) => {
+      const result = await this.service.setCoinSetting(arg);
+      evt.sender.send(SET_COIN_SETTING_RETURN, result);
     });
 
-    ipcMain.on(GET_SAVED_ASSETS_DATA_FILE, async (evt, arg) => {
-      const { data: assetsData } = await this.coinServcie.getAssetsData();
-
-      evt.sender.send(ASSETS_RETURN, { status: SUCCESS, assetsData: assetsData });
-    });
-
-    ipcMain.on(GET_SAVED_RESERVATION_ORDER_DATA_FILE, async (evt, arg) => {
-      const { data: reservationOrderData } = await this.coinServcie.getReservationOrderData();
-
-      evt.sender.send(RESERVATION_ORDER_RETURN, {
-        status: SUCCESS,
-        reservationOrderData: reservationOrderData,
-      });
-    });
-
-    ipcMain.on(ORDER_RESERVATION, async (evt, arg) => {
-      const { data: isReservationOrderData } = await this.coinServcie.getReservationOrderData();
-
-      const newReservationData = {
-        ...isReservationOrderData,
-        ...arg,
-      };
-      await this.coinServcie.saveJsonData('reservation_order_data', newReservationData);
-      evt.sender.send(RESERVATION_ORDER_RETURN, { status: SUCCESS });
-    });
-
-    ipcMain.on(API_REQ_GET_COIN_CURRENT_PRICE, async (evt, arg) => {
-      const result = await this.coinServcie.getCoinPrice();
-      if ((result.status + '')[0] !== '2') {
-        evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: FAIL, data: result.data });
+    // 1차 매수 후 -> 코인 별 세팅하기
+    ipcMain.on(ORDER_AND_SETTING, async (evt, arg: { settingData: settingArg; orderData: orderArg }) => {
+      const result = await this.service.orderAndSetting(arg);
+      if (result.status === 200) {
+        evt.sender.send(ORDER_AND_SETTING_RETURN, result);
+      } else {
+        evt.sender.send(ORDER_AND_SETTING_RETURN, result);
       }
-      evt.sender.send(API_RES_COIN_CURRENT_PRICE_RETURN, { status: SUCCESS, data: result.data });
     });
 
-    ipcMain.on(API_REQ_ORDER_COIN, async (evt: Electron.IpcMainEvent, arg: I_orderBody) => {
-      const result = await this.coinServcie.orderCoin(arg);
-      if ((result.status + '')[0] !== '2') {
-        evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
-      }
-      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
+    // 주문하기 (매수)
+    // 이건 무조건 1차수 밖에 없음. 티커만 보내면 끝
+    // ex) arg = { market: 'KRW-BTC', inputPrice: 1000000, limit : 10 }
+    ipcMain.on(ORDER_BID, async (evt, arg: orderArg) => {
+      console.log(arg);
+      const result = await this.service.order(arg);
+      evt.sender.send(ORDER_BID_RETURN, result);
     });
 
-    ipcMain.on(API_REQ_GET_PURCHASE_DATA, async (evt, arg) => {
-      const result = await this.coinServcie.getPurchasData(arg);
-      if ((result.status + '')[0] !== '2') {
-        evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: FAIL, data: result.data });
-      }
-      evt.sender.send(API_RES_GET_PURCHASE_DATA, { status: SUCCESS, data: result.data });
+    // 실시간 감시 기능 on/off
+    ipcMain.on(CHANGE_WATCHING, async (evt, arg: settingArg) => {
+      const result = await this.service.changeWatching(arg);
+      evt.sender.send(CHANGE_WATCHING_RETURN, result);
     });
 
-    ipcMain.on(API_REQ_JSON_EXPORT, async (evt, arg) => {
-      const result = await this.coinServcie.downloadJsonData();
-      if (!result) {
-        evt.sender.send(API_RES_JSON_EXPORT, { status: FAIL, data: result });
+    // 부스팅 기능 (1차 매도 후 재매수) on/off
+    ipcMain.on(CHANGE_BOOSTING, async (evt, arg: settingArg) => {
+      const result = await this.service.changeBoosting(arg);
+      evt.sender.send(CHANGE_BOOSTING_RETURN, result);
+    });
+
+    // 코인 세팅 불러오기
+    ipcMain.on(GET_SETTING, async (evt, arg) => {
+      const result = await this.service.getSetting();
+      evt.sender.send(GET_SETTING_RETURN, result);
+    });
+
+    // 현재가 조회하기 && 업비트 연결 테스트
+    ipcMain.on(GET_CURRENT_PRICE, async (evt, arg: string[]) => {
+      const result = await this.service.getCurrentPrice(arg);
+      evt.sender.send(GET_CURRENT_PRICE_RETURN, result);
+    });
+
+    // 로그 raw data 조회하기 && 구매내역 조회하기
+    ipcMain.on(GET_PURCHASE_DATA_LOG, async (evt, arg: settingArg) => {
+      const result = await this.service.getPurchaseData(arg);
+      evt.sender.send(GET_PURCHASE_DATA_LOG_RETURN, result);
+    });
+
+    // 자동매도 데이터 불러오기
+    ipcMain.on(GET_ORDER_DATA, async (evt, arg: settingArg) => {
+      const result = await this.service.getOrderData(arg);
+      evt.sender.send(GET_ORDER_DATA_RETURN, result);
+    });
+
+    // 키값 저장하기
+    ipcMain.on(SAVE_FILE, async (evt, arg) => {
+      if (arg.accessKey === '' || arg.secretKey === '') {
+        evt.sender.send(SAVE_FILE_RETURN, { status: FAIL });
         return;
       }
-      evt.sender.send(API_RES_JSON_EXPORT, { status: SUCCESS, data: result });
-    });
-
-    ipcMain.on(API_REQ_JSON_SAVE, async (evt, arg) => {
-      const result = await this.coinServcie.saveInitJsonData(arg);
+      const result = await this.service.saveJsonData('private_user_data', arg);
       if (!result) {
-        evt.sender.send(API_RES_JSON_SAVE, { status: FAIL, data: result });
+        evt.sender.send(SAVE_FILE_RETURN, { status: FAIL });
         return;
       }
-      evt.sender.send(API_RES_JSON_SAVE, { status: SUCCESS, data: result });
+      evt.sender.send(SAVE_FILE_RETURN, { status: SUCCESS });
     });
 
-    ipcMain.on(API_REQ_FIRST_ORDER_ASK, async (evt, arg) => {
-      // 이거 그대로 쓸거면 추가 할 필요가 없음
-      // upbit api에 일괄매도 관련 기능있으면 그걸로 처리하려고 하는데 될까
-      const result = await this.coinServcie.orderCoin(arg);
-      if ((result.status + '')[0] !== '2') {
-        evt.sender.send(API_RES_ORDER_COIN, { status: FAIL, data: result.data });
-      }
-      evt.sender.send(API_RES_ORDER_COIN, { status: SUCCESS, data: result.data });
+    // 구매내역 초기화하기
+    ipcMain.on(RESET_PURCHASE_DATA, async (evt, arg: settingArg) => {
+      const result = await this.service.resetPurchaseData(arg);
+      evt.sender.send(RESET_PURCHASE_DATA_RETURN, result);
+    });
+
+    // 전체 초기화하기
+    ipcMain.on(RESET_ALL_DATA, async (evt, arg) => {
+      const result = await this.service.resetAllData();
+      evt.sender.send(RESET_ALL_DATA_RETURN, result);
+    });
+
+    // 코인 리스트 불러오기
+    ipcMain.on(GET_COIN_LIST, async (evt, arg) => {
+      const result = await this.service.getCoinList();
+      evt.sender.send(GET_COIN_LIST_RETURN, result);
     });
   }
+
+  // 주문하기 (일괄매도)
+
+  // 구매내역 엑셀로 저장하기
+
+  // 전체 초기화하기
 }

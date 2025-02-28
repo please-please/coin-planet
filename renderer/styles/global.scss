@@ -3,7 +3,6 @@
 @tailwind utilities;
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 @import 'antd';
-@import 'tetrominos';
 @import 'font';
 @import 'styles/variables';
 
@@ -374,7 +373,8 @@ button {
     .ant-table-content {
       .ant-table-cell {
         &.ant-table-cell-row-hover {
-          background: $primary-op;
+          // background: $primary-op;
+          background-color: transparent;
           &.ant-table-cell-fix-left {
             background: $gray-100;
           }

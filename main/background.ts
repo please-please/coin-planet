@@ -1,23 +1,18 @@
 import { app } from 'electron';
 import serve from 'electron-serve';
 import { createWindow } from './helpers';
-import { CoinService } from './service/coin-service';
+
 import { WINDOW_ALL_CLOSED } from '../constants';
 import { CoinRepository } from './repository/coin-repository';
 import { Routes } from './route';
+import { storeData } from './store';
+import { Service } from './service/service';
 
 const isProd: boolean = process.env.NODE_ENV === 'development' ? false : true;
 const coinRepository = new CoinRepository();
-const coinService = new CoinService(coinRepository);
+const coinService = new Service(coinRepository);
 const route = new Routes(coinService);
 route.eventRegister();
-
-const currentPrice = {
-  'KRW-BTC': 0,
-  'KRW-ETH': 0,
-  'KRW-XRP': 0,
-  'KRW-DOGE': 0,
-};
 
 if (isProd) {
   serve({ directory: 'app' });
@@ -27,52 +22,46 @@ if (isProd) {
 
 const autoMonitoring = () => {
   setInterval(async () => {
-    const { data } = await coinService.getCoinPrice();
+    const { data: settingData } = await coinService.getSettingData();
 
-    currentPrice['KRW-BTC'] = data[0].trade_price;
-    currentPrice['KRW-ETH'] = data[1].trade_price;
-    currentPrice['KRW-XRP'] = data[2].trade_price;
-    currentPrice['KRW-DOGE'] = data[3].trade_price;
+    if (storeData.privateData) {
+      try {
+        const { data } = await coinService.getCoinPrice();
 
-    const { data: orderData } = await coinService.getReservationOrderData();
+        for (let i = 0; i < data.length; i++) {
+          const market = data[i].market;
 
-    const btcData = orderData['KRW-BTC'];
-    const ethData = orderData['KRW-ETH'];
-    const xrpData = orderData['KRW-XRP'];
-    const dogeData = orderData['KRW-DOGE'];
+          if (!settingData[market]) {
+            continue;
+          }
 
-    // reservation_order_data.json에 저장된 가격보다 현재가가 낮거나 같으면 시작
-    if (btcData.bid.length && btcData.bid[0].price >= currentPrice['KRW-BTC']) {
-      await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-BTC');
-    }
+          if (!settingData[market].watching) {
+            continue;
+          }
 
-    if (ethData.bid.length && ethData.bid[0].price >= currentPrice['KRW-ETH']) {
-      await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-ETH');
-    }
+          const currentPrice = data[i].trade_price;
 
-    if (xrpData.bid.length && xrpData.bid[0].price >= currentPrice['KRW-XRP']) {
-      await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-XRP');
-    }
-
-    if (dogeData.bid.length && dogeData.bid[0].price >= currentPrice['KRW-DOGE']) {
-      await coinService.autoMonitoringBidOrder(orderData, currentPrice, 'KRW-DOGE');
-    }
-
-    // 매도
-    if (btcData.ask.length && btcData.ask[btcData.ask.length - 1].price <= currentPrice['KRW-BTC']) {
-      await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-BTC');
-    }
-
-    if (ethData.ask.length && ethData.ask[ethData.ask.length - 1].price <= currentPrice['KRW-ETH']) {
-      await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-ETH');
-    }
-
-    if (xrpData.ask.length && xrpData.ask[xrpData.ask.length - 1].price <= currentPrice['KRW-XRP']) {
-      await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-XRP');
-    }
-
-    if (dogeData.ask.length && dogeData.ask[dogeData.ask.length - 1].price <= currentPrice['KRW-DOGE']) {
-      await coinService.autoMonitoringAskOrder(orderData, currentPrice, 'KRW-DOGE');
+          try {
+            const { data: orderData } = await coinService.getReservationOrderData({ market: market });
+            if (orderData.bid.length && orderData.bid[0].price >= currentPrice) {
+              await coinService.autoMonitoringBidOrder(orderData, currentPrice, market);
+            } else if (orderData.ask.length && orderData.ask[orderData.ask.length - 1].price <= currentPrice) {
+              await coinService.autoMonitoringAskOrder(orderData, currentPrice, market);
+            } else {
+              continue;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      } catch (e) {
+        const errorData = {
+          error: e.message,
+          time: new Date(),
+        };
+        await coinService.saveErrorLog(errorData);
+        storeData.changePrivateData();
+      }
     }
   }, 2000);
 };
@@ -103,6 +92,9 @@ const autoMonitoring = () => {
       await mainWindow.loadURL(`http://localhost:${port}/main`);
       mainWindow.webContents.openDevTools();
     }
+
+    storeData.changePrivateData();
+    console.log(storeData.privateData);
   }
 
   autoMonitoring();

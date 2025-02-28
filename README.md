@@ -109,3 +109,52 @@
 - 기타 버그 수정
 
 </details>
+
+<details><summary>버전 업데이트 목록</summary>
+
+- 코인 별 세팅하기
+  - request : SET_COIN_SETTING
+  - response : SET_COIN_SETTING_RETURN
+- 주문하기 (매수) 이건 무조건 1차수 밖에 없음. 티커만 보내면 끝
+  - request : ORDER_BID
+  - response : ORDER_BID_RETURN
+- 실시간 감시 기능 on/off
+  - request : CHANGE_WATCHING
+  - response : CHANGE_WATCHING_RETURN
+- 부스팅 기능 (1차 매도 후 재매수) on/off
+  - request : CHANGE_BOOSTING
+  - response : CHANGE_BOOSTING_RETURN
+- 부스팅 기능 (1차 매도 후 재매수), 실시간 감시 기능 on/off 유무 조회하기 (코인별로 리턴)
+  - request : GET_SETTING
+  - response : GET_SETTING_RETURN
+- 현재가 조회하기 && 업비트 연결 테스트
+  - request : GET_CURRENT_PRICE
+  - response : GET_CURRENT_PRICE_RETURN
+- 로그 raw data 조회하기 && 구매내역 조회하기
+  - request : GET_PURCHASE_DATA_LOG
+  - response : GET_PURCHASE_DATA_LOG_RETURN
+- 자동매도 데이터 불러오기
+  - request : GET_ORDER_DATA
+  - response : GET_ORDER_DATA_RETURN
+- 키값 저장하기
+  - request : SAVE_FILE
+  - response : SAVE_FILE_RETURN
+- 구매내역 초기화하기
+  - request : RESET_PURCHASE_DATA
+  - response : RESET_PURCHASE_DATA_RETURN
+- 전체 초기화하기
+  - request : RESET_ALL_DATA
+  - response : RESET_ALL_DATA_RETURN
+- 주문하기 (일괄매도)
+  - request :
+  - response :
+- 코인 리스트 불러오기
+  - request :
+  - response :
+- 구매내역 엑셀로 저장하기
+  - request :
+  - response :
+- 전체 초기화하기
+  - request :
+  - response :
+  </details>
