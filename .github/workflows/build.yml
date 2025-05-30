@@ -32,7 +32,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm' # package-lock.json 생성 후 다시 활성화
 
       # 의존성 설치 및 빌드 (프로젝트에 맞게 수정)
       - name: Install dependencies
