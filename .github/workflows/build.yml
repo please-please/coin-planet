@@ -16,8 +16,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup SonarQube Scanner
-        uses: warchant/setup-sonar-scanner@v8
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Download and setup SonarQube Scanner
+        run: |
+          export SONAR_SCANNER_VERSION=4.8.0.2856
+          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+          curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          echo "$SONAR_SCANNER_HOME/bin" >> $GITHUB_PATH
 
       - name: Run SonarQube Analysis
         env:
@@ -30,4 +48,4 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.min.js
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.min.js,**/.git/**
