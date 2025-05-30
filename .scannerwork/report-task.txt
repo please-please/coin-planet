@@ -1,0 +1,6 @@
+projectKey=test-repo
+serverUrl=http://localhost:8000
+serverVersion=9.9.8.100196
+dashboardUrl=http://localhost:8000/dashboard?id=test-repo
+ceTaskId=AZcfT-gtqyU2VWBos2w4
+ceTaskUrl=http://localhost:8000/api/ce/task?id=AZcfT-gtqyU2VWBos2w4
